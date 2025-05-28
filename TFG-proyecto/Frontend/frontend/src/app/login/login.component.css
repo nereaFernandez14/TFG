@@ -1,0 +1,43 @@
+.login-container {
+  max-width: 300px;
+  margin: 30px auto;
+  padding: 20px;
+  border: 1px solid green;
+  background-color: white;
+  border-radius: 8px;
+}
+h2{
+  text-align: center;
+  color: green;
+}
+
+label {
+  display: block;
+  margin-top: 10px;
+}
+
+input {
+  width: 100%;
+  padding: 6px;
+  margin-top: 4px;
+  box-sizing: border-box;
+}
+
+button {
+  margin-top: 20px;
+  padding: 8px;
+  width: 100%;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+button:hover {
+  background: #1565c0;
+}
+
+
+.error {
+  color: red;
+  margin-top: 10px;
+}

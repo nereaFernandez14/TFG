@@ -1,0 +1,33 @@
+<div class="home-container">
+
+  <!-- ✅ Alerta de mensaje logout -->
+  <div *ngIf="mensajeLogout" class="alert alert-success" style="margin-bottom: 20px;">
+    {{ mensajeLogout }}
+  </div>
+
+  <div class="banner">
+    <h1>Encuentra tu restaurante ideal</h1>
+    <input [(ngModel)]="searchQuery" placeholder="Buscar restaurante" />
+    <button (click)="buscar()">Buscar</button>
+  </div>
+
+  <div *ngIf="restaurantes.length > 0">
+    <h2>Resultados de búsqueda</h2>
+    <div class="restaurantes">
+      <div class="card" *ngFor="let r of restaurantes">
+        <h3>{{ r.nombre }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="restaurantes.length === 0">
+    <h2>Restaurantes destacados</h2>
+    <div class="restaurantes">
+      <div class="card" *ngFor="let r of destacados">
+        <h3>{{ r.nombre }}</h3>
+        <p>{{ r.descripcion }}</p>
+      </div>
+    </div>
+  </div>
+
+</div>

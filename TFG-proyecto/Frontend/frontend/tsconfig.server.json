@@ -1,0 +1,24 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+      "outDir": "./dist/server",               // Directorio de salida para la compilación del servidor
+      "target": "ES2019",                      // Usamos un target más reciente como ES2019 para compatibilidad con Node.js
+      "module": "CommonJS",                    // Usamos CommonJS para Node.js
+      "moduleResolution": "node",              // Resolución de módulos de Node
+      "esModuleInterop": true,                 // Habilitamos la interoperabilidad de módulos ES
+      "skipLibCheck": true,                    // Saltamos la verificación de librerías para acelerar la compilación
+      "types": ["node"],                       // Añadimos tipos de Node.js para compilar sin errores
+      "declaration": false,                    // No es necesario generar archivos `.d.ts`
+      "sourceMap": true                        // Activamos los mapas de fuente para depuración
+    },
+    "include": [
+      "src/**/*.ts",
+      "server/**/*.ts"                         // Asegúrate de incluir tu código de servidor en `server/` si lo tienes en una carpeta separada
+    ],
+    "exclude": [
+      "node_modules",                          // Excluimos `node_modules`
+      "src/test.ts",                           // Excluimos archivos de prueba
+      "src/**/*.spec.ts"                       // Excluimos archivos `.spec.ts`
+    ]
+  }
+  
