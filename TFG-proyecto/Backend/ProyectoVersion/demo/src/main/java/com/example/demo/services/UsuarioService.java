@@ -49,7 +49,7 @@ public class UsuarioService {
     public void setLogout(String email) {
         System.out.println("📤 Logout registrado para el usuario: " + email);
     }
-    public void changePassword(String email, ChangePasswordRequest request) {
+    public void cambiarPassword(String email, ChangePasswordRequest request) {
         Usuario usuario = usuarioRepository.findByEmail(email)
             .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
@@ -57,7 +57,12 @@ public class UsuarioService {
             throw new IllegalArgumentException("La contraseña actual es incorrecta");
         }
 
+        if (passwordEncoder.matches(request.getNewPassword(), usuario.getPassword())) {
+            throw new IllegalArgumentException("La nueva contraseña no puede ser igual a la actual");
+        }
+
         usuario.setPassword(passwordEncoder.encode(request.getNewPassword()));
         usuarioRepository.save(usuario);
     }
+
 }

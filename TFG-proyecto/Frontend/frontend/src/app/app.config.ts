@@ -1,7 +1,7 @@
 // src/app/app.config.ts
-import { ApplicationConfig, importProvidersFrom } from '@angular/core';
+import { ApplicationConfig } from '@angular/core';
 import { provideRouter, Routes, withRouterConfig } from '@angular/router';
-import { HttpClientModule, HttpClientXsrfModule } from '@angular/common/http';
+import { provideHttpClient, withXsrfConfiguration } from '@angular/common/http'; // 👈 NUEVO
 
 import { LoginComponent } from './login/login.component';
 import { HomeComponent } from './home/home.component';
@@ -44,6 +44,11 @@ export const routes: Routes = [
     loadComponent: () => import('./profile/profile.component').then(m => m.ProfileComponent),
     canActivate: [AuthGuard]
   },
+  {
+    path: 'change-password',
+    loadComponent: () => import('./change-password/change-password.component').then(m => m.ChangePasswordComponent),
+    canActivate: [AuthGuard]
+  },
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' }
@@ -54,9 +59,8 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withRouterConfig({
       onSameUrlNavigation: 'reload'
     })),
-    importProvidersFrom(
-      HttpClientModule,
-      HttpClientXsrfModule.withOptions({
+    provideHttpClient( // 👈 Aquí Angular sí aplica la configuración CSRF
+      withXsrfConfiguration({
         cookieName: 'XSRF-TOKEN',
         headerName: 'X-XSRF-TOKEN'
       })

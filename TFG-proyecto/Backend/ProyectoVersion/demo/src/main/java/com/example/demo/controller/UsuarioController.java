@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+
 @RestController
 @CrossOrigin(origins = "https://localhost:4200", allowCredentials = "true")
 public class UsuarioController {
@@ -73,17 +74,20 @@ public class UsuarioController {
                 "nombre", usuario.getNombre(),
                 "apellidos", usuario.getApellidos(),
                 "email", usuario.getEmail(),
-                "rol", usuario.getRol().getNombre() // ✅ string directo
+                "rol", usuario.getRol().getNombre() 
         ));
     }
 
     @PostMapping("/change-password")
     public ResponseEntity<?> cambiarPassword(@RequestBody ChangePasswordRequest request, Principal principal) {
+        System.out.println("👉 Principal: " + (principal != null ? principal.getName() : "null")); // 👈 AÑADIDO
+
         try {
-            usuarioService.changePassword(principal.getName(), request);
+            usuarioService.cambiarPassword(principal.getName(), request);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
+
 }

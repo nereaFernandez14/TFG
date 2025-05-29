@@ -4,6 +4,7 @@ import { Observable, tap, BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { FlashMessageService } from './flash-message.service';
 import { UsuarioService, Usuario } from './usuario.service';
+import { switchMap, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -30,9 +31,14 @@ export class AutenticacionService {
     }, {
       withCredentials: true
     }).pipe(
+      // 🔁 Esperamos a que el backend nos mande la cookie CSRF
+      switchMap((respuesta: any) =>
+        this.http.get(`${this.baseUrl}/api/csrf`, { withCredentials: true }).pipe(
+          tap(() => console.log('✅ CSRF token sincronizado')),
+          map(() => respuesta) // devolvemos la respuesta original del login
+        )
+      ),
       tap((respuesta: any) => {
-        console.log('🟢 Respuesta del backend:', respuesta);
-
         if (respuesta && respuesta.role) {
           const usuario: Usuario = {
             id: respuesta.id,
@@ -46,6 +52,7 @@ export class AutenticacionService {
       })
     );
   }
+
 
   verificarSesion(): Observable<any> {
     return this.http.get(`${this.baseUrl}/api/rol`, { withCredentials: true }).pipe(

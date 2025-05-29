@@ -1,3 +1,4 @@
+// src/app/csrf.interceptor.ts
 import { Injectable } from '@angular/core';
 import {
   HttpInterceptor,
@@ -11,16 +12,17 @@ import { Observable } from 'rxjs';
 export class CsrfInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = this.getCookie('XSRF-TOKEN');
-    if (token) {
-      const cloned = req.clone({
+
+    const cloned = req.clone({
+      withCredentials: true,
+      ...(token ? {
         setHeaders: {
-          'X-XSRF-TOKEN': token
-        },
-        withCredentials: true
-      });
-      return next.handle(cloned);
-    }
-    return next.handle(req);
+          'X-XSRF-TOKEN': decodeURIComponent(token)
+        }
+      } : {})
+    });
+
+    return next.handle(cloned);
   }
 
   private getCookie(name: string): string | null {

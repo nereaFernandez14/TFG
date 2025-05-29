@@ -29,50 +29,54 @@ public class SecurityConfig {
 
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-                http
-                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                                .csrf(csrf -> csrf
-                                                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                                                .ignoringRequestMatchers(
-                                                                "/api/login",
-                                                                "/api/register",
-                                                                "/register",
-                                                                "/restaurantes/buscar",
-                                                                "/api/logout",
-                                                                "/roles",
-                                                                "/usuarios/change-password"))
-                                .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                                .requestMatchers(
-                                                                "/api/login",
-                                                                "/api/logout",
-                                                                "/api/register",
-                                                                "/register",
-                                                                "/api/rol",
-                                                                "/api/sesion",
-                                                                "/restaurantes/buscar",
-                                                                "/roles",
-                                                                "/usuarios/change-password")
-                                                .permitAll()
-                                                .anyRequest().authenticated())
-                                .sessionManagement(session -> session
-                                                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
-                                .formLogin(form -> form.disable())
-                                .httpBasic(httpBasic -> httpBasic.disable())
-                                .logout(logout -> logout
-                                                .logoutUrl("/api/logout")
-                                                .invalidateHttpSession(true)
-                                                .deleteCookies("JSESSIONID", "XSRF-TOKEN")
-                                                .logoutSuccessHandler((request, response, authentication) -> {
-                                                        response.setStatus(HttpServletResponse.SC_OK);
-                                                        response.setContentType("application/json");
-                                                        PrintWriter writer = response.getWriter();
-                                                        writer.write("{\"message\": \"Logout exitoso\"}");
-                                                        writer.flush();
-                                                }));
+        CookieCsrfTokenRepository csrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        csrfTokenRepository.setSecure(false); // 👈❗ IMPORTANTE: solo en local
+        csrfTokenRepository.setCookiePath("/");
 
-                return http.build();
+        http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf
+                .csrfTokenRepository(csrfTokenRepository)
+                .ignoringRequestMatchers(
+                        "/api/login",
+                        "/api/register",
+                        "/register",
+                        "/restaurantes/buscar",
+                        "/api/logout",
+                        "/roles"
+                ))
+                .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers(
+                        "/api/login",
+                        "/api/logout",
+                        "/api/register",
+                        "/register",
+                        "/api/rol",
+                        "/api/sesion",
+                        "/restaurantes/buscar",
+                        "/roles"
+                ).permitAll()
+                .anyRequest().authenticated())
+                .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                .formLogin(form -> form.disable())
+                .httpBasic(httpBasic -> httpBasic.disable())
+                .logout(logout -> logout
+                .logoutUrl("/api/logout")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID", "XSRF-TOKEN")
+                .logoutSuccessHandler((request, response, authentication) -> {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.setContentType("application/json");
+                        PrintWriter writer = response.getWriter();
+                        writer.write("{\"message\": \"Logout exitoso\"}");
+                        writer.flush();
+                }));
+
+        return http.build();
         }
+
 
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {

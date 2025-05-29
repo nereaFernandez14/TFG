@@ -17,6 +17,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -133,5 +134,12 @@ public class LoginController {
 
         return ResponseEntity.ok(Map.of("message", "Logout exitoso"));
     }
+    @GetMapping("/csrf")
+    public Map<String, String> getCsrfToken(CsrfToken token) {
+        // ✅ Al devolver el token, Spring lo inicializa y envía la cookie automáticamente
+        return Map.of("token", token.getToken());
+    }
+
+
 
 }

@@ -61,14 +61,19 @@ export class UsuarioService {
   }
 
   cambiarPassword(passwordActual: string, nuevaPassword: string): Observable<any> {
-    return this.http.post('/api/change-password', {
+    return this.http.post(`${environment.apiUrl}/change-password`, {
       currentPassword: passwordActual,
       newPassword: nuevaPassword
     }, {
       withCredentials: true
-    }).pipe(
-      catchError(this.handleError)
-    );
+    });
   }
+
+
+  private getCookie(name: string): string | null {
+    const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+    return match ? match[2] : null;
+  }
+
 
 }
