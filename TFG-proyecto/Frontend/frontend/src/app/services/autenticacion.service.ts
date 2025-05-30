@@ -31,13 +31,6 @@ export class AutenticacionService {
     }, {
       withCredentials: true
     }).pipe(
-      // 🔁 Esperamos a que el backend nos mande la cookie CSRF
-      switchMap((respuesta: any) =>
-        this.http.get(`${this.baseUrl}/api/csrf`, { withCredentials: true }).pipe(
-          tap(() => console.log('✅ CSRF token sincronizado')),
-          map(() => respuesta) // devolvemos la respuesta original del login
-        )
-      ),
       tap((respuesta: any) => {
         if (respuesta?.role) {
           const rol = this.mapearRol(respuesta.role);
@@ -50,11 +43,20 @@ export class AutenticacionService {
             rol: rol
           };
           this.setUsuario(usuario);
+
+          // 🛡️ Obtén el token CSRF después del login
+          this.obtenerCsrfToken().subscribe({
+            next: () => {
+              console.log('✅ Token CSRF obtenido y almacenado por Angular');
+            },
+            error: (err) => {
+              console.error('❌ Error al obtener token CSRF', err);
+            }
+          });
         }
       })
     );
   }
-
 
   verificarSesion(): Observable<any> {
     return this.http.get(`${this.baseUrl}/api/rol`, { withCredentials: true }).pipe(

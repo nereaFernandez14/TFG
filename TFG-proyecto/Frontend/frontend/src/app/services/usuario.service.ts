@@ -1,3 +1,4 @@
+
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
@@ -82,17 +83,6 @@ export class UsuarioService {
     );
   }
 
-  /**
-   * Cierra la sesión del usuario autenticado.
-   * POST /api/logout
-   */
-  logout(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/logout`, {}, {
-      withCredentials: true
-    }).pipe(
-      catchError(this.handleError)
-    );
-  }
 
   /**
    * Manejo centralizado de errores HTTP.

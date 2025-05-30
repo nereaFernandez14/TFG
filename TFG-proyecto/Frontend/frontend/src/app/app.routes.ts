@@ -39,12 +39,20 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
-  path: 'restaurantes/crear',
-  loadComponent: () =>
-    import('./restaurante/restaurante.component').then(m => m.RestauranteComponent),
-  canActivate: [AuthGuard, RoleGuard],
-  data: { rol: 'RESTAURANTE' }
-}
+    path: 'change-password',
+    loadComponent: () =>
+      import('./change-password/change-password.component').then(
+        (m) => m.ChangePasswordComponent
+      ),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'restaurantes/crear',
+    loadComponent: () =>
+      import('./restaurante/restaurante.component').then(m => m.RestauranteComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { rol: 'RESTAURANTE' }
+  }
 ,
   {
     path: 'dashboard',

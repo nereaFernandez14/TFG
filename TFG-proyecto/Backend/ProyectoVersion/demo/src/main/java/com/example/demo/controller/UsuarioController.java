@@ -2,12 +2,15 @@ package com.example.demo.controller;
 
 import com.example.demo.entities.Usuario;
 import com.example.demo.repositories.UsuarioRepository;
-import jakarta.servlet.http.HttpServletRequest;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+
 
 @RestController
 @RequestMapping("/api")
@@ -45,5 +48,5 @@ public class UsuarioController {
     // ✅ DTO interno para limitar la información enviada
     public record UsuarioDTO(Long id, String nombre, String apellidos, String email, String rol) {
     }
-
+    
 }

@@ -41,28 +41,29 @@ export class ChangePasswordComponent {
       return;
     }
 
-    // Paso 1: hacer GET a /api/perfil para forzar seteo de XSRF-TOKEN
-    this.http.get('/api/perfil', { withCredentials: true }).subscribe({
+    // ⚠️ FORZAMOS petición GET para obtener el token XSRF
+    this.http.get('https://localhost:8443/api/csrf', { withCredentials: true }).subscribe({
       next: () => {
-        // Paso 2: ahora sí, enviar el POST para cambiar la contraseña
-        this.usuarioService.cambiarPassword(currentPassword!, newPassword!).subscribe({
-          next: () => {
-            this.successMessage = '¡Contraseña actualizada!';
-            this.errorMessage = '';
-            this.passwordForm.reset();
-            setTimeout(() => {
-              this.router.navigate(['/profile']);
-            }, 1500);
-          },
-          error: err => {
-            this.errorMessage = err.message || 'Error al cambiar contraseña';
-            this.successMessage = '';
-          }
-        });
+        // ✅ Ahora Angular automáticamente enviará el X-XSRF-TOKEN
+        this.usuarioService
+          .cambiarPassword(currentPassword!, newPassword!)
+          .subscribe({
+            next: () => {
+              this.successMessage = '¡Contraseña actualizada!';
+              this.errorMessage = '';
+              this.passwordForm.reset();
+              setTimeout(() => this.router.navigate(['/profile']), 1500);
+            },
+            error: err => {
+              this.errorMessage = err.message || 'Error al cambiar la contraseña';
+              this.successMessage = '';
+            }
+          });
       },
       error: () => {
-        this.errorMessage = 'No se pudo establecer el token CSRF (GET /perfil falló)';
+        this.errorMessage = 'No se pudo obtener el token CSRF';
       }
     });
   }
+
 }

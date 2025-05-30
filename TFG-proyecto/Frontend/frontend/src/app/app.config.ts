@@ -1,9 +1,9 @@
 // src/app/app.config.ts
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideRouter, Routes, withRouterConfig } from '@angular/router';
 import {
-  HttpClientModule,
-  HttpClientXsrfModule
+  HttpClientModule/*,
+  HttpClientXsrfModule*/
 } from '@angular/common/http';
 
 import { LoginComponent } from './login/login.component';
@@ -16,6 +16,7 @@ import { RegisterComponent } from './register/register.component';
 import { AuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
 import { RedirectIfAuthenticatedGuard } from './guards/redirect-if-authenticated.guard';
+import { ChangePasswordComponent } from './change-password/change-password.component';
 
 export const routes: Routes = [
   { path: 'header', component: HeaderComponent },
@@ -40,10 +41,25 @@ export const routes: Routes = [
     data: { rol: 'admin' }
   },
   {
+    path: 'change-password',
+    loadComponent: () =>
+      import('./change-password/change-password.component').then(
+        (m) => m.ChangePasswordComponent
+      ),
+    canActivate: [AuthGuard]
+  },
+  {
     path: 'profile',
     loadComponent: () =>
       import('./profile/profile.component').then((m) => m.ProfileComponent),
     canActivate: [AuthGuard]
+  },
+  {
+    path: 'restaurantes/crear',
+    loadComponent: () =>
+      import('./restaurante/restaurante.component').then(m => m.RestauranteComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { rol: 'RESTAURANTE' }
   },
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -59,11 +75,11 @@ export const appConfig: ApplicationConfig = {
       })
     ),
     importProvidersFrom(
-      HttpClientModule,
+      HttpClientModule/*,
       HttpClientXsrfModule.withOptions({
         cookieName: 'XSRF-TOKEN',
         headerName: 'X-XSRF-TOKEN'
-      })
+      })*/
     )
   ]
 };

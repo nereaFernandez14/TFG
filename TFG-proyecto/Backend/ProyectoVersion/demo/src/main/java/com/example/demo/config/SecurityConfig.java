@@ -36,14 +36,12 @@ public class SecurityConfig {
                                                 .ignoringRequestMatchers(
                                                                 "/register",
                                                                 "/api/register",
-                                                                "/api/csrf",
                                                                 "/api/login",
                                                                 "/api/logout",
                                                                 "/api/rol",
                                                                 "/api/sesion",
                                                                 "/restaurantes/buscar",
                                                                 "/restaurantes/**", // ✅ Añadido para permitir rutas
-                                                                                    // como /restaurantes/crear
                                                                 "/roles"))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -76,9 +74,8 @@ public class SecurityConfig {
                                                         writer.flush();
                                                 }));
 
-        return http.build();
+                return http.build();
         }
-
 
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {

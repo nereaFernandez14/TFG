@@ -1,18 +1,22 @@
-// src/main.ts
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideHttpClient, withXsrfConfiguration } from '@angular/common/http';
 import { AppComponent } from './app/app.component';
 import { appConfig } from './app/app.config';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+  withXsrfConfiguration
+} from '@angular/common/http';
 
 bootstrapApplication(AppComponent, {
   ...appConfig,
   providers: [
-    ...appConfig.providers || [],
+    ...(appConfig.providers || []),
     provideHttpClient(
+      withInterceptorsFromDi(), // 👈 importante si usas interceptores en otros lugares
       withXsrfConfiguration({
-        cookieName: 'XSRF-TOKEN',       // nombre de la cookie (debe coincidir con Spring)
-        headerName: 'X-XSRF-TOKEN'      // header que Angular añadirá automáticamente
+        cookieName: 'XSRF-TOKEN',     // ⚠️ Exactamente como el nombre de la cookie
+        headerName: 'X-XSRF-TOKEN'    // ⚠️ Lo que Spring espera en header
       })
     )
   ]
-}).catch(err => console.error(err));
+}).catch((err) => console.error(err));
