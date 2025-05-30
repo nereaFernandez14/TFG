@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.entities.LoginRequest;
-import com.example.demo.entities.Rol;
+import com.example.demo.enums.RolNombre;
 import com.example.demo.services.AuthService;
 import com.example.demo.services.UsuarioService;
 
@@ -33,7 +33,6 @@ public class LoginController {
     @Autowired
     private UsuarioService usuarioService;
 
-    // ✅ Endpoint para preparar la sesión y el token CSRF
     @GetMapping("/sesion")
     public ResponseEntity<?> prepararSesion(HttpSession session) {
         return ResponseEntity.ok(Map.of("mensaje", "Sesión iniciada"));
@@ -56,15 +55,14 @@ public class LoginController {
                         .body(Map.of("error", "Tu cuenta aún no está activada"));
             }
 
-            Rol rol = authService.obtenerRol(loginRequest.getUsername());
+            RolNombre rol = authService.obtenerRolEnum(loginRequest.getUsername());
 
-            // 🔍 Aquí asumimos que puedes obtener el nombre del usuario desde el servicio
             String nombre = usuarioService.obtenerNombrePorEmail(loginRequest.getUsername());
 
             session.setAttribute("usuario", loginRequest.getUsername());
             session.setAttribute("rol", rol);
 
-            GrantedAuthority authority = (GrantedAuthority) () -> "ROLE_" + rol.getNombre();
+            GrantedAuthority authority = (GrantedAuthority) () -> "ROLE_" + rol.name();
             User userDetails = new User(loginRequest.getUsername(), "", Collections.singletonList(authority));
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails,
                     null, userDetails.getAuthorities());
@@ -74,11 +72,11 @@ public class LoginController {
             SecurityContextHolder.setContext(securityContext);
             session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
 
-            System.out.println("✅ Login correcto para: " + loginRequest.getUsername() + " con rol " + rol.getNombre());
+            System.out.println("✅ Login correcto para: " + loginRequest.getUsername() + " con rol " + rol.name());
 
             return ResponseEntity.ok(Map.of(
                     "message", "Login exitoso",
-                    "role", rol.getNombre(),
+                    "role", rol.name(),
                     "email", loginRequest.getUsername(),
                     "nombre", nombre));
         } catch (Exception ex) {
@@ -90,12 +88,12 @@ public class LoginController {
 
     @GetMapping("/rol")
     public ResponseEntity<?> getRol(HttpSession session) {
-        Rol rol = (Rol) session.getAttribute("rol");
+        RolNombre rol = (RolNombre) session.getAttribute("rol");
         String email = (String) session.getAttribute("usuario");
 
         if (rol != null) {
             String nombre = usuarioService.obtenerNombrePorEmail(email);
-            return ResponseEntity.ok(Map.of("role", rol.getNombre(), "nombre", nombre));
+            return ResponseEntity.ok(Map.of("role", rol.name(), "nombre", nombre));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -103,19 +101,15 @@ public class LoginController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpSession session, HttpServletResponse response) {
-        // Recuperamos el nombre del usuario antes de invalidar la sesión
         String email = (String) session.getAttribute("usuario");
 
-        // Log de logout (si aplica lógica adicional, como actualizar BD o logs)
         if (email != null) {
-            usuarioService.setLogout(email); // Puedes registrar que el usuario se desconectó
+            usuarioService.setLogout(email);
         }
 
-        // Limpiar sesión y contexto de seguridad
         session.invalidate();
         SecurityContextHolder.clearContext();
 
-        // Limpiar cookies de sesión
         Cookie jsessionCookie = new Cookie("JSESSIONID", null);
         jsessionCookie.setPath("/");
         jsessionCookie.setMaxAge(0);
@@ -123,7 +117,6 @@ public class LoginController {
         jsessionCookie.setSecure(true);
         response.addCookie(jsessionCookie);
 
-        // Limpiar token CSRF si se usó
         Cookie csrfCookie = new Cookie("XSRF-TOKEN", null);
         csrfCookie.setPath("/");
         csrfCookie.setMaxAge(0);
@@ -133,5 +126,4 @@ public class LoginController {
 
         return ResponseEntity.ok(Map.of("message", "Logout exitoso"));
     }
-
 }

@@ -1,12 +1,13 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.RestauranteDTO;
 import com.example.demo.entities.Restaurante;
-import com.example.demo.entities.Usuario;
-import com.example.demo.repositories.RestauranteRepository;
-import com.example.demo.repositories.UsuarioRepository;
-
+import com.example.demo.enums.Barrio;
+import com.example.demo.enums.RangoPrecio;
+import com.example.demo.enums.RestriccionDietetica;
+import com.example.demo.enums.TipoCocina;
+import com.example.demo.services.RestauranteService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,49 +18,64 @@ import java.util.List;
 public class RestauranteController {
 
     @Autowired
-    private RestauranteRepository restauranteRepository;
+    private RestauranteService restauranteService;
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
-
-    //Crear un restaurante y asignarle un dueño
+    // ✅ Crear restaurante con validación de rol y lógica completa
     @PostMapping
     public Restaurante crearRestaurante(@RequestParam Long idUsuario,
-                                        @RequestBody Restaurante restaurante) {
-        Usuario usuario = usuarioRepository.findById(idUsuario).orElseThrow();
-        restaurante.setUsuario(usuario);
-        return restauranteRepository.save(restaurante);
+            @RequestBody Restaurante restaurante) {
+        return restauranteService.crearRestaurante(idUsuario, restaurante);
     }
 
-    //Obtener todos los restaurantes
+    // Obtener todos los restaurantes
     @GetMapping
     public List<Restaurante> getAllRestaurantes() {
-        return restauranteRepository.findAll();
+        return restauranteService.obtenerTodosLosRestaurantes();
     }
 
-    //Obtener un restaurante por ID
+    // Obtener un restaurante por ID
     @GetMapping("/{id}")
     public Restaurante getRestauranteById(@PathVariable Long id) {
-        return restauranteRepository.findById(id).orElseThrow();
+        return restauranteService.obtenerRestaurantePorId(id);
     }
 
-    //Obtener restaurante por ID del usuario dueño
+    // Obtener restaurante por ID del usuario dueño
     @GetMapping("/mio")
     public Restaurante getRestauranteByUsuario(@RequestParam Long idUsuario) {
-        return restauranteRepository.findByUsuarioId(idUsuario);
+        return restauranteService.obtenerRestaurantePorUsuario(idUsuario);
     }
+
+    // Restaurantes destacados (últimos 5)
     @GetMapping("/destacados")
     public List<Restaurante> getRestaurantesDestacados() {
-        // Ejemplo: los 5 primeros
-        return restauranteRepository.findTop5ByOrderByIdDesc();
+        return restauranteService.obtenerTodosLosRestaurantes()
+                .stream()
+                .sorted((r1, r2) -> Long.compare(r2.getId(), r1.getId()))
+                .limit(5)
+                .toList();
     }
+
+    // Buscar por nombre
     @GetMapping("/buscar")
     public ResponseEntity<?> buscarRestaurantes(@RequestParam String nombre) {
-        System.out.println("Buscando: " + nombre); // 🔍 LOG
-        List<Restaurante> resultados = restauranteRepository.findByNombreContainingIgnoreCase(nombre);
-        System.out.println("Encontrados: " + resultados.size()); // 🔍 LOG
+        List<Restaurante> resultados = restauranteService.obtenerTodosLosRestaurantes()
+                .stream()
+                .filter(r -> r.getNombre().toLowerCase().contains(nombre.toLowerCase()))
+                .toList();
+
         return ResponseEntity.ok(resultados);
     }
 
+    // ✅ Filtro avanzado
+    @GetMapping("/filtrar-avanzado")
+    public List<RestauranteDTO> filtrarRestaurantesAvanzado(
+            @RequestParam(required = false) TipoCocina tipoCocina,
+            @RequestParam(required = false) Barrio barrio,
+            @RequestParam(required = false) RangoPrecio rangoPrecio,
+            @RequestParam(required = false) Double minPuntuacion,
+            @RequestParam(required = false) List<RestriccionDietetica> restricciones) {
 
+        return restauranteService.filtrarRestaurantesAvanzado(
+                tipoCocina, barrio, rangoPrecio, minPuntuacion, restricciones);
+    }
 }

@@ -1,8 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AutenticacionService } from '../services/autenticacion.service';
 import { NgZone } from '@angular/core';
+import { Usuario } from '../models/usuario.model';
 
 @Component({
   selector: 'app-header',
@@ -14,25 +15,30 @@ import { NgZone } from '@angular/core';
 export class HeaderComponent implements OnInit {
   isAuthenticated = signal(false);
   userName = signal<string | null>(null);
+  user = signal<Usuario | null>(null);
   sidebarOpen = false;
+
+  esRestaurante = computed(() => {
+    const rol = this.user()?.rol;
+    return rol?.toUpperCase() === 'RESTAURANTE';
+  });
 
   constructor(
     private authService: AutenticacionService,
-    private router: Router,
+    public router: Router,
     private zone: NgZone
   ) {}
 
   ngOnInit(): void {
     this.authService.usuario$.subscribe((usuario) => {
-      // Aseguramos que Angular actualice el DOM y detecte el cambio
       this.zone.run(() => {
         if (usuario) {
-          console.log('✅ Usuario autenticado en Header:', usuario);
           this.isAuthenticated.set(true);
+          this.user.set(usuario);
           this.userName.set(usuario.nombre ?? 'Usuario');
         } else {
-          console.warn('⚠️ No hay usuario autenticado en Header');
           this.isAuthenticated.set(false);
+          this.user.set(null);
           this.userName.set(null);
         }
       });
@@ -51,15 +57,14 @@ export class HeaderComponent implements OnInit {
 
   irAlPerfil(): void {
     this.sidebarOpen = false;
-    console.log('👤 Navegando a /profile desde Header. URL actual:', this.router.url);
+    this.router.navigate(['/profile']);
+  }
 
-    // 🔄 Forzar navegación incluso si ya estamos en profile
-    if (this.router.url === '/profile') {
-      this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-        this.router.navigate(['/profile']);
-      });
-    } else {
-      this.router.navigate(['/profile']);
-    }
+  navegarACrearRestaurante(): void {
+    this.sidebarOpen = false;
+    this.router.navigate(['/restaurante/crear']);
+  }
+  cerrarSidebar(): void {
+  this.sidebarOpen = false;
   }
 }

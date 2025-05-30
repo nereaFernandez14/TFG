@@ -1,44 +1,81 @@
 package com.example.demo.entities;
+
+import com.example.demo.enums.Barrio;
+import com.example.demo.enums.RangoPrecio;
+import com.example.demo.enums.RestriccionDietetica;
+import com.example.demo.enums.TipoCocina;
+import jakarta.persistence.*;
+import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import lombok.Data;
 
 @Entity
 @Data
 public class Restaurante {
-  
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String nombre;
+
     private String direccion;
     private String telefono;
     private String email;
     private String password;
+
+    @Column
+    private String tipoCocinaPersonalizado;
+
     @OneToOne
-    private Usuario usuario;    //Usuario que representa al restaurante
+    private Usuario usuario;
+
     @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL)
-    private List<Resenya> resenyas;
+    private List<Resenya> resenyas = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoCocina tipoCocina;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Barrio barrio;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RangoPrecio rangoPrecio;
+
+    @ElementCollection(targetClass = RestriccionDietetica.class)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "restaurante_restricciones", joinColumns = @JoinColumn(name = "restaurante_id"))
+    @Column(name = "restriccion")
+    private List<RestriccionDietetica> restriccionesDieteticas = new ArrayList<>();
 
     public Restaurante() {
     }
-    public Restaurante(String nombre, String direccion, String telefono, String email, String password) {
+
+    public Restaurante(String nombre, String direccion, String telefono, String email, String password,
+            TipoCocina tipoCocina, Barrio barrio, RangoPrecio rangoPrecio) {
         this.nombre = nombre;
         this.direccion = direccion;
         this.telefono = telefono;
         this.email = email;
         this.password = password;
-        this.resenyas= new ArrayList<>();
+        this.tipoCocina = tipoCocina;
+        this.barrio = barrio;
+        this.rangoPrecio = rangoPrecio;
+        this.resenyas = new ArrayList<>();
+    }
+
+    public double getMediaPuntuacion() {
+        if (resenyas == null || resenyas.isEmpty()) {
+            return 0.0;
+        }
+        return resenyas.stream()
+                .mapToInt(Resenya::getValoracion)
+                .average()
+                .orElse(0.0);
     }
 }

@@ -26,12 +26,12 @@
       <input id="password" formControlName="password" type="password">
     </div>
 
-    <!-- Rol dinámico desde la BBDD -->
+    <!-- Rol basado en el enum RolNombre -->
     <div class="form-group">
-      <label for="rolId">Rol:</label>
-      <select id="rolId" formControlName="rolId">
-        <option *ngFor="let rol of roles" [value]="rol.id">
-          {{ rol.nombre }}
+      <label for="rol">Rol:</label>
+      <select id="rol" formControlName="rol">
+        <option *ngFor="let rol of roles" [value]="rol">
+          {{ rol | titlecase }}
         </option>
       </select>
     </div>

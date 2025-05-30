@@ -1,9 +1,8 @@
 package com.example.demo.controller;
 
 import com.example.demo.entities.RegistroRequest;
-import com.example.demo.entities.Rol;
 import com.example.demo.entities.Usuario;
-import com.example.demo.repositories.RolRepository;
+import com.example.demo.enums.RolNombre;
 import com.example.demo.repositories.UsuarioRepository;
 
 import jakarta.validation.Valid;
@@ -13,9 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Optional;
 
-@CrossOrigin(origins = "https://localhost:4200", allowCredentials = "true")
 @RestController
 public class RegistroController {
 
@@ -23,25 +20,27 @@ public class RegistroController {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
-    private RolRepository rolRepository;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @PostMapping("/register")
+    @PostMapping({ "/register", "/api/register" })
+
     public ResponseEntity<?> registrarUsuario(@Valid @RequestBody RegistroRequest request) {
+        if (request.getEmail() == null || request.getEmail().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "El email es obligatorio"));
+        }
+
         if (usuarioRepository.existsByEmail(request.getEmail())) {
             return ResponseEntity.badRequest().body(Map.of("error", "El email ya está registrado"));
         }
 
-        Optional<Rol> rolOptional = rolRepository.findById(request.getRolId());
-        if (rolOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Rol inválido o no encontrado"));
+        RolNombre rol;
+        try {
+            rol = RolNombre.valueOf(request.getRol().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Rol inválido o no reconocido"));
         }
 
-        Rol rol = rolOptional.get();
-
-        if (rol.getNombre().equalsIgnoreCase("ADMIN")) {
+        if (rol == RolNombre.ADMIN) {
             return ResponseEntity.status(403).body(Map.of("error", "No se permite registrar usuarios con rol ADMIN"));
         }
 

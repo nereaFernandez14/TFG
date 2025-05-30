@@ -1,0 +1,68 @@
+<div class="formulario-container">
+  <h2>Registrar Restaurante</h2>
+
+  <form [formGroup]="restauranteForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label>Nombre*</label>
+      <input type="text" formControlName="nombre" />
+    </div>
+
+    <div class="form-group">
+      <label>Dirección*</label>
+      <input type="text" formControlName="direccion" />
+    </div>
+
+    <div class="form-group">
+      <label>Teléfono*</label>
+      <input type="text" formControlName="telefono" />
+    </div>
+
+    <div class="form-group">
+      <label>Email*</label>
+      <input type="email" formControlName="email" />
+    </div>
+
+    <div class="form-group">
+      <label>Contraseña*</label>
+      <input type="password" formControlName="password" />
+    </div>
+
+    <div class="form-group">
+      <label>Tipo de Cocina*</label>
+      <select formControlName="tipoCocina">
+        <option value="">Seleccionar</option>
+        <option *ngFor="let tipo of tiposCocina" [value]="tipo">{{ tipo }}</option>
+      </select>
+    </div>
+
+    <div class="form-group" *ngIf="restauranteForm.get('tipoCocina')?.value === 'OTRO'">
+      <label>Tipo Personalizado*</label>
+      <input type="text" formControlName="tipoCocinaPersonalizado" />
+    </div>
+
+    <div class="form-group">
+      <label>Barrio*</label>
+      <select formControlName="barrio">
+        <option value="">Seleccionar</option>
+        <option *ngFor="let b of barrios" [value]="b">{{ b }}</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Rango de Precio*</label>
+      <select formControlName="rangoPrecio">
+        <option value="">Seleccionar</option>
+        <option *ngFor="let r of rangosPrecio" [value]="r">{{ r }}</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Restricciones Dietéticas</label>
+      <select formControlName="restriccionesDieteticas" multiple>
+        <option *ngFor="let r of restricciones" [value]="r">{{ r }}</option>
+      </select>
+    </div>
+
+    <button type="submit" [disabled]="restauranteForm.invalid">Crear Restaurante</button>
+  </form>
+</div>

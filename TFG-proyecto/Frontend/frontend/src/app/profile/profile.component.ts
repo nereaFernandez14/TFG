@@ -13,7 +13,10 @@ import { Router } from '@angular/router';
 export class ProfileComponent implements OnInit {
   usuario: Usuario | null = null;
 
-  constructor(private usuarioService: UsuarioService,private router: Router) {}
+  constructor(
+    private usuarioService: UsuarioService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     console.log('✅ ProfileComponent cargado');
@@ -25,8 +28,27 @@ export class ProfileComponent implements OnInit {
       error: (err) => console.error('❌ Error al obtener perfil:', err)
     });
   }
-  irACambiarPassword() {
-    console.log('Click');
+
+  irACambiarPassword(): void {
     this.router.navigate(['/change-password']);
+  }
+
+  irACrearRestaurante(): void {
+    this.router.navigate(['/restaurante/crear']);
+  }
+
+  logout(): void {
+    this.usuarioService.logout().subscribe({
+      next: () => {
+        console.log('🔒 Sesión cerrada desde perfil');
+        // 🔐 Limpieza opcional de storage (por seguridad)
+        localStorage.removeItem('usuario');
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        console.error('❌ Error al cerrar sesión desde perfil', err);
+        this.router.navigate(['/login']); // Incluso si falla, navega
+      }
+    });
   }
 }

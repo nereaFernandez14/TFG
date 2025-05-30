@@ -34,26 +34,29 @@ public class SecurityConfig {
                                 .csrf(csrf -> csrf
                                                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                                                 .ignoringRequestMatchers(
-                                                                "/api/login",
-                                                                "/api/register",
                                                                 "/register",
-                                                                "/restaurantes/buscar",
+                                                                "/api/register",
+                                                                "/api/csrf",
+                                                                "/api/login",
                                                                 "/api/logout",
-                                                                "/roles",
-                                                                "/usuarios/change-password"))
+                                                                "/api/rol",
+                                                                "/api/sesion",
+                                                                "/restaurantes/buscar",
+                                                                "/roles"))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                 .requestMatchers(
+                                                                "/register",
+                                                                "/api/register",
+                                                                "/api/csrf",
                                                                 "/api/login",
                                                                 "/api/logout",
-                                                                "/api/register",
-                                                                "/register",
                                                                 "/api/rol",
                                                                 "/api/sesion",
                                                                 "/restaurantes/buscar",
                                                                 "/roles",
-                                                                "/usuarios/change-password")
-                                                .permitAll()
+                                                                "/error" // <- Añadido aquí
+                                                ).permitAll()
                                                 .anyRequest().authenticated())
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))

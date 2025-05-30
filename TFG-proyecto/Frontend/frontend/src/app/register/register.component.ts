@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { UsuarioService } from '../services/usuario.service';
 import { AutenticacionService } from '../services/autenticacion.service';
-import { RolService } from '../services/rol.service';
+import { RolNombre } from '../models/enums/RolNombre.enum';
 
 @Component({
   selector: 'app-register',
@@ -18,39 +18,22 @@ export class RegisterComponent implements OnInit {
   formSubmitted = false;
   isSubmitting = false;
   errorMessage: string | null = null;
-  roles: { id: number, nombre: string }[] = [];
+
+  // ✅ Usamos enum y excluimos ADMIN
+  roles = Object.values(RolNombre).filter(rol => rol !== RolNombre.ADMIN);
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly usuarioService: UsuarioService,
     private readonly authService: AutenticacionService,
-    private readonly rolService: RolService,
     private readonly router: Router
   ) {}
 
   ngOnInit(): void {
-    // ✅ Prepara cookies JSESSIONID + XSRF-TOKEN
-    this.authService.prepararSesion().subscribe({
-      next: () => console.log('✅ Sesión preparada para el registro'),
-      error: (err) => console.warn('⚠️ No se pudo preparar la sesión:', err)
-    });
-
-    // ✅ Carga dinámica de roles desde el backend, excluyendo "admin" y "administrador"
-    this.rolService.obtenerRoles().subscribe({
-      next: (data) => {
-        this.roles = data
-          .filter(r => {
-            const nombre = r?.nombre?.trim().toLowerCase();
-            return !!nombre && nombre !== 'admin' && nombre !== 'administrador';
-          })
-          .sort((a, b) => a.nombre.localeCompare(b.nombre));
-
-        console.log('📋 Roles cargados (filtrados y ordenados):', this.roles);
-      },
-      error: (err) => {
-        console.error('❌ Error al cargar roles desde el backend:', err);
-        this.roles = [];
-      }
+    // ✅ Solicitamos el token CSRF (también fuerza la creación de sesión)
+    this.authService.obtenerCsrfToken().subscribe({
+      next: () => console.log('✅ Token CSRF obtenido correctamente'),
+      error: (err) => console.warn('⚠️ No se pudo obtener el token CSRF:', err)
     });
 
     // 🧾 Inicializa el formulario
@@ -59,7 +42,7 @@ export class RegisterComponent implements OnInit {
       apellidos: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      rolId: [null, Validators.required]
+      rol: [RolNombre.USUARIO, Validators.required] // Valor por defecto
     });
   }
 
@@ -73,9 +56,8 @@ export class RegisterComponent implements OnInit {
     }
 
     this.isSubmitting = true;
-
     const formData = this.registerForm.value;
-    console.log('📤 Enviando datos de registro:', formData);
+    console.log('📤 Enviando datos de registro (enum):', formData);
 
     this.usuarioService.registrar(formData).subscribe({
       next: () => {

@@ -1,7 +1,10 @@
 // src/app/app.config.ts
 import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideRouter, Routes, withRouterConfig } from '@angular/router';
-import { HttpClientModule, HttpClientXsrfModule } from '@angular/common/http';
+import {
+  HttpClientModule,
+  HttpClientXsrfModule
+} from '@angular/common/http';
 
 import { LoginComponent } from './login/login.component';
 import { HomeComponent } from './home/home.component';
@@ -29,9 +32,6 @@ export const routes: Routes = [
   {
     path: 'home',
     component: HomeComponent
-    // Puedes descomentar estos si luego quieres proteger esta ruta:
-    // canActivate: [AuthGuard, RoleGuard],
-    // data: { rol: 'usuario' }
   },
   {
     path: 'admin',
@@ -41,7 +41,8 @@ export const routes: Routes = [
   },
   {
     path: 'profile',
-    loadComponent: () => import('./profile/profile.component').then(m => m.ProfileComponent),
+    loadComponent: () =>
+      import('./profile/profile.component').then((m) => m.ProfileComponent),
     canActivate: [AuthGuard]
   },
   { path: 'unauthorized', component: UnauthorizedComponent },
@@ -51,9 +52,12 @@ export const routes: Routes = [
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes, withRouterConfig({
-      onSameUrlNavigation: 'reload'
-    })),
+    provideRouter(
+      routes,
+      withRouterConfig({
+        onSameUrlNavigation: 'reload'
+      })
+    ),
     importProvidersFrom(
       HttpClientModule,
       HttpClientXsrfModule.withOptions({

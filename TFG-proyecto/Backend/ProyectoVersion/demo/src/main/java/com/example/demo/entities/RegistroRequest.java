@@ -1,5 +1,6 @@
 package com.example.demo.entities;
 
+import com.example.demo.enums.RolNombre;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -22,5 +23,7 @@ public class RegistroRequest {
     @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     private String password;
 
-    private Long rolId; // ✅ Por ID
+    @NotBlank(message = "El rol es obligatorio")
+    private String rol; // ✅ Ahora es un String (ej: "USUARIO", "RESTAURANTE"), lo convierte el
+                        // controller al enum
 }

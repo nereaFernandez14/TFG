@@ -53,7 +53,7 @@ export class LoginComponent {
       next: () => {
         this.authService.verificarSesion().subscribe({
           next: (respuesta) => {
-            const rol = respuesta?.role ?? respuesta?.rol;
+            const rol = (respuesta?.role ?? respuesta?.rol ?? '').toLowerCase(); // 🔁 Convertir a minúscula
 
             if (!rol) {
               this.error = 'No se pudo determinar el rol del usuario.';

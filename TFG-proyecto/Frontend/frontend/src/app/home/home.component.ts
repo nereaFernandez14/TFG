@@ -6,6 +6,7 @@ import { Restaurante } from '../models/restaurante.model';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FlashMessageService } from '../services/flash-message.service';
+import { RolNombre } from '../models/enums/RolNombre.enum'; // ✅ Enum importado
 
 @Component({
   standalone: true,
@@ -19,6 +20,17 @@ export class HomeComponent implements OnInit {
   searchQuery: string = '';
   restaurantes: Restaurante[] = [];
   mensajeLogout: string | null = null;
+
+  destacados = [
+    {
+      nombre: 'Pizzería Bella',
+      descripcion: 'Auténtica pizza napolitana en el centro'
+    },
+    {
+      nombre: 'Sushi Tokyo',
+      descripcion: 'Experiencia japonesa premium'
+    }
+  ];
 
   constructor(
     private autenticacionService: AutenticacionService,
@@ -48,10 +60,10 @@ export class HomeComponent implements OnInit {
     }
 
     switch (usuario.rol) {
-      case 'restaurante':
+      case RolNombre.RESTAURANTE:
         this.router.navigate(['/restaurante']);
         break;
-      case 'usuario':
+      case RolNombre.USUARIO:
         this.usuarioEmail = usuario.email || 'Desconocido';
         break;
       default:
@@ -63,17 +75,6 @@ export class HomeComponent implements OnInit {
     this.autenticacionService.logout();
     this.router.navigate(['/login']);
   }
-
-  destacados = [
-    {
-      nombre: 'Pizzería Bella',
-      descripcion: 'Auténtica pizza napolitana en el centro'
-    },
-    {
-      nombre: 'Sushi Tokyo',
-      descripcion: 'Experiencia japonesa premium'
-    }
-  ];
 
   buscar() {
     console.log('Buscando:', this.searchQuery);

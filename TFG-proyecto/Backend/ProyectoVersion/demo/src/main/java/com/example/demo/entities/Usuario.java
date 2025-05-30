@@ -1,15 +1,14 @@
 package com.example.demo.entities;
 
-import java.util.Optional;
-
+import com.example.demo.enums.RolNombre;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
 @Data
-@NoArgsConstructor // Constructor vacío generado automáticamente
-@AllArgsConstructor // Constructor con todos los campos
+@NoArgsConstructor
+@AllArgsConstructor
 public class Usuario {
 
     @Id
@@ -26,14 +25,14 @@ public class Usuario {
     private String email;
 
     @Column(nullable = false)
-    @ToString.Exclude // Evita que aparezca en toString (por seguridad)
-    @EqualsAndHashCode.Exclude // No usar password en equals/hashCode
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private String password;
 
-    @ManyToOne
-    @JoinColumn(name = "rol_id", nullable = false)
+    @Enumerated(EnumType.STRING)
     @NotNull(message = "El rol es obligatorio para el usuario")
-    private Rol rol;
+    private RolNombre rol;
+
     @Column(name = "esta_registrado")
     private boolean estaRegistrado = false;
 
