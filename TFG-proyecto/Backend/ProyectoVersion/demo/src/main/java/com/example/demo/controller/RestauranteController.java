@@ -33,10 +33,10 @@ public class RestauranteController {
         return restauranteService.obtenerTodosLosRestaurantes();
     }
 
-    // Obtener un restaurante por ID
+    // ✅ Obtener un restaurante por ID e incrementar visitas
     @GetMapping("/{id}")
     public Restaurante getRestauranteById(@PathVariable Long id) {
-        return restauranteService.obtenerRestaurantePorId(id);
+        return restauranteService.obtenerYIncrementarVisitas(id);
     }
 
     // Obtener restaurante por ID del usuario dueño
@@ -77,5 +77,18 @@ public class RestauranteController {
 
         return restauranteService.filtrarRestaurantesAvanzado(
                 tipoCocina, barrio, rangoPrecio, minPuntuacion, restricciones);
+    }
+
+    // ✅ Endpoint para dashboard
+    @GetMapping("/dashboard")
+    public ResponseEntity<RestauranteDTO> obtenerDashboard(@RequestParam Long idUsuario) {
+        Restaurante restaurante = restauranteService.obtenerRestaurantePorUsuario(idUsuario);
+
+        if (restaurante == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        RestauranteDTO dto = new RestauranteDTO(restaurante);
+        return ResponseEntity.ok(dto);
     }
 }

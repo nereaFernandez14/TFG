@@ -41,6 +41,10 @@ public class RestauranteDTO {
 
     private List<String> comentarios;
 
+    // ✅ NUEVOS CAMPOS PARA DASHBOARD
+    private int visitas;
+    private int cantidadComentarios;
+
     // 🔄 Para mostrar "ITALIANA" o "Peruana (otro)"
     public String getTipoCocinaFinal() {
         if (tipoCocina == TipoCocina.OTRO && tipoCocinaPersonalizado != null && !tipoCocinaPersonalizado.isBlank()) {
@@ -60,10 +64,15 @@ public class RestauranteDTO {
         this.mediaPuntuacion = restaurante.getMediaPuntuacion();
         this.restricciones = restaurante.getRestriccionesDieteticas();
 
+        // Comentarios: mostramos los primeros 5
         this.comentarios = restaurante.getResenyas().stream()
                 .map(Resenya::getContenido)
                 .limit(5)
                 .collect(Collectors.toList());
+
+        // 👇 Datos nuevos del dashboard
+        this.visitas = restaurante.getVisitas();
+        this.cantidadComentarios = restaurante.getResenyas() != null ? restaurante.getResenyas().size() : 0;
     }
 
     public RestauranteDTO() {

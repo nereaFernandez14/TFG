@@ -34,7 +34,6 @@ public class RestauranteService {
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // ✅ Verificar si el usuario tiene rol RESTAURANTE usando el enum
         if (usuario.getRol() != RolNombre.RESTAURANTE) {
             throw new RuntimeException("No puede agregar un restaurante porque no tiene el rol RESTAURANTE.");
         }
@@ -78,6 +77,22 @@ public class RestauranteService {
 
     public Restaurante obtenerRestaurantePorUsuario(Long idUsuario) {
         return restauranteRepository.findByUsuarioId(idUsuario);
+    }
+
+    /**
+     * Lógica completa para devolver un restaurante y aumentar contador de visitas.
+     */
+    public Restaurante obtenerYIncrementarVisitas(Long id) {
+        Restaurante restaurante = obtenerRestaurantePorId(id);
+        restaurante.setVisitas(restaurante.getVisitas() + 1);
+        return restauranteRepository.save(restaurante);
+    }
+
+    /**
+     * Guardar restaurante desde fuera.
+     */
+    public Restaurante guardar(Restaurante restaurante) {
+        return restauranteRepository.save(restaurante);
     }
 
     /**
