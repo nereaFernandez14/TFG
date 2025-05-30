@@ -50,7 +50,7 @@ export const routes: Routes = [
         path: 'dashboard',
         loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent),
         canActivate: [AuthGuard, RoleGuard],
-        data: { rol: 'RESTAURANTE' }
+        data: { rol: 'RESTAURANTE'}
       }
     ]
   },
