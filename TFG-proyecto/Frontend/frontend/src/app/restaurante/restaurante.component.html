@@ -2,60 +2,97 @@
   <h2>Registrar Restaurante</h2>
 
   <form [formGroup]="restauranteForm" (ngSubmit)="onSubmit()">
+    <!-- Nombre -->
     <div class="form-group">
       <label>Nombre*</label>
       <input type="text" formControlName="nombre" />
+      <div *ngIf="restauranteForm.get('nombre')?.touched && restauranteForm.get('nombre')?.invalid" class="error">
+        El nombre es obligatorio.
+      </div>
     </div>
 
+    <!-- Dirección -->
     <div class="form-group">
       <label>Dirección*</label>
       <input type="text" formControlName="direccion" />
+      <div *ngIf="restauranteForm.get('direccion')?.touched && restauranteForm.get('direccion')?.invalid" class="error">
+        La dirección es obligatoria.
+      </div>
     </div>
 
+    <!-- Teléfono -->
     <div class="form-group">
       <label>Teléfono*</label>
       <input type="text" formControlName="telefono" />
+      <div *ngIf="restauranteForm.get('telefono')?.touched && restauranteForm.get('telefono')?.invalid" class="error">
+        El teléfono es obligatorio.
+      </div>
     </div>
 
+    <!-- Email -->
     <div class="form-group">
       <label>Email*</label>
       <input type="email" formControlName="email" />
+      <div *ngIf="restauranteForm.get('email')?.touched && restauranteForm.get('email')?.invalid" class="error">
+        Introduce un email válido.
+      </div>
     </div>
 
+    <!-- Contraseña -->
     <div class="form-group">
       <label>Contraseña*</label>
       <input type="password" formControlName="password" />
+      <div *ngIf="restauranteForm.get('password')?.touched && restauranteForm.get('password')?.invalid" class="error">
+        La contraseña debe tener al menos 6 caracteres.
+      </div>
     </div>
 
+    <!-- Tipo de Cocina -->
     <div class="form-group">
       <label>Tipo de Cocina*</label>
       <select formControlName="tipoCocina">
         <option value="">Seleccionar</option>
         <option *ngFor="let tipo of tiposCocina" [value]="tipo">{{ tipo }}</option>
       </select>
+      <div *ngIf="restauranteForm.get('tipoCocina')?.touched && restauranteForm.get('tipoCocina')?.invalid" class="error">
+        Selecciona un tipo de cocina.
+      </div>
     </div>
 
+    <!-- Tipo Personalizado -->
     <div class="form-group" *ngIf="restauranteForm.get('tipoCocina')?.value === 'OTRO'">
       <label>Tipo Personalizado*</label>
       <input type="text" formControlName="tipoCocinaPersonalizado" />
+      <div *ngIf="restauranteForm.get('tipoCocinaPersonalizado')?.touched && restauranteForm.get('tipoCocinaPersonalizado')?.invalid" class="error">
+        Especifica el tipo personalizado (mínimo 2 caracteres).
+      </div>
     </div>
 
+    <!-- Barrio -->
     <div class="form-group">
       <label>Barrio*</label>
       <select formControlName="barrio">
         <option value="">Seleccionar</option>
         <option *ngFor="let b of barrios" [value]="b">{{ b }}</option>
       </select>
+      <div *ngIf="restauranteForm.get('barrio')?.touched && restauranteForm.get('barrio')?.invalid" class="error">
+        Selecciona un barrio.
+      </div>
     </div>
 
+    <!-- Rango de Precio -->
     <div class="form-group">
       <label>Rango de Precio*</label>
       <select formControlName="rangoPrecio">
         <option value="">Seleccionar</option>
         <option *ngFor="let r of rangosPrecio" [value]="r">{{ r }}</option>
       </select>
+      <div *ngIf="restauranteForm.get('rangoPrecio')?.touched && restauranteForm.get('rangoPrecio')?.invalid" class="error">
+        Selecciona un rango de precio.
+      </div>
     </div>
 
+    <!-- Restricciones -->
     <div class="form-group">
       <label>Restricciones Dietéticas</label>
       <select formControlName="restriccionesDieteticas" multiple>
@@ -63,6 +100,7 @@
       </select>
     </div>
 
+    <!-- Botón -->
     <button type="submit" [disabled]="restauranteForm.invalid">Crear Restaurante</button>
   </form>
 </div>

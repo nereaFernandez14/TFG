@@ -23,4 +23,10 @@ export class RestauranteService {
     const params = new HttpParams().set('idUsuario', idUsuario.toString());
     return this.http.post<Restaurante>(`${this.apiUrl}`, data, { params });
   }
+
+  // 🔄 Nuevo método para obtener el restaurante del usuario autenticado
+  obtenerRestaurantePorUsuario(idUsuario: number): Observable<Restaurante> {
+    const params = new HttpParams().set('idUsuario', idUsuario.toString());
+    return this.http.get<Restaurante>(`${this.apiUrl}/mio`, { params });
+  }
 }

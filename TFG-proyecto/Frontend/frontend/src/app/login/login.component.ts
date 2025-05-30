@@ -66,7 +66,7 @@ export class LoginComponent {
                 this.router.navigate(['/admin']);
                 break;
               case 'restaurante':
-                this.router.navigate(['/restaurante']);
+                this.router.navigate(['/restaurantes']);
                 break;
               case 'usuario':
                 this.router.navigate(['/home']);

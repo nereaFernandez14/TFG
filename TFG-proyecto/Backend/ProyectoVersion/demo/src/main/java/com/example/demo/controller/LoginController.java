@@ -56,8 +56,8 @@ public class LoginController {
             }
 
             RolNombre rol = authService.obtenerRolEnum(loginRequest.getUsername());
-
             String nombre = usuarioService.obtenerNombrePorEmail(loginRequest.getUsername());
+            Long id = usuarioService.obtenerIdPorEmail(loginRequest.getUsername());
 
             session.setAttribute("usuario", loginRequest.getUsername());
             session.setAttribute("rol", rol);
@@ -78,7 +78,8 @@ public class LoginController {
                     "message", "Login exitoso",
                     "role", rol.name(),
                     "email", loginRequest.getUsername(),
-                    "nombre", nombre));
+                    "nombre", nombre,
+                    "id", id));
         } catch (Exception ex) {
             ex.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

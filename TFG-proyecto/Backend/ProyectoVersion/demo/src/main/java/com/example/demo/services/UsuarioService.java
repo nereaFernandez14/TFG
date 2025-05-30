@@ -42,6 +42,12 @@ public class UsuarioService {
                 .orElse("Usuario");
     }
 
+    public Long obtenerIdPorEmail(String email) {
+        return usuarioRepository.findByEmail(email)
+                .map(Usuario::getId)
+                .orElse(null);
+    }
+
     public Usuario obtenerPorEmail(String email) {
         return usuarioRepository.findByEmail(email).orElse(null);
     }
@@ -49,9 +55,10 @@ public class UsuarioService {
     public void setLogout(String email) {
         System.out.println("📤 Logout registrado para el usuario: " + email);
     }
+
     public void changePassword(String email, ChangePasswordRequest request) {
         Usuario usuario = usuarioRepository.findByEmail(email)
-            .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), usuario.getPassword())) {
             throw new IllegalArgumentException("La contraseña actual es incorrecta");

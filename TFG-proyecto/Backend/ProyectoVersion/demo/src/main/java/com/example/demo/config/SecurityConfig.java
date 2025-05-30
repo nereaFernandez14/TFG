@@ -42,6 +42,8 @@ public class SecurityConfig {
                                                                 "/api/rol",
                                                                 "/api/sesion",
                                                                 "/restaurantes/buscar",
+                                                                "/restaurantes/**", // ✅ Añadido para permitir rutas
+                                                                                    // como /restaurantes/crear
                                                                 "/roles"))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -55,8 +57,8 @@ public class SecurityConfig {
                                                                 "/api/sesion",
                                                                 "/restaurantes/buscar",
                                                                 "/roles",
-                                                                "/error" // <- Añadido aquí
-                                                ).permitAll()
+                                                                "/error")
+                                                .permitAll()
                                                 .anyRequest().authenticated())
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))

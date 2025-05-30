@@ -39,6 +39,14 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+  path: 'restaurantes/crear',
+  loadComponent: () =>
+    import('./restaurante/restaurante.component').then(m => m.RestauranteComponent),
+  canActivate: [AuthGuard, RoleGuard],
+  data: { rol: 'RESTAURANTE' }
+}
+,
+  {
     path: 'dashboard',
     loadComponent: () =>
       import('./dashboard/dashboard.component').then((m) => m.DashboardComponent),

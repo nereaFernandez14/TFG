@@ -31,6 +31,35 @@ export class RestauranteComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+  const usuario = this.authService.obtenerUsuario();
+  const idUsuario = usuario?.id;
+
+  if (!idUsuario) {
+    console.error('❌ Usuario no autenticado o ID no disponible');
+    this.router.navigate(['/login']);
+    return;
+  }
+
+  this.restauranteService.obtenerRestaurantePorUsuario(idUsuario).subscribe({
+    next: (restaurante) => {
+      console.log('📦 Respuesta restaurante:', restaurante);
+      if (restaurante && restaurante.id) {
+        console.warn('⚠️ El usuario ya tiene un restaurante. Redirigiendo al dashboard.');
+        this.router.navigate(['/dashboard']);
+      } else {
+        console.log('📥 No tiene restaurante, vamos a crear uno');
+        this.initForm();
+      }
+    },
+    error: (err) => {
+      console.log('ℹ️ No existe restaurante, permitiendo creación');
+      this.initForm(); // ✅ SIEMPRE lo llamamos aquí, sin navigate
+    }
+  });
+}
+
+  private initForm(): void {
+    console.log('🛠️ Iniciando el formulario de restaurante');
     this.restauranteForm = this.fb.group({
       nombre: ['', Validators.required],
       direccion: ['', Validators.required],
@@ -50,7 +79,7 @@ export class RestauranteComponent implements OnInit {
         personalizadoCtrl?.setValidators([Validators.required, Validators.minLength(2)]);
       } else {
         personalizadoCtrl?.clearValidators();
-        personalizadoCtrl?.setValue('');
+        personalizadoCtrl?.setValue(null);
       }
       personalizadoCtrl?.updateValueAndValidity();
     });
@@ -63,7 +92,12 @@ export class RestauranteComponent implements OnInit {
     }
 
     const formData = this.restauranteForm.value;
-    const usuario = this.authService.obtenerUsuario(); // ✅ nombre correcto
+
+    if (formData.tipoCocina !== TipoCocina.OTRO) {
+      formData.tipoCocinaPersonalizado = null;
+    }
+
+    const usuario = this.authService.obtenerUsuario();
     const idUsuario = usuario?.id;
 
     if (!idUsuario) {
@@ -73,7 +107,7 @@ export class RestauranteComponent implements OnInit {
 
     this.restauranteService.crearRestaurante(formData, idUsuario).subscribe({
       next: () => {
-        console.log('✅ Restaurante creado');
+        console.log('✅ Restaurante creado correctamente');
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {

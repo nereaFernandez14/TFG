@@ -12,7 +12,7 @@ export const RedirectIfAuthenticatedGuard: CanActivateFn = () => {
     case 'USUARIO':
       return router.createUrlTree(['/home']);
     case 'RESTAURANTE':
-      return router.createUrlTree(['/restaurante']);
+      return router.createUrlTree(['/restaurantes']);
     case 'ADMIN':
       return router.createUrlTree(['/admin']);
     default:
