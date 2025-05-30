@@ -1,5 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  AbstractControl,
+  ValidatorFn,
+  ReactiveFormsModule
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { RestauranteService } from '../services/restaurante.service';
@@ -22,6 +29,7 @@ export class RestauranteComponent implements OnInit {
   barrios = Object.values(Barrio);
   rangosPrecio = Object.values(RangoPrecio);
   restricciones = Object.values(RestriccionDietetica);
+  private palabrasProhibidas = ['puta', 'mierda', 'cabrón', 'estúpido', 'idiota']; // Personalizable
 
   constructor(
     private fb: FormBuilder,
@@ -44,16 +52,29 @@ export class RestauranteComponent implements OnInit {
       restriccionesDieteticas: [[]]
     });
 
-    this.restauranteForm.get('tipoCocina')?.valueChanges.subscribe(value => {
+    this.restauranteForm.get('tipoCocina')?.valueChanges.subscribe((value) => {
       const personalizadoCtrl = this.restauranteForm.get('tipoCocinaPersonalizado');
       if (value === TipoCocina.OTRO) {
-        personalizadoCtrl?.setValidators([Validators.required, Validators.minLength(2)]);
+        personalizadoCtrl?.setValidators([
+          Validators.required,
+          Validators.minLength(2),
+          this.palabraProhibidaValidator(this.palabrasProhibidas)
+        ]);
       } else {
         personalizadoCtrl?.clearValidators();
         personalizadoCtrl?.setValue('');
       }
       personalizadoCtrl?.updateValueAndValidity();
     });
+  }
+
+  private palabraProhibidaValidator(palabras: string[]): ValidatorFn {
+    return (control: AbstractControl) => {
+      if (!control.value) return null;
+      const valor = control.value.toLowerCase();
+      const encontrada = palabras.find((p) => valor.includes(p));
+      return encontrada ? { prohibido: true } : null;
+    };
   }
 
   onSubmit(): void {
@@ -63,7 +84,7 @@ export class RestauranteComponent implements OnInit {
     }
 
     const formData = this.restauranteForm.value;
-    const usuario = this.authService.obtenerUsuario(); // ✅ nombre correcto
+    const usuario = this.authService.obtenerUsuario();
     const idUsuario = usuario?.id;
 
     if (!idUsuario) {

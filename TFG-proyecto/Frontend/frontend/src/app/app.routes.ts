@@ -1,3 +1,4 @@
+// src/app/routes.ts
 import { Routes } from '@angular/router';
 import { RedirectIfAuthenticatedGuard } from './guards/redirect-if-authenticated.guard';
 import { AuthGuard } from './guards/auth.guard';
@@ -40,8 +41,14 @@ export const routes: Routes = [
         canActivate: [AuthGuard]
       },
       {
-        path: 'restaurante/crear',
+        path: 'restaurantes/crear',
         loadComponent: () => import('./restaurante/restaurante.component').then(m => m.RestauranteComponent),
+        canActivate: [AuthGuard, RoleGuard],
+        data: { rol: 'RESTAURANTE' }
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent),
         canActivate: [AuthGuard, RoleGuard],
         data: { rol: 'RESTAURANTE' }
       }

@@ -1,0 +1,59 @@
+.dashboard-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #004d40;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background-color: #e0f2f1;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease;
+}
+
+.card h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.card p {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #00695c;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.link-card {
+  cursor: pointer;
+  background-color: #b2dfdb;
+}
+
+.link-card:hover {
+  background-color: #80cbc4;
+}
+.loading {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #555;
+  padding: 2rem;
+}
+

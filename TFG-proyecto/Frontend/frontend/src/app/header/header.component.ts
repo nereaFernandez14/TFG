@@ -62,7 +62,7 @@ export class HeaderComponent implements OnInit {
 
   navegarACrearRestaurante(): void {
     this.sidebarOpen = false;
-    this.router.navigate(['/restaurante/crear']);
+    this.router.navigate(['/restaurantes/crear']);
   }
   cerrarSidebar(): void {
   this.sidebarOpen = false;

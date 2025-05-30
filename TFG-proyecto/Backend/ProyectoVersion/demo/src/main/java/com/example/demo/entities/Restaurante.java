@@ -53,6 +53,10 @@ public class Restaurante {
     @Column(name = "restriccion")
     private List<RestriccionDietetica> restriccionesDieteticas = new ArrayList<>();
 
+    // ✅ NUEVO: visitas
+    @Column(nullable = false)
+    private int visitas = 0;
+
     public Restaurante() {
     }
 
@@ -77,5 +81,18 @@ public class Restaurante {
                 .mapToInt(Resenya::getValoracion)
                 .average()
                 .orElse(0.0);
+    }
+
+    // ✅ NUEVOS MÉTODOS PARA visitas
+    public int getVisitas() {
+        return visitas;
+    }
+
+    public void setVisitas(int visitas) {
+        this.visitas = visitas;
+    }
+
+    public void incrementarVisitas() {
+        this.visitas++;
     }
 }
