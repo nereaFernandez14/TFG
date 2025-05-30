@@ -1,0 +1,10 @@
+export enum TipoCocina {
+  ITALIANA = 'ITALIANA',
+  JAPONESA = 'JAPONESA',
+  ESPAÑOLA = 'ESPAÑOLA',
+  MEXICANA = 'MEXICANA',
+  CHINA = 'CHINA',
+  INDIA = 'INDIA',
+  AMERICANA = 'AMERICANA',
+  OTRO = 'OTRO'
+}

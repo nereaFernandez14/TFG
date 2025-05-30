@@ -1,0 +1,9 @@
+export enum Barrio {
+  CENTRO = 'CENTRO',
+  SALAMANCA = 'SALAMANCA',
+  CHUECA = 'CHUECA',
+  LAVAPIES = 'LAVAPIES',
+  MALASANA = 'MALASANA',
+  RETIRO = 'RETIRO',
+  OTRO = 'OTRO'
+}

@@ -41,10 +41,11 @@ export class AppComponent implements OnInit {
 
   mensajes: any[] = [];
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.authService.prepararSesion().subscribe({
       next: () => {
         const usuario = this.authService.obtenerUsuario();
+        const rol = this.authService.obtenerRol();
 
         if (!usuario) {
           console.log("🟢 Visitante: no autenticado, sesión iniciada.");
@@ -54,6 +55,7 @@ export class AppComponent implements OnInit {
 
         this.authService.verificarSesion().subscribe({
           next: () => {
+            console.log(`🔐 Usuario autenticado como ${rol}`);
             this.mensajeService.obtenerMensajes().subscribe({
               next: (data) => {
                 this.mensajes = Array.isArray(data) ? data : Object.values(data);

@@ -1,17 +1,47 @@
-<div class="perfil-container">
-  <div class="perfil-card">
-    <div class="perfil-header">
-      <i class="fas fa-user-circle perfil-icon"></i>
-      <h2>{{ usuario?.nombre }} {{ usuario?.apellidos }}</h2>
-    </div>
+<div class="perfil-wrapper">
 
-    <div class="perfil-info">
-      <p><strong>Email:</strong> {{ usuario?.email }}</p>
-      <p><strong>Rol:</strong> {{ usuario?.rol | titlecase }}</p>
-    </div>
-  </div>
-    <div class="perfil-actions">
-    <button type="button" (click)="irACambiarPassword()">Cambiar contraseña</button>
-  </div>
+  <!-- Contenido principal del perfil -->
+  <section class="perfil-contenido">
+    <div class="perfil-container">
+      <div class="perfil-card">
+        <div class="perfil-header">
+          <i class="fas fa-user-circle perfil-icon"></i>
+          <h2>{{ usuario?.nombre }} {{ usuario?.apellidos }}</h2>
+        </div>
 
+        <div class="perfil-info">
+          <p><strong>Email:</strong> {{ usuario?.email }}</p>
+          <p><strong>Rol:</strong>
+            {{
+              usuario?.rol === 'ADMIN' ? 'Administrador' :
+              usuario?.rol === 'USUARIO' ? 'Usuario' :
+              usuario?.rol === 'RESTAURANTE' ? 'Restaurante' :
+              usuario?.rol
+            }}
+          </p>
+        </div>
+      </div>
+
+      <div class="perfil-actions">
+        <button type="button" (click)="irACambiarPassword()">Cambiar contraseña</button>
+      </div>
+
+      <!-- ✅ Sección para RESTAURANTE -->
+      <div *ngIf="usuario?.rol === 'RESTAURANTE'" class="extra-section">
+        <p>¿Tienes un restaurante? ¡Añádelo ahora para empezar a recibir reseñas!</p>
+        <button type="button" (click)="irACrearRestaurante()">Añadir restaurante</button>
+      </div>
+
+      <!-- ✅ Sección para USUARIO -->
+      <div *ngIf="usuario?.rol === 'USUARIO'" class="extra-section">
+        <h3>Preferencias dietéticas</h3>
+        <form>
+          <label for="restricciones">Indica tus alergias o restricciones:</label>
+          <textarea id="restricciones" rows="4" cols="50" placeholder="Ej: Sin gluten, vegano..."></textarea>
+          <br />
+          <button type="button">Guardar preferencias</button>
+        </form>
+      </div>
+    </div>
+  </section>
 </div>

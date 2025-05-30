@@ -1,14 +1,14 @@
 package com.example.demo.services;
 
-import java.util.Optional;
+import com.example.demo.entities.Usuario;
+import com.example.demo.enums.RolNombre;
+import com.example.demo.repositories.UsuarioRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.entities.Rol;
-import com.example.demo.entities.Usuario;
-import com.example.demo.repositories.UsuarioRepository;
+import java.util.Optional;
 
 @Service
 public class AuthService {
@@ -27,13 +27,9 @@ public class AuthService {
                 .orElse(false);
     }
 
-    public Rol obtenerRol(String username) {
-        return usuarioRepository.findByEmail(username)
+    public RolNombre obtenerRolEnum(String email) {
+        return usuarioRepository.findByEmail(email)
                 .map(Usuario::getRol)
-                .orElseGet(() -> {
-                    Rol rol = new Rol();
-                    rol.setNombre("UNKNOWN");
-                    return rol;
-                });
+                .orElse(RolNombre.USUARIO); // Puedes cambiar el valor por defecto si prefieres lanzar una excepción
     }
 }

@@ -1,16 +1,17 @@
 <header>
   <div class="container">
     <a class="logo" routerLink="/">DEGUSTA</a>
-    <img src="assets/degusta.png" alt="Degusta Logo" class="logo-img">
+    <img src="assets/degusta.png" alt="Degusta Logo" class="logo-img" />
 
     <div class="social-icons">
       <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
       <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
       <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
     </div>
+
     <nav>
       <ul *ngIf="!isAuthenticated(); else loggedIn">
-        <li><a routerLink="/login">Acceso</a></li>
+        <li><a routerLink="/login">Iniciar Sesión</a></li>
         <li><a routerLink="/register">Registrarse</a></li>
       </ul>
 
@@ -22,6 +23,7 @@
       </ng-template>
     </nav>
   </div>
+
   <div class="sidebar" [class.open]="sidebarOpen">
     <button class="close-btn" (click)="toggleSidebar()">×</button>
 
@@ -31,10 +33,19 @@
     </div>
 
     <ul class="menu-list">
-      <li (click)="irAlPerfil()"><i class="fas fa-id-badge"></i> Mi perfil</li>
-      <li (click)="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</li>
+      <li (click)="irAlPerfil(); cerrarSidebar()">
+        <i class="fas fa-id-badge"></i> Mi perfil
+      </li>
+
+      <li *ngIf="esRestaurante()" (click)="navegarACrearRestaurante(); cerrarSidebar()">
+        <i class="fas fa-utensils"></i> Registrar Restaurante
+      </li>
+
+      <li (click)="logout(); cerrarSidebar()">
+        <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+      </li>
     </ul>
   </div>
 
-  <div class="overlay" *ngIf="sidebarOpen" (click)="toggleSidebar()"></div>
+  <div class="overlay" *ngIf="sidebarOpen" (click)="cerrarSidebar()"></div>
 </header>

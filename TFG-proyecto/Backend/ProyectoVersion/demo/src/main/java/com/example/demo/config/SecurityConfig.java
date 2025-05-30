@@ -29,50 +29,52 @@ public class SecurityConfig {
 
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        CookieCsrfTokenRepository csrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
-        csrfTokenRepository.setSecure(false); // 👈❗ IMPORTANTE: solo en local
-        csrfTokenRepository.setCookiePath("/");
-
-        http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf
-                .csrfTokenRepository(csrfTokenRepository)
-                .ignoringRequestMatchers(
-                        "/api/login",
-                        "/api/register",
-                        "/register",
-                        "/restaurantes/buscar",
-                        "/api/logout",
-                        "/roles"
-                ))
-                .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers(
-                        "/api/login",
-                        "/api/logout",
-                        "/api/register",
-                        "/register",
-                        "/api/rol",
-                        "/api/sesion",
-                        "/restaurantes/buscar",
-                        "/roles"
-                ).permitAll()
-                .anyRequest().authenticated())
-                .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
-                .formLogin(form -> form.disable())
-                .httpBasic(httpBasic -> httpBasic.disable())
-                .logout(logout -> logout
-                .logoutUrl("/api/logout")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID", "XSRF-TOKEN")
-                .logoutSuccessHandler((request, response, authentication) -> {
-                        response.setStatus(HttpServletResponse.SC_OK);
-                        response.setContentType("application/json");
-                        PrintWriter writer = response.getWriter();
-                        writer.write("{\"message\": \"Logout exitoso\"}");
-                        writer.flush();
-                }));
+                http
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                                .csrf(csrf -> csrf
+                                                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                                                .ignoringRequestMatchers(
+                                                                "/register",
+                                                                "/api/register",
+                                                                "/api/csrf",
+                                                                "/api/login",
+                                                                "/api/logout",
+                                                                "/api/rol",
+                                                                "/api/sesion",
+                                                                "/restaurantes/buscar",
+                                                                "/restaurantes/**", // ✅ Añadido para permitir rutas
+                                                                                    // como /restaurantes/crear
+                                                                "/roles"))
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                                .requestMatchers(
+                                                                "/register",
+                                                                "/api/register",
+                                                                "/api/csrf",
+                                                                "/api/login",
+                                                                "/api/logout",
+                                                                "/api/rol",
+                                                                "/api/sesion",
+                                                                "/restaurantes/buscar",
+                                                                "/roles",
+                                                                "/error")
+                                                .permitAll()
+                                                .anyRequest().authenticated())
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                                .formLogin(form -> form.disable())
+                                .httpBasic(httpBasic -> httpBasic.disable())
+                                .logout(logout -> logout
+                                                .logoutUrl("/api/logout")
+                                                .invalidateHttpSession(true)
+                                                .deleteCookies("JSESSIONID", "XSRF-TOKEN")
+                                                .logoutSuccessHandler((request, response, authentication) -> {
+                                                        response.setStatus(HttpServletResponse.SC_OK);
+                                                        response.setContentType("application/json");
+                                                        PrintWriter writer = response.getWriter();
+                                                        writer.write("{\"message\": \"Logout exitoso\"}");
+                                                        writer.flush();
+                                                }));
 
         return http.build();
         }

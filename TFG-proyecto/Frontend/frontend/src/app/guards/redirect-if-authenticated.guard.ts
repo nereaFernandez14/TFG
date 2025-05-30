@@ -6,10 +6,16 @@ export const RedirectIfAuthenticatedGuard: CanActivateFn = () => {
   const authService = inject(AutenticacionService);
   const router = inject(Router);
 
-  const rol = authService.obtenerRol(); // ahora es string: 'usuario' | 'restaurante' | null
+  const rol = authService.obtenerRol()?.toUpperCase(); // ← mayúsculas por consistencia
 
-  if (rol === 'usuario') return router.createUrlTree(['/home']);
-  if (rol === 'restaurante') return router.createUrlTree(['/restaurante']);
-
-  return true; // visitante o sin rol
+  switch (rol) {
+    case 'USUARIO':
+      return router.createUrlTree(['/home']);
+    case 'RESTAURANTE':
+      return router.createUrlTree(['/restaurantes']);
+    case 'ADMIN':
+      return router.createUrlTree(['/admin']);
+    default:
+      return true; // visitante o no autenticado
+  }
 };

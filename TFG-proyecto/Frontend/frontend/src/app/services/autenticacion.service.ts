@@ -4,17 +4,17 @@ import { Observable, tap, BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { FlashMessageService } from './flash-message.service';
 import { UsuarioService, Usuario } from './usuario.service';
-import { switchMap, map } from 'rxjs/operators';
+import { RolNombre } from '../models/enums/RolNombre.enum';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AutenticacionService {
   private readonly baseUrl = 'https://localhost:8443';
-  private usuarioSubject = new BehaviorSubject<Usuario | null>(this.obtenerUsuario());
+  private usuarioSubject = new BehaviorSubject<Usuario | null>(this.obtenerUsuarioDesdeStorage());
   public usuario$ = this.usuarioSubject.asObservable();
 
-  private rolSubject = new BehaviorSubject<string | null>(this.obtenerRolDesdeStorage());
+  private rolSubject = new BehaviorSubject<RolNombre | null>(this.obtenerRolDesdeStorage());
   public rol$ = this.rolSubject.asObservable();
 
   constructor(
@@ -39,13 +39,15 @@ export class AutenticacionService {
         )
       ),
       tap((respuesta: any) => {
-        if (respuesta && respuesta.role) {
+        if (respuesta?.role) {
+          const rol = this.mapearRol(respuesta.role);
+
           const usuario: Usuario = {
             id: respuesta.id,
             email: respuesta.email ?? email,
             nombre: respuesta.nombre ?? 'Usuario',
             apellidos: respuesta.apellidos ?? '',
-            rol: respuesta.role.toLowerCase()
+            rol: rol
           };
           this.setUsuario(usuario);
         }
@@ -57,12 +59,9 @@ export class AutenticacionService {
   verificarSesion(): Observable<any> {
     return this.http.get(`${this.baseUrl}/api/rol`, { withCredentials: true }).pipe(
       tap((respuesta: any) => {
-        console.log('🟡 Respuesta /api/rol:', respuesta);
-
         if (respuesta?.role) {
-          const usuario = this.obtenerUsuario() || {} as Usuario;
-
-          usuario.rol = respuesta.role.toLowerCase(); // ✅ string
+          const usuario = this.usuarioActual() || {} as Usuario;
+          usuario.rol = this.mapearRol(respuesta.role);
           if (respuesta.nombre) usuario.nombre = respuesta.nombre;
 
           this.setUsuario(usuario);
@@ -72,21 +71,16 @@ export class AutenticacionService {
   }
 
   logout(): void {
-    console.log('🚨 ENTRANDO A logout()');
-
-    this.http.post(`${this.baseUrl}/api/logout`, {}, { withCredentials: true }).subscribe({
+    this.usuarioService.logout().subscribe({
       next: () => {
-        console.log('✅ Logout exitoso');
-
-        localStorage.removeItem('usuario');
-        this.usuarioSubject.next(null);
-        this.rolSubject.next(null);
-
+        this.limpiarSesion();
         this.flashService.setMensaje('Has cerrado sesión correctamente');
         this.router.navigate(['/home']);
       },
       error: (err) => {
         console.error('❌ Error al cerrar sesión:', err);
+        this.limpiarSesion(); // 🔁 incluso si falla, limpiamos
+        this.router.navigate(['/home']);
       }
     });
   }
@@ -99,46 +93,30 @@ export class AutenticacionService {
     return this.http.get(`${this.baseUrl}/api/csrf`, { withCredentials: true });
   }
 
-  private setUsuario(usuario: Usuario): void {
-    localStorage.setItem('usuario', JSON.stringify(usuario));
-    this.usuarioSubject.next(usuario);
-    this.rolSubject.next(usuario.rol ?? null);
-  }
-
-  obtenerUsuario(): Usuario | null {
-    const usuario = localStorage.getItem('usuario');
-    return usuario ? JSON.parse(usuario) : null;
-  }
-
-  obtenerPerfilActual(): Usuario | null {
-    return this.obtenerUsuario();
+  prepararSesion(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/api/sesion`, {
+      withCredentials: true
+    });
   }
 
   sincronizarPerfilConBackend(): void {
-    const local = this.obtenerUsuario();
-    if (!local) {
-      console.warn('⚠️ No hay usuario local para sincronizar');
-      return;
-    }
+    const local = this.usuarioActual();
+    if (!local) return;
 
     this.usuarioService.obtenerPerfil().subscribe({
       next: (remoto) => {
         const necesitaActualizar =
-          local.nombre !== remoto.nombre ||
-          local.apellidos !== remoto.apellidos;
+          local.nombre !== remoto.nombre || local.apellidos !== remoto.apellidos;
 
         if (necesitaActualizar) {
           const usuarioActualizado: Usuario = {
             ...local,
             nombre: remoto.nombre,
             apellidos: remoto.apellidos,
-            rol: remoto.rol.toLowerCase()
+            rol: this.mapearRol(remoto.rol)
           };
 
-          console.log('🔄 Actualizando perfil local con datos del backend', usuarioActualizado);
           this.setUsuario(usuarioActualizado);
-        } else {
-          console.log('✅ Perfil local ya está sincronizado con el backend');
         }
       },
       error: (err) => {
@@ -147,12 +125,27 @@ export class AutenticacionService {
     });
   }
 
-  private obtenerRolDesdeStorage(): string | null {
-    const usuario = this.obtenerUsuario();
-    return usuario?.rol ?? null;
+  private setUsuario(usuario: Usuario): void {
+    localStorage.setItem('usuario', JSON.stringify(usuario));
+    this.usuarioSubject.next(usuario);
+    this.rolSubject.next(usuario.rol ?? null);
   }
 
-  obtenerRol(): string | null {
+  private limpiarSesion(): void {
+    localStorage.removeItem('usuario');
+    this.usuarioSubject.next(null);
+    this.rolSubject.next(null);
+  }
+
+  obtenerUsuario(): Usuario | null {
+    return this.usuarioSubject.value;
+  }
+
+  usuarioActual(): Usuario | null {
+    return this.usuarioSubject.value;
+  }
+
+  obtenerRol(): RolNombre | null {
     return this.rolSubject.value;
   }
 
@@ -160,17 +153,38 @@ export class AutenticacionService {
     return !!this.obtenerRol();
   }
 
-  prepararSesion(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/api/sesion`, {
-      withCredentials: true
-    });
+  actualizarRol(nuevoRol: string): void {
+    const usuario = this.usuarioActual();
+    if (usuario) {
+      usuario.rol = this.mapearRol(nuevoRol);
+      this.setUsuario(usuario);
+    }
   }
 
-  actualizarRol(nuevoRol: string): void {
-    const usuario = this.obtenerUsuario();
-    if (usuario) {
-      usuario.rol = nuevoRol;
-      this.setUsuario(usuario);
+  private obtenerUsuarioDesdeStorage(): Usuario | null {
+    const usuario = localStorage.getItem('usuario');
+    if (!usuario) return null;
+
+    const parseado = JSON.parse(usuario);
+    parseado.rol = this.mapearRol(parseado.rol);
+    return parseado;
+  }
+
+  private obtenerRolDesdeStorage(): RolNombre | null {
+    const usuario = this.obtenerUsuarioDesdeStorage();
+    return usuario?.rol ?? null;
+  }
+
+  /**
+   * Convierte un string a RolNombre validado
+   */
+  private mapearRol(rol: string): RolNombre {
+    const rolFormateado = rol.toUpperCase();
+    if (Object.values(RolNombre).includes(rolFormateado as RolNombre)) {
+      return rolFormateado as RolNombre;
+    } else {
+      console.warn(`⚠️ Rol inválido recibido: ${rol}. Se asignará 'USUARIO' por defecto.`);
+      return RolNombre.USUARIO;
     }
   }
 }
