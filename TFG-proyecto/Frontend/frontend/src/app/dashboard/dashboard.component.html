@@ -1,0 +1,25 @@
+<div class="dashboard-container">
+  <h2>Panel de Control del Restaurante</h2>
+
+  <div class="cards-grid" *ngIf="datos">
+    <div class="card">
+      <h3>Visitas</h3>
+      <p>{{ datos.visitas }}</p>
+    </div>
+
+    <div class="card">
+      <h3>Comentarios</h3>
+      <p>{{ datos.comentarios }}</p>
+    </div>
+
+    <div class="card">
+      <h3>Valoración Promedio</h3>
+      <p>{{ datos.valoracionPromedio }} ⭐</p>
+    </div>
+
+    <div class="card link-card" routerLink="/menu/modificar">
+      <h3>Modificar Menú</h3>
+      <p>Haz clic aquí para editar tu carta</p>
+    </div>
+  </div>
+</div>

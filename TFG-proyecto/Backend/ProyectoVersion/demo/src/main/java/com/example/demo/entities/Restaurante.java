@@ -83,6 +83,10 @@ public class Restaurante {
                 .orElse(0.0);
     }
 
+    public int getVisitas() {
+        return visitas;
+    }
+
     public void setVisitas(int visitas) {
         this.visitas = visitas;
     }
