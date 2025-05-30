@@ -1,43 +1,131 @@
-.login-container {
-  max-width: 300px;
-  margin: 30px auto;
-  padding: 20px;
-  border: 1px solid green;
-  background-color: white;
-  border-radius: 8px;
-}
-h2{
-  text-align: center;
-  color: green;
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  z-index: 1000;
+  opacity: 0;
+  animation: fadeInBackdrop 0.3s forwards;
 }
 
-label {
-  display: block;
-  margin-top: 10px;
+
+@keyframes fadeInBackdrop {
+  to {
+    opacity: 1;
+  }
 }
 
-input {
-  width: 100%;
-  padding: 6px;
-  margin-top: 4px;
-  box-sizing: border-box;
+/* Contenedor del modal */
+.modal-content {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  background: #ffffff;
+  padding: 35px 40px;
+  border-radius: 15px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+  z-index: 1001;
+  width: 360px;
+  max-width: 90%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  opacity: 0;
+  animation: fadeInModal 0.3s forwards;
+  transition: transform 0.3s ease;
 }
 
-button {
-  margin-top: 20px;
-  padding: 8px;
-  width: 100%;
-  background: #1976d2;
-  color: white;
+@keyframes fadeInModal {
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Botón de cierre */
+.close-btn {
+  position: absolute;
+  top: 10px; right: 15px;
+  background: transparent;
   border: none;
-  border-radius: 4px;
-}
-button:hover {
-  background: #1565c0;
+  font-size: 26px;
+  font-weight: bold;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.3s ease;
 }
 
+.close-btn:hover {
+  color: #e74c3c;
+}
 
+/* Título del modal */
+h2 {
+  margin-bottom: 25px;
+  font-size: 1.7rem;
+  font-weight: bold;
+  text-align: center;
+  color: #222;
+}
+
+/* Campos del formulario */
+label {
+  font-weight: 600;
+  display: block;
+  margin-top: 18px;
+  margin-bottom: 6px;
+  color: #555;
+}
+
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: inherit;
+  transition: border-color 0.3s ease;
+}
+
+input[type="email"]:focus,
+input[type="password"]:focus {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+}
+
+/* Botón de enviar */
+button[type="submit"] {
+  background-color: #3498db;
+  border: none;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 16px;
+  width: 100%;
+  margin-top: 25px;
+  cursor: pointer;
+  box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+button[type="submit"]:hover:not(:disabled) {
+  background-color: #2980b9;
+  box-shadow: 0 8px 20px rgba(41, 128, 185, 0.6);
+}
+
+button[type="submit"]:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Mensajes de error */
 .error {
-  color: red;
+  color: #e74c3c;
+  font-size: 14px;
+  font-style: italic;
   margin-top: 10px;
+  text-align: center;
 }

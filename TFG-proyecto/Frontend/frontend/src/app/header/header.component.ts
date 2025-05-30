@@ -1,8 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
+
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AutenticacionService } from '../services/autenticacion.service';
 import { NgZone } from '@angular/core';
+import { Component, OnInit, signal, Output, EventEmitter } from '@angular/core';
+
 
 @Component({
   selector: 'app-header',
@@ -12,6 +14,9 @@ import { NgZone } from '@angular/core';
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent implements OnInit {
+  @Output() mostrarLogin = new EventEmitter<void>();
+  @Output() mostrarRegistro = new EventEmitter<void>();
+
   isAuthenticated = signal(false);
   userName = signal<string | null>(null);
   sidebarOpen = false;
@@ -60,6 +65,14 @@ export class HeaderComponent implements OnInit {
       });
     } else {
       this.router.navigate(['/profile']);
-    }
+          }
   }
+  abrirLogin(): void {
+  this.mostrarLogin.emit();
+}
+
+  abrirRegistro(): void {
+  this.mostrarRegistro.emit();
+}
+
 }

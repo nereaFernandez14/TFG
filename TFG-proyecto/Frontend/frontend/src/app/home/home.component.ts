@@ -6,10 +6,13 @@ import { Restaurante } from '../models/restaurante.model';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FlashMessageService } from '../services/flash-message.service';
+import { HeaderComponent } from '../header/header.component';
+import { LoginComponent } from '../login/login.component';
+import { RegisterComponent } from '../register/register.component';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,HeaderComponent, LoginComponent, RegisterComponent],
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
@@ -87,4 +90,22 @@ export class HomeComponent implements OnInit {
       }
     );
   }
+  loginVisible = false;
+registroVisible = false;
+
+mostrarLoginModal(): void {
+  this.loginVisible = true;
+  this.registroVisible = false;
+}
+
+mostrarRegistroModal(): void {
+  this.registroVisible = true;
+  this.loginVisible = false;
+}
+
+cerrarModal(): void {
+  this.loginVisible = false;
+  this.registroVisible = false;
+}
+
 }

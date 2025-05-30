@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RouterModule } from '@angular/router';
@@ -14,6 +14,8 @@ import { ReactiveFormsModule } from '@angular/forms';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
+  @Output() cerrar = new EventEmitter<void>(); // ✅ Evento para cerrar el modal
+
   loginForm: FormGroup;
   error: string = '';
   cargando: boolean = false;
@@ -60,6 +62,9 @@ export class LoginComponent {
               this.cargando = false;
               return;
             }
+
+            // ✅ Emite el evento para cerrar el modal si el login fue exitoso
+            this.cerrar.emit();
 
             switch (rol) {
               case 'admin':

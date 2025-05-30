@@ -1,7 +1,9 @@
 <header>
   <div class="container">
-    <a class="logo" routerLink="/">DEGUSTA</a>
-    <img src="assets/degusta.png" alt="Degusta Logo" class="logo-img">
+    <a routerLink="/">
+  <img src="assets/degusta.png" alt="Degusta Logo" class="logo-img" />
+</a>
+
 
     <div class="social-icons">
       <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
@@ -10,8 +12,9 @@
     </div>
     <nav>
       <ul *ngIf="!isAuthenticated(); else loggedIn">
-        <li><a routerLink="/login">Iniciar Sesión</a></li>
-        <li><a routerLink="/register">Registrarse</a></li>
+       <li><a (click)="abrirLogin()">Iniciar Sesión</a></li>
+      <li><a (click)="abrirRegistro()">Registrarse</a></li>
+
       </ul>
 
       <ng-template #loggedIn>

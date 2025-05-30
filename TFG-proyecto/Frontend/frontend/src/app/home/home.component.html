@@ -1,5 +1,17 @@
-<div class="home-container">
+<!-- ✅ Header con eventos personalizados -->
+<app-header
+  (mostrarLogin)="mostrarLoginModal()"
+  (mostrarRegistro)="mostrarRegistroModal()">
+</app-header>
 
+<!-- ✅ Modales condicionales -->
+<app-login *ngIf="loginVisible" (cerrar)="cerrarModal()"></app-login>
+<app-register *ngIf="registroVisible" (cerrar)="cerrarModal()"></app-register>
+<!-- home.component.html -->
+
+
+<div class="home-container">
+  
   <!-- ✅ Alerta de mensaje logout -->
   <div *ngIf="mensajeLogout" class="alert alert-success" style="margin-bottom: 20px;">
     {{ mensajeLogout }}
@@ -29,5 +41,4 @@
       </div>
     </div>
   </div>
-
 </div>
