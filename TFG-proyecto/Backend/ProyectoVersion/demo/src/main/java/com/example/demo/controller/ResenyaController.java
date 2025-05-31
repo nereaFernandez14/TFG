@@ -1,56 +1,64 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.ResenyaRequest;
 import com.example.demo.entities.Resenya;
-import com.example.demo.entities.Restaurante;
-import com.example.demo.entities.Usuario;
-import com.example.demo.repositories.ResenyaRepository;
-import com.example.demo.repositories.RestauranteRepository;
-import com.example.demo.repositories.UsuarioRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.demo.services.ResenyaService;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/resenyas")
+@RequiredArgsConstructor
 public class ResenyaController {
 
-    @Autowired
-    private ResenyaRepository resenyaRepository;
+    private final ResenyaService resenyaService;
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    @PostMapping("/resenyas")
+    @Transactional
+    public ResponseEntity<?> crearResenya(@RequestBody ResenyaRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body(Map.of("error", "No autenticado"));
+        }
 
-    @Autowired
-    private RestauranteRepository restauranteRepository;
+        String email = auth.getName();
 
-    @PostMapping
-    public Resenya crearResenya(@RequestParam Long idCliente,
-                                      @RequestParam Long idRestaurante,
-                                      @RequestBody String contenido) {
-
-        Usuario cliente = usuarioRepository.findById(idCliente).orElseThrow();  //Si no existe el cliente, lanzará una excepción
-        Restaurante restaurante = restauranteRepository.findById(idRestaurante).orElseThrow(); //Si no existe el restaurante, lanzará una excepción
-
-        Resenya resenya = new Resenya();
-        resenya.setAutor(cliente);
-        resenya.setRestaurante(restaurante);
-        resenya.setContenido(contenido);
-
-        return resenyaRepository.save(resenya);
+        try {
+            resenyaService.guardarResenya(
+                    request.getContenido(),
+                    request.getValoracion(),
+                    request.getRestauranteId(),
+                    email);
+            return ResponseEntity.ok(Map.of("message", "Reseña guardada con éxito"));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        }
     }
 
-    @GetMapping
-    public List<Resenya> getAllResenyas() {
-        return resenyaRepository.findAll();
-    }
+    @PutMapping("/resenyas")
+    @Transactional
+    public ResponseEntity<?> actualizarResenya(@RequestBody ResenyaRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body(Map.of("error", "No autenticado"));
+        }
 
-    //Obtener Resenyas del restaurante actual 
-    @GetMapping("/mios")
-    public List<Resenya> getMisresenyas(@RequestParam Long idUsuarioRestaurante) {
-        // Buscar restaurante por usuario
-        Restaurante restaurante = restauranteRepository.findByUsuarioId(idUsuarioRestaurante);
-        return resenyaRepository.findByRestaurante(restaurante);
+        String email = auth.getName();
+
+        try {
+            resenyaService.actualizarResenya(
+                    request.getRestauranteId(),
+                    email,
+                    request.getContenido(),
+                    request.getValoracion());
+            return ResponseEntity.ok(Map.of("message", "Reseña actualizada con éxito"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        }
     }
 }

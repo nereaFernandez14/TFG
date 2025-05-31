@@ -1,53 +1,40 @@
 package com.example.demo.controller;
 
-import com.example.demo.entities.Usuario;
-import com.example.demo.repositories.UsuarioRepository;
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.demo.dto.ChangePasswordRequest;
+import com.example.demo.services.UsuarioService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/change-password")
 public class ChangePasswordController {
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    private UsuarioService usuarioService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @PostMapping("/change-password")
+    @PostMapping
     @Transactional
     public ResponseEntity<?> cambiarPassword(@RequestBody ChangePasswordRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(401).body("No autenticado");
+            return ResponseEntity.status(401).body(Map.of("error", "No autenticado"));
         }
 
         String email = authentication.getName();
-        Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
 
-        if (usuario == null) {
-            return ResponseEntity.status(404).body("Usuario no encontrado");
+        try {
+            usuarioService.changePassword(email, request);
+            // 🔧 Devolver JSON con clave `message` para que Angular lo entienda
+            return ResponseEntity.ok(Map.of("message", "Contraseña cambiada correctamente"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(403).body(Map.of("error", e.getMessage()));
         }
-
-        // Validar contraseña actual
-        if (!passwordEncoder.matches(request.currentPassword(), usuario.getPassword())) {
-            return ResponseEntity.status(403).body("La contraseña actual es incorrecta");
-        }
-
-        // Cambiar la contraseña
-        usuario.setPassword(passwordEncoder.encode(request.newPassword()));
-        usuarioRepository.save(usuario);
-
-        return ResponseEntity.ok("Contraseña cambiada correctamente");
     }
-
-    public record ChangePasswordRequest(String currentPassword, String newPassword) {}
 }

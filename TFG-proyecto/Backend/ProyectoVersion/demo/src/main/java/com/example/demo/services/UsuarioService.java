@@ -1,6 +1,6 @@
 package com.example.demo.services;
 
-import com.example.demo.entities.ChangePasswordRequest;
+import com.example.demo.dto.ChangePasswordRequest;
 import com.example.demo.entities.Usuario;
 import com.example.demo.exception.DangerException;
 import com.example.demo.repositories.UsuarioRepository;

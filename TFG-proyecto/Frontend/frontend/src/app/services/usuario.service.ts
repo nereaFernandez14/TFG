@@ -1,4 +1,3 @@
-
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
@@ -53,23 +52,26 @@ export class UsuarioService {
 
   /**
    * Cambia la contraseña del usuario autenticado.
-   * POST /api/change-password
+   * POST /change-password
    */
   cambiarPassword(passwordActual: string, nuevaPassword: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/change-password`, {
+  return this.http.post(
+    `${environment.apiUrl}/change-password`,
+    {
       currentPassword: passwordActual,
       newPassword: nuevaPassword
-    }, {
-      withCredentials: true
-    });
-  }
-
+    },
+    {
+      withCredentials: true,
+      responseType: 'json'
+    }
+  );
+}
 
   private getCookie(name: string): string | null {
     const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
     return match ? match[2] : null;
   }
-
 
   /**
    * Cierra la sesión del usuario autenticado.
@@ -82,7 +84,6 @@ export class UsuarioService {
       catchError(this.handleError)
     );
   }
-
 
   /**
    * Manejo centralizado de errores HTTP.

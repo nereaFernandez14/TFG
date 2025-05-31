@@ -6,43 +6,61 @@ import com.example.demo.entities.Usuario;
 import com.example.demo.repositories.ResenyaRepository;
 import com.example.demo.repositories.RestauranteRepository;
 import com.example.demo.repositories.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ResenyaService {
 
-    @Autowired
-    private ResenyaRepository comentarioRepository;
+    private final ResenyaRepository resenyaRepository;
+    private final RestauranteRepository restauranteRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    @Autowired 
-    private UsuarioRepository usuarioRepository;
+    private static final List<String> PALABRAS_PROHIBIDAS = List.of("tonto", "gilipollas", "idiota");
 
-    @Autowired
-    private RestauranteRepository restauranteRepository;
+    public Resenya guardarResenya(String contenido, int valoracion, Long restauranteId, String email) {
+        Usuario autor = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        Restaurante restaurante = restauranteRepository.findById(restauranteId)
+                .orElseThrow(() -> new IllegalArgumentException("Restaurante no encontrado"));
 
-    // Método para crear un nuevo comentario
-    public Resenya crearComentario(Long idCliente, Long idRestaurante, String contenido) {
-        // Buscar al usuario (cliente) y al restaurante
-        Usuario cliente = usuarioRepository.findById(idCliente).orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
-        Restaurante restaurante = restauranteRepository.findById(idRestaurante).orElseThrow(() -> new RuntimeException("Restaurante no encontrado"));
+        if (resenyaRepository.findByAutorAndRestaurante(autor, restaurante).isPresent()) {
+            throw new IllegalStateException("Ya has reseñado este restaurante.");
+        }
 
-        Resenya comentario = new Resenya();
-        comentario.setAutor(cliente);
-        comentario.setRestaurante(restaurante);
-        comentario.setContenido(contenido);
+        validarContenido(contenido);
 
-        return comentarioRepository.save(comentario);
+        Resenya nueva = new Resenya(contenido, valoracion, autor, restaurante);
+        return resenyaRepository.save(nueva);
     }
 
-    public List<Resenya> obtenerTodosLosComentarios() {
-        return comentarioRepository.findAll();
+    public Resenya actualizarResenya(Long restauranteId, String email, String contenido, Integer nuevaValoracion) {
+        Usuario autor = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        Restaurante restaurante = restauranteRepository.findById(restauranteId)
+                .orElseThrow(() -> new IllegalArgumentException("Restaurante no encontrado"));
+
+        Resenya existente = resenyaRepository.findByAutorAndRestaurante(autor, restaurante)
+                .orElseThrow(() -> new IllegalArgumentException("No tienes una reseña para este restaurante"));
+
+        if (!existente.getValoracion().equals(nuevaValoracion)) {
+            throw new IllegalArgumentException("No se permite modificar la puntuación de la reseña.");
+        }
+
+        validarContenido(contenido);
+
+        existente.setContenido(contenido);
+        return resenyaRepository.save(existente);
     }
 
-    public List<Resenya> obtenerComentariosDeRestaurante(Long idRestaurante) {
-        Restaurante restaurante = restauranteRepository.findById(idRestaurante).orElseThrow(() -> new RuntimeException("Restaurante no encontrado"));
-        return comentarioRepository.findByRestaurante(restaurante);
+    private void validarContenido(String contenido) {
+        for (String palabra : PALABRAS_PROHIBIDAS) {
+            if (contenido.toLowerCase().contains(palabra)) {
+                throw new IllegalArgumentException("El comentario contiene palabras inapropiadas.");
+            }
+        }
     }
 }

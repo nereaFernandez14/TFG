@@ -41,8 +41,10 @@ public class SecurityConfig {
                                                                 "/api/rol",
                                                                 "/api/sesion",
                                                                 "/restaurantes/buscar",
-                                                                "/restaurantes/**", // ✅ Añadido para permitir rutas
-                                                                "/roles"))
+                                                                "/restaurantes/**",
+                                                                "/roles",
+                                                                "/change-password" // ✅ Se ignora para CSRF
+                                                ))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                 .requestMatchers(
@@ -55,6 +57,8 @@ public class SecurityConfig {
                                                                 "/api/sesion",
                                                                 "/restaurantes/buscar",
                                                                 "/roles",
+                                                                "/change-password", // ✅ Se permite el acceso a esta
+                                                                                    // ruta
                                                                 "/error")
                                                 .permitAll()
                                                 .anyRequest().authenticated())

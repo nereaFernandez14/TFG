@@ -10,10 +10,7 @@ import { HttpClient } from '@angular/common/http';
   standalone: true,
   templateUrl: './change-password.component.html',
   styleUrls: ['./change-password.component.css'],
-  imports: [
-    ReactiveFormsModule,
-    CommonModule
-  ]
+  imports: [ReactiveFormsModule, CommonModule]
 })
 export class ChangePasswordComponent {
   passwordForm = this.fb.group({
@@ -24,6 +21,7 @@ export class ChangePasswordComponent {
 
   errorMessage = '';
   successMessage = '';
+  currentPasswordError = '';
 
   constructor(
     private fb: FormBuilder,
@@ -32,38 +30,52 @@ export class ChangePasswordComponent {
     private router: Router
   ) {}
 
+  get passwordsNoMatch(): boolean {
+    const newPassword = this.passwordForm.get('newPassword')?.value ?? '';
+    const confirmNewPassword = this.passwordForm.get('confirmNewPassword')?.value ?? '';
+    return newPassword !== confirmNewPassword;
+  }
+
   cambiarPassword() {
     const { currentPassword, newPassword, confirmNewPassword } = this.passwordForm.value;
 
-    if (newPassword !== confirmNewPassword) {
+    if (this.passwordsNoMatch) {
       this.errorMessage = 'Las nuevas contraseñas no coinciden';
       this.successMessage = '';
       return;
     }
 
-    // ⚠️ FORZAMOS petición GET para obtener el token XSRF
     this.http.get('https://localhost:8443/api/csrf', { withCredentials: true }).subscribe({
       next: () => {
-        // ✅ Ahora Angular automáticamente enviará el X-XSRF-TOKEN
-        this.usuarioService
-          .cambiarPassword(currentPassword!, newPassword!)
-          .subscribe({
-            next: () => {
-              this.successMessage = '¡Contraseña actualizada!';
+        this.usuarioService.cambiarPassword(currentPassword!, newPassword!).subscribe({
+          next: (res) => {
+            console.log('✅ Respuesta del backend:', res);
+            this.successMessage = res.message || '¡Contraseña actualizada!';
+            this.errorMessage = '';
+            this.currentPasswordError = '';
+            this.passwordForm.reset();
+
+            setTimeout(() => {
+              this.router.navigate(['/miPerfil']);
+            }, 2000);
+          },
+          error: (err) => {
+            const backendMsg = err.error?.error || err.message;
+            if (backendMsg.toLowerCase().includes('actual')) {
+              this.currentPasswordError = backendMsg;
               this.errorMessage = '';
-              this.passwordForm.reset();
-              setTimeout(() => this.router.navigate(['/profile']), 1500);
-            },
-            error: err => {
-              this.errorMessage = err.message || 'Error al cambiar la contraseña';
-              this.successMessage = '';
+            } else {
+              this.errorMessage = backendMsg;
+              this.currentPasswordError = '';
             }
-          });
+            this.successMessage = '';
+          }
+        });
       },
       error: () => {
         this.errorMessage = 'No se pudo obtener el token CSRF';
+        this.successMessage = '';
       }
     });
   }
-
 }

@@ -1,7 +1,7 @@
-package com.example.demo.entities;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+package com.example.demo.dto;
+
 import lombok.Data;
+
 @Data
 public class ChangePasswordRequest {
     private String currentPassword;
