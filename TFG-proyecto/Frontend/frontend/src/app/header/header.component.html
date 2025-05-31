@@ -37,7 +37,7 @@
         <i class="fas fa-id-badge"></i> Mi perfil
       </li>
 
-      <li *ngIf="esRestaurante()" (click)="navegarACrearRestaurante(); cerrarSidebar()">
+      <li *ngIf="puedeRegistrarRestaurante()" (click)="navegarACrearRestaurante(); cerrarSidebar()">
         <i class="fas fa-utensils"></i> Registrar Restaurante
       </li>
 

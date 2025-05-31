@@ -25,4 +25,5 @@ export interface Restaurante {
 
   resenyas?: Resenya[];
   mediaPuntuacion?: number;
+  descripcion?: string;
 }

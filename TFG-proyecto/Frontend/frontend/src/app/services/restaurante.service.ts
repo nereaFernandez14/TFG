@@ -1,11 +1,15 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { Restaurante } from '../models/restaurante.model';
 
 @Injectable({ providedIn: 'root' })
 export class RestauranteService {
-  private apiUrl = 'http://localhost:8080/api/restaurantes';
+  private apiUrl = '/api/restaurantes';
+
+  // 🟢 NUEVO: Notificador reactivo de creación de restaurante
+  private restauranteCreadoSubject = new BehaviorSubject<boolean>(false);
+  restauranteCreado$ = this.restauranteCreadoSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -24,9 +28,39 @@ export class RestauranteService {
     return this.http.post<Restaurante>(`${this.apiUrl}`, data, { params });
   }
 
-  // 🔄 Nuevo método para obtener el restaurante del usuario autenticado
   obtenerRestaurantePorUsuario(idUsuario: number): Observable<Restaurante> {
     const params = new HttpParams().set('idUsuario', idUsuario.toString());
     return this.http.get<Restaurante>(`${this.apiUrl}/mio`, { params });
   }
+
+  // ✅ Método para notificar la creación del restaurante
+  notificarRestauranteCreado() {
+    this.restauranteCreadoSubject.next(true);
+  }
+  filtrarRestaurantesAvanzado(
+    tipoCocina: string | null,
+    barrio: string | null,
+    rangoPrecio: string | null,
+    minPuntuacion: number | null,
+    restricciones: string[]
+  ): Observable<Restaurante[]> {
+    const params: any = {};
+
+    if (tipoCocina) params.tipoCocina = tipoCocina;
+    if (barrio) params.barrio = barrio;
+    if (rangoPrecio) params.rangoPrecio = rangoPrecio;
+    if (minPuntuacion !== null && minPuntuacion !== undefined) {
+      params.minPuntuacion = minPuntuacion;
+    }
+    if (restricciones && restricciones.length > 0) {
+      params.restricciones = restricciones;
+    }
+
+    return this.http.get<Restaurante[]>('/api/restaurantes/filtrar-avanzado', {
+      params,
+      withCredentials: true
+    });
+  }
+
+
 }

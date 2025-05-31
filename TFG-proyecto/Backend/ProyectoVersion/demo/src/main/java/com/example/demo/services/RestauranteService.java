@@ -12,6 +12,7 @@ import com.example.demo.repositories.RestauranteRepository;
 import com.example.demo.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Comparator;
 import java.util.List;
@@ -25,12 +26,14 @@ public class RestauranteService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     /**
      * Crear restaurante y asignar usuario, con validación de tipo de cocina y
      * filtro de palabras ofensivas.
      */
-    public Restaurante crearRestaurante(Long idUsuario, Restaurante restaurante) {
+   public Restaurante crearRestaurante(Long idUsuario, Restaurante restaurante) {
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
@@ -40,12 +43,18 @@ public class RestauranteService {
 
         restaurante.setUsuario(usuario);
 
+        // 🔒 Encriptar la contraseña si viene del frontend
+        if (restaurante.getPassword() != null && !restaurante.getPassword().isBlank()) {
+            String passwordHasheada = passwordEncoder.encode(restaurante.getPassword());
+            restaurante.setPassword(passwordHasheada);
+        }
+
+        // ✅ Validación de tipo cocina personalizado
         if (restaurante.getTipoCocina() == TipoCocina.OTRO) {
             String personalizada = restaurante.getTipoCocinaPersonalizado();
 
             if (personalizada == null || personalizada.isBlank()) {
-                throw new RuntimeException(
-                        "Si se selecciona 'OTRO' como tipo de cocina, se debe especificar un valor personalizado.");
+                throw new RuntimeException("Si se selecciona 'OTRO' como tipo de cocina, se debe especificar un valor personalizado.");
             }
 
             List<String> palabrasProhibidas = List.of("mierda", "puta", "gilipollas", "cabron", "joder", "idiota",
@@ -54,8 +63,7 @@ public class RestauranteService {
 
             for (String prohibida : palabrasProhibidas) {
                 if (normalizado.contains(prohibida)) {
-                    throw new RuntimeException(
-                            "El tipo de cocina contiene lenguaje inapropiado. Por favor, elige otro término.");
+                    throw new RuntimeException("El tipo de cocina contiene lenguaje inapropiado. Por favor, elige otro término.");
                 }
             }
 
@@ -65,6 +73,7 @@ public class RestauranteService {
 
         return restauranteRepository.save(restaurante);
     }
+
 
     public List<Restaurante> obtenerTodosLosRestaurantes() {
         return restauranteRepository.findAll();

@@ -1,7 +1,7 @@
 <div class="formulario-container">
   <h2>Registrar Restaurante</h2>
 
-  <form [formGroup]="restauranteForm" (ngSubmit)="onSubmit()">
+  <form *ngIf="restauranteForm" [formGroup]="restauranteForm" (ngSubmit)="onSubmit()">
     <!-- Nombre -->
     <div class="form-group">
       <label>Nombre*</label>

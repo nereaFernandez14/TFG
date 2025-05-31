@@ -2,6 +2,7 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AutenticacionService } from '../services/autenticacion.service';
+import { RestauranteService } from '../services/restaurante.service';
 import { NgZone } from '@angular/core';
 import { Usuario } from '../models/usuario.model';
 
@@ -23,8 +24,11 @@ export class HeaderComponent implements OnInit {
     return rol?.toUpperCase() === 'RESTAURANTE';
   });
 
+  puedeRegistrarRestaurante = signal(false);
+
   constructor(
     private authService: AutenticacionService,
+    private restauranteService: RestauranteService,
     public router: Router,
     private zone: NgZone
   ) {}
@@ -36,12 +40,37 @@ export class HeaderComponent implements OnInit {
           this.isAuthenticated.set(true);
           this.user.set(usuario);
           this.userName.set(usuario.nombre ?? 'Usuario');
+
+          if (usuario.rol?.toUpperCase() === 'RESTAURANTE') {
+            this.comprobarEstadoRestaurante(usuario.id);
+          } else {
+            this.puedeRegistrarRestaurante.set(false);
+          }
         } else {
           this.isAuthenticated.set(false);
           this.user.set(null);
           this.userName.set(null);
+          this.puedeRegistrarRestaurante.set(false);
         }
       });
+    });
+
+    // 👂 Suscribirse a notificación de restaurante creado
+    this.restauranteService.restauranteCreado$.subscribe((creado) => {
+      if (creado && this.user()?.id) {
+        this.comprobarEstadoRestaurante(this.user()!.id);
+      }
+    });
+  }
+
+  private comprobarEstadoRestaurante(idUsuario: number): void {
+    this.restauranteService.obtenerRestaurantePorUsuario(idUsuario).subscribe({
+      next: (restaurante) => {
+        this.puedeRegistrarRestaurante.set(!restaurante);
+      },
+      error: () => {
+        this.puedeRegistrarRestaurante.set(true);
+      }
     });
   }
 
@@ -64,7 +93,8 @@ export class HeaderComponent implements OnInit {
     this.sidebarOpen = false;
     this.router.navigate(['/restaurantes/crear']);
   }
+
   cerrarSidebar(): void {
-  this.sidebarOpen = false;
+    this.sidebarOpen = false;
   }
 }

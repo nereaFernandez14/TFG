@@ -108,11 +108,13 @@ export class RestauranteComponent implements OnInit {
     this.restauranteService.crearRestaurante(formData, idUsuario).subscribe({
       next: () => {
         console.log('✅ Restaurante creado correctamente');
+        this.restauranteService.notificarRestauranteCreado(); // 👈 🔥 ACTUALIZA EL HEADER
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         console.error('❌ Error al crear restaurante:', err);
       }
     });
+
   }
 }
