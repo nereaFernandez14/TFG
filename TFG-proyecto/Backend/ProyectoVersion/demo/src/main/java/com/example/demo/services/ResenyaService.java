@@ -63,4 +63,8 @@ public class ResenyaService {
             }
         }
     }
+    public List<Resenya> obtenerResenyasPorRestaurante(Long restauranteId) {
+        return resenyaRepository.findByRestauranteId(restauranteId);
+    }
+
 }

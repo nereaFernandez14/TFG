@@ -60,25 +60,29 @@
   </div>
 </div>
 
-<div *ngIf="restaurantes.length > 0" class="resultados-container">
-  <h2>Restaurantes encontrados</h2>
+  <div *ngIf="restaurantes.length > 0" class="resultados-container">
+    <h2>Restaurantes encontrados</h2>
 
-  <div *ngFor="let restaurante of restaurantes" class="restaurante-card">
-    <h3>{{ restaurante.nombre }}</h3>
-    <p>{{ restaurante.descripcion || 'Sin descripción disponible' }}</p>
-    <p><strong>Dirección:</strong> {{ restaurante.direccion }}</p>
-    <p><strong>Teléfono:</strong> {{ restaurante.telefono }}</p>
-    
-    <div class="etiquetas">
-      <span class="etiqueta">{{ restaurante.tipoCocina }}</span>
-      <span class="etiqueta">{{ restaurante.barrio }}</span>
-      <span class="etiqueta">{{ restaurante.rangoPrecio }}</span>
-      <span
-        *ngFor="let restriccion of restaurante.restriccionesDieteticas"
-        class="etiqueta"
-      >
-        {{ restriccion }}
-      </span>
+    <div
+      *ngFor="let restaurante of restaurantes"
+      class="restaurante-card clickable"
+      (click)="verPerfil(restaurante.id!)">
+      
+      <h3>{{ restaurante.nombre }}</h3>
+      <p>{{ restaurante.descripcion || 'Sin descripción disponible' }}</p>
+      <p><strong>Dirección:</strong> {{ restaurante.direccion }}</p>
+      <p><strong>Teléfono:</strong> {{ restaurante.telefono }}</p>
+
+      <div class="etiquetas">
+        <span class="etiqueta">{{ restaurante.tipoCocina }}</span>
+        <span class="etiqueta">{{ restaurante.barrio }}</span>
+        <span class="etiqueta">{{ restaurante.rangoPrecio }}</span>
+        <span
+          *ngFor="let restriccion of restaurante.restriccionesDieteticas"
+          class="etiqueta"
+        >
+          {{ restriccion }}
+        </span>
+      </div>
     </div>
-  </div>
 </div>

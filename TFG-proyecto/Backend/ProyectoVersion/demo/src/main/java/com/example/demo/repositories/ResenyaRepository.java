@@ -17,4 +17,5 @@ public interface ResenyaRepository extends JpaRepository<Resenya, Long> {
     List<Resenya> findByRestaurante(Restaurante restaurante);
 
     boolean existsByAutorAndRestaurante(Usuario autor, Restaurante restaurante);
+    List<Resenya> findByRestauranteId(Long restauranteId);
 }

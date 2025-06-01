@@ -1,0 +1,59 @@
+<div *ngIf="restaurante" class="perfil-restaurante">
+  <h2>{{ restaurante.nombre }}</h2>
+  <p>{{ restaurante.descripcion || 'Sin descripción disponible' }}</p>
+
+  <div class="info-contacto">
+    <p><strong>Dirección:</strong> {{ restaurante.direccion }}</p>
+    <p><strong>Teléfono:</strong> {{ restaurante.telefono }}</p>
+  </div>
+
+  <div class="etiquetas">
+    <span class="etiqueta">{{ restaurante.tipoCocina }}</span>
+    <span class="etiqueta">{{ restaurante.barrio }}</span>
+    <span class="etiqueta">{{ restaurante.rangoPrecio }}</span>
+    <span
+      *ngFor="let restriccion of restaurante.restriccionesDieteticas"
+      class="etiqueta"
+    >
+      {{ restriccion }}
+    </span>
+  </div>
+
+  <!-- ✅ Botón para abrir el modal -->
+  <button class="btn-resena" *ngIf="mostrarFormularioResena" (click)="abrirModalResena()">
+    Añadir reseña
+  </button>
+
+  <!-- ❌ Mostrar mensaje si no está logueado -->
+  <p *ngIf="!mostrarFormularioResena" class="aviso-login">
+    🔒 Debes iniciar sesión para dejar una reseña.
+  </p>
+
+  <!-- ✅ Modal con reseña -->
+  <div class="modal-backdrop" *ngIf="modalAbierto" (click)="cerrarModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <app-resenya
+        [restauranteNombre]="restaurante.nombre"
+        [restauranteId]="restaurante.id"
+        (resenaEnviada)="recargarResenas(); cerrarModal()"
+      ></app-resenya>
+      <button class="cerrar-modal" (click)="cerrarModal()">✖</button>
+    </div>
+  </div>
+
+
+
+  <!-- 🔽 Reseñas -->
+  <div class="resenas">
+    <h3>Reseñas</h3>
+    <div *ngIf="resenas.length === 0">No hay reseñas aún.</div>
+    <div *ngFor="let resena of resenas" class="resena-card">
+      <div class="estrellas">
+        <span *ngFor="let star of [].constructor(5); let i = index">
+          <span [class.activa]="i < resena.puntuacion">★</span>
+        </span>
+      </div>
+      <p><em>{{ resena.comentario }}</em></p>
+    </div>
+  </div>
+</div>

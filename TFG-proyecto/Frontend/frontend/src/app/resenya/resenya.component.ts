@@ -1,6 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-resenya',
@@ -10,7 +11,10 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
   styleUrls: ['./resenya.component.css']
 })
 export class ResenyaComponent {
+  @Input() restauranteId!: number;
   @Input() restauranteNombre: string = '';
+  @Output() resenaEnviada = new EventEmitter<void>();
+
   resenyaForm: FormGroup;
   estrellas: number[] = [1, 2, 3, 4, 5];
   puntuacionSeleccionada = 0;
@@ -18,7 +22,12 @@ export class ResenyaComponent {
   mostrarExito = false;
   visible = true;
 
-  constructor(private fb: FormBuilder) {
+  imagenes: File[] = [];
+  vistaPrevia: string[] = [];
+  palabrasMalas = ['puta', 'mierda', 'gilipollas', 'estúpido'];
+  comentarioValido = true;
+
+  constructor(private fb: FormBuilder, private http: HttpClient) {
     this.resenyaForm = this.fb.group({
       comentario: ['', [Validators.required, Validators.maxLength(300)]]
     });
@@ -37,23 +46,50 @@ export class ResenyaComponent {
   }
 
   enviarResena() {
-    if (!this.resenyaForm.valid || this.puntuacionSeleccionada === 0) return;
+    const formData = new FormData();
+    formData.append('restauranteId', this.restauranteId.toString());
+    formData.append('contenido', this.resenyaForm.value.comentario);
+    formData.append('valoracion', this.puntuacionSeleccionada.toString());
 
-    // Aquí iría tu lógica de envío real
-    console.log('Reseña enviada:', {
-      puntuacion: this.puntuacionSeleccionada,
-      comentario: this.resenyaForm.value.comentario
+    this.http.post(`/api/resenyas`, formData, {
+      withCredentials: true
+    }).subscribe({
+      next: () => {
+        console.log('✅ Reseña enviada correctamente');
+        this.mostrarExito = true;
+        this.resenaEnviada.emit();
+        setTimeout(() => {
+          this.visible = false;
+        }, 2000);
+      },
+      error: (err) => {
+        console.error('❌ Error al enviar reseña:', err);
+      }
     });
-
-    this.mostrarExito = true;
-
-    // Simular cierre tras 2 segundos
-    setTimeout(() => {
-      this.visible = false;
-    }, 2000);
   }
 
   cerrarSinGuardar() {
     this.visible = false;
+  }
+
+  handleFileInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files) return;
+
+    this.imagenes = Array.from(input.files);
+    this.vistaPrevia = [];
+
+    this.imagenes.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.vistaPrevia.push(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  validarComentario() {
+    const texto = this.resenyaForm.value.comentario.toLowerCase();
+    this.comentarioValido = !this.palabrasMalas.some(palabra => texto.includes(palabra));
   }
 }

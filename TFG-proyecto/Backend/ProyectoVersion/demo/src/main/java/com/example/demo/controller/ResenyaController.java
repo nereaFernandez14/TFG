@@ -10,8 +10,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
-
+@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 @RestController
 @RequiredArgsConstructor
 public class ResenyaController {
@@ -20,7 +21,7 @@ public class ResenyaController {
 
     @PostMapping("/resenyas")
     @Transactional
-    public ResponseEntity<?> crearResenya(@RequestBody ResenyaRequest request) {
+    public ResponseEntity<?> crearResenya(@ModelAttribute ResenyaRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
             return ResponseEntity.status(401).body(Map.of("error", "No autenticado"));
@@ -61,4 +62,14 @@ public class ResenyaController {
             return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
         }
     }
+    @GetMapping("/restaurantes/{id}/resenas")
+    public ResponseEntity<?> obtenerResenyasDeRestaurante(@PathVariable Long id) {
+        try {
+            List<Resenya> resenyas = resenyaService.obtenerResenyasPorRestaurante(id);
+            return ResponseEntity.ok(resenyas);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Error al obtener reseñas"));
+        }
+    }
+
 }

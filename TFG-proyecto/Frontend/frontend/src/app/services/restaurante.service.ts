@@ -32,6 +32,9 @@ export class RestauranteService {
     const params = new HttpParams().set('idUsuario', idUsuario.toString());
     return this.http.get<Restaurante>(`${this.apiUrl}/mio`, { params });
   }
+  obtenerRestaurantePorId(id: number): Observable<Restaurante> {
+    return this.http.get<Restaurante>(`${this.apiUrl}/${id}`);
+  }
 
   // ✅ Método para notificar la creación del restaurante
   notificarRestauranteCreado() {

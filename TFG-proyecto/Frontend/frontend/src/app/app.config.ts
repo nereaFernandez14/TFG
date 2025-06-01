@@ -61,6 +61,11 @@ export const routes: Routes = [
     canActivate: [AuthGuard, RoleGuard],
     data: { rol: 'RESTAURANTE' }
   },
+  {
+    path: 'restaurantes/:id',
+    loadComponent: () =>
+      import('./restaurante-perfil/restaurante-perfil.component').then((m) => m.RestaurantePerfilComponent)
+  },
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' }

@@ -9,6 +9,7 @@ import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { AuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
 import { RedirectIfAuthenticatedGuard } from './guards/redirect-if-authenticated.guard';
+import { RestauranteComponent } from './restaurante/restaurante.component';
 
 export const routes: Routes = [
   { path: 'header', component: HeaderComponent },
@@ -52,8 +53,12 @@ export const routes: Routes = [
       import('./restaurante/restaurante.component').then(m => m.RestauranteComponent),
     canActivate: [AuthGuard, RoleGuard],
     data: { rol: 'RESTAURANTE' }
-  }
-,
+  },
+  {
+    path: 'restaurantes/:id',
+    loadComponent: () =>
+      import('./restaurante-perfil/restaurante-perfil.component').then((m) => m.RestaurantePerfilComponent)
+  },
   {
     path: 'dashboard',
     loadComponent: () =>

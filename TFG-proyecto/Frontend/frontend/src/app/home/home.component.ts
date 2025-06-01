@@ -12,6 +12,7 @@ import { Barrio } from '../models/enums/barrio.enum';
 import { RangoPrecio } from '../models/enums/rango-precio.enum';
 import { RestriccionDietetica } from '../models/enums/restriccion-dietetica.enum';
 
+
 @Component({
   standalone: true,
   imports: [CommonModule, FormsModule],
@@ -26,7 +27,7 @@ export class HomeComponent implements OnInit {
   mensajeLogout: string | null = null;
   restriccionesAbierto: boolean = false;
   busquedaRealizada: boolean = false;
-
+  mostrarFormularioResena: boolean = false; // inicializa aquí
 
   // Enums para filtros
   tiposCocina = Object.values(TipoCocina);
@@ -61,6 +62,7 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.mostrarFormularioResena = this.autenticacionService.isAuthenticated();
     this.flashService.mensaje$.subscribe((mensaje) => {
       if (mensaje) {
         this.mensajeLogout = mensaje;
@@ -121,6 +123,10 @@ export class HomeComponent implements OnInit {
 
   toggleRestricciones() {
     this.restriccionesAbierto = !this.restriccionesAbierto;
+  }
+  verPerfil(id: number): void {
+    console.log('➡️ Navegando al restaurante con ID:', id);
+    this.router.navigate(['/restaurantes', id]);
   }
 
 }

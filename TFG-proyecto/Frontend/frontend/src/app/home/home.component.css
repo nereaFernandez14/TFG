@@ -202,3 +202,10 @@
   font-size: 0.85rem;
   font-weight: 500;
 }
+.restaurante-card.clickable {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.restaurante-card.clickable:hover {
+  background-color: #f4f4f4;
+}

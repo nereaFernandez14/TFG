@@ -1,29 +1,35 @@
-<div *ngIf="visible" class="resenya-modal">
-  <h2>Reseña para "{{ restauranteNombre }}"</h2>
+<form [formGroup]="resenyaForm" (ngSubmit)="enviarResena()">
+  <div class="estrella-container">
+    <span *ngFor="let estrella of estrellas"
+          class="estrella"
+          [class.activa]="estrella <= (puntuacionHover || puntuacionSeleccionada)"
+          (click)="seleccionarPuntuacion(estrella)"
+          (mouseover)="destacarPuntuacion(estrella)"
+          (mouseleave)="resetearHover()">
+      ★
+    </span>
+  </div>
 
-  <form [formGroup]="resenyaForm" (ngSubmit)="enviarResena()">
-    <div class="estrella-container">
-      <span *ngFor="let estrella of estrellas"
-            class="estrella"
-            [class.activa]="estrella <= (puntuacionHover || puntuacionSeleccionada)"
-            (click)="seleccionarPuntuacion(estrella)"
-            (mouseover)="destacarPuntuacion(estrella)"
-            (mouseleave)="resetearHover()">
-        ★
-      </span>
-    </div>
+  <textarea formControlName="comentario"
+            placeholder="Escriba aquí su opinión..."
+            rows="4"
+            (input)="validarComentario()"></textarea>
 
-    <textarea formControlName="comentario"
-              placeholder="Escriba aquí su opinión..."
-              rows="4"></textarea>
+  <div *ngIf="!comentarioValido" class="error">
+    ❌ El comentario contiene palabras inapropiadas
+  </div>
 
-    <div class="botones">
-      <button type="submit" [disabled]="resenyaForm.invalid || puntuacionSeleccionada === 0">
-        Enviar Reseña
-      </button>
-      <button type="button" class="cancelar" (click)="cerrarSinGuardar()">❌</button>
-    </div>
+  <input type="file" accept="image/*" multiple (change)="handleFileInput($event)" />
 
-    <p *ngIf="mostrarExito" class="exito">✅ Reseña registrada correctamente</p>
-  </form>
-</div>
+  <div class="vista-previa">
+    <img *ngFor="let img of vistaPrevia" [src]="img" class="preview-img"/>
+  </div>
+
+  <div class="botones">
+    <button type="submit" [disabled]="resenyaForm.invalid || puntuacionSeleccionada === 0 || !comentarioValido">
+      Enviar Reseña
+    </button>
+  </div>
+
+  <p *ngIf="mostrarExito" class="exito">✅ Reseña registrada correctamente</p>
+</form>
