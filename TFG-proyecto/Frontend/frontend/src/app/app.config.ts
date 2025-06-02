@@ -2,9 +2,9 @@
 import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideRouter, Routes, withRouterConfig } from '@angular/router';
 import {
-  HttpClientModule/*,
-  HttpClientXsrfModule*/
-} from '@angular/common/http';
+  HttpClientModule,
+  HttpClientXsrfModule
+} from '@angular/common/http'; // 👈 incluimos XsrfModule
 
 import { LoginComponent } from './login/login.component';
 import { HomeComponent } from './home/home.component';
@@ -80,11 +80,11 @@ export const appConfig: ApplicationConfig = {
       })
     ),
     importProvidersFrom(
-      HttpClientModule/*,
+      HttpClientModule,
       HttpClientXsrfModule.withOptions({
         cookieName: 'XSRF-TOKEN',
         headerName: 'X-XSRF-TOKEN'
-      })*/
+      }) // 👈 activamos protección CSRF para Angular
     )
   ]
 };
