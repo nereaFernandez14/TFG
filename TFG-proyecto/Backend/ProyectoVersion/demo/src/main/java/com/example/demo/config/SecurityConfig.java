@@ -57,7 +57,9 @@ public class SecurityConfig {
                                                                 "/restaurantes/buscar",
                                                                 "/roles",
                                                                 "/change-password",
-                                                                "/error")
+                                                                "/error",
+                                                                "/restaurantes/filtrar-avanzado",
+                                                                "/restaurantes/**" )
                                                 .permitAll()
                                                 .requestMatchers(HttpMethod.POST, "/resenyas")
                                                 .hasRole("USUARIO") // ✅

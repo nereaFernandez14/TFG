@@ -32,6 +32,8 @@ public class RestauranteDTO {
 
     @NotNull(message = "El rango de precio es obligatorio.")
     private RangoPrecio rangoPrecio;
+    @NotNull(message = "El teléfono es obligatorio.")
+    private String telefono;
 
     private String tipoCocinaPersonalizado;
 
@@ -59,6 +61,7 @@ public class RestauranteDTO {
         this.direccion = restaurante.getDireccion();
         this.tipoCocina = restaurante.getTipoCocina();
         this.barrio = restaurante.getBarrio();
+        this.telefono = restaurante.getTelefono();
         this.rangoPrecio = restaurante.getRangoPrecio();
         this.tipoCocinaPersonalizado = restaurante.getTipoCocinaPersonalizado();
         this.mediaPuntuacion = restaurante.getMediaPuntuacion();

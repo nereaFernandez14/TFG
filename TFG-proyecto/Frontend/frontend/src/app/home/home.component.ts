@@ -13,6 +13,7 @@ import { RangoPrecio } from '../models/enums/rango-precio.enum';
 import { RestriccionDietetica } from '../models/enums/restriccion-dietetica.enum';
 
 
+
 @Component({
   standalone: true,
   imports: [CommonModule, FormsModule],
@@ -99,7 +100,8 @@ export class HomeComponent implements OnInit {
       this.filtros.barrio || null,
       this.filtros.rangoPrecio || null,
       null,
-      this.filtros.restricciones
+      this.filtros.restricciones,
+      this.searchQuery || null
     ).subscribe({
       next: (data) => {
         this.restaurantes = data;
@@ -119,6 +121,8 @@ export class HomeComponent implements OnInit {
     } else {
       this.filtros.restricciones = this.filtros.restricciones.filter(r => r !== value);
     }
+
+    this.buscar(); 
   }
 
   toggleRestricciones() {

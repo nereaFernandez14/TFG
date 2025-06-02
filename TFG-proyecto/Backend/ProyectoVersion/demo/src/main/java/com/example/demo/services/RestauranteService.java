@@ -113,7 +113,8 @@ public class RestauranteService {
             Barrio barrio,
             RangoPrecio rangoPrecio,
             Double minPuntuacion,
-            List<RestriccionDietetica> restricciones) {
+            List<RestriccionDietetica> restricciones,
+            String nombre) {
 
         return restauranteRepository.findAll().stream()
                 .filter(r -> tipoCocina == null || r.getTipoCocina() == tipoCocina)
@@ -122,8 +123,11 @@ public class RestauranteService {
                 .filter(r -> minPuntuacion == null || r.getMediaPuntuacion() >= minPuntuacion)
                 .filter(r -> restricciones == null || restricciones.isEmpty()
                         || r.getRestriccionesDieteticas().containsAll(restricciones))
+                .filter(r -> nombre == null || r.getNombre() != null &&
+                        r.getNombre().toLowerCase().contains(nombre.toLowerCase())) 
                 .sorted(Comparator.comparingDouble(Restaurante::getMediaPuntuacion).reversed())
                 .map(RestauranteDTO::new)
                 .collect(Collectors.toList());
     }
+
 }
