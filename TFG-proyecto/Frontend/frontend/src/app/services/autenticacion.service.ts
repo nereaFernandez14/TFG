@@ -48,6 +48,7 @@ export class AutenticacionService {
           this.obtenerCsrfToken().subscribe({
             next: () => {
               console.log('✅ Token CSRF obtenido y almacenado por Angular');
+              window.location.reload();
             },
             error: (err) => {
               console.error('❌ Error al obtener token CSRF', err);
