@@ -41,8 +41,6 @@
     </div>
   </div>
 
-
-
   <!-- 🔽 Reseñas -->
   <div class="resenas">
     <h3>Reseñas</h3>
@@ -50,10 +48,20 @@
     <div *ngFor="let resena of resenas" class="resena-card">
       <div class="estrellas">
         <span *ngFor="let star of [].constructor(5); let i = index">
-          <span [class.activa]="i < resena.puntuacion">★</span>
+          <span [class.activa]="i < resena.valoracion">★</span>
         </span>
       </div>
-      <p><em>{{ resena.comentario }}</em></p>
+      <p *ngIf="resena.contenido"><em>{{ resena.contenido }}</em></p>
+
+      <!-- 🖼️ Imágenes -->
+      <div *ngIf="resena.imagenes && resena.imagenes.length > 0" class="imagenes-resena">
+        <img
+          *ngFor="let img of resena.imagenes"
+          [src]="'/uploads/' + img.nombreArchivo"
+          alt="Imagen de reseña"
+          class="img-resena"
+        />
+      </div>
     </div>
   </div>
 </div>

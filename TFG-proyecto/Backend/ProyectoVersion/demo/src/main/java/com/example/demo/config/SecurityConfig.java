@@ -42,6 +42,7 @@ public class SecurityConfig {
                                                                 "/api/sesion",
                                                                 "/restaurantes/buscar",
                                                                 "/restaurantes/**",
+                                                                "/resenyas/**", // ✅ Añadido igual que restaurante
                                                                 "/roles",
                                                                 "/change-password"))
                                 .authorizeHttpRequests(auth -> auth
@@ -59,12 +60,15 @@ public class SecurityConfig {
                                                                 "/change-password",
                                                                 "/error",
                                                                 "/restaurantes/filtrar-avanzado",
-                                                                "/restaurantes/**")
-                                                .permitAll()
-                                                .requestMatchers(HttpMethod.POST, "/resenyas")
-                                                .hasRole("USUARIO") // ✅
+                                                                "/restaurantes/**",
+                                                                "/resenyas/**" // ✅ Igual que restaurante
+                                                ).permitAll()
+                                                .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO") // ✅
+                                                                                                                  // Mantiene
+                                                                                                                  // lógica
+                                                                                                                  // de
+                                                                                                                  // seguridad
                                                 .anyRequest().authenticated())
-
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                                 .formLogin(form -> form.disable())
