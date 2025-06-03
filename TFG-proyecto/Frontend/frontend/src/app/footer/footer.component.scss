@@ -1,92 +1,69 @@
-:root {
-  /* Modo claro: verdes muy suaves y neutrales */
-  --bg-color-light: #f1f8f4;
-  --text-color-light: #2d4739;
-  --link-color-light: #5f8f7b;
-  --link-hover-light: #3b6b5a;
-  --border-color-light: #b5d2c4;
-
-  /* Modo oscuro: verdes oscuros suavizados */
-  --bg-color-dark: #243d32;
-  --text-color-dark: #d8ebe3;
-  --link-color-dark: #98c3b0;
-  --link-hover-dark: #b7e0cb;
-  --border-color-dark: #4b7964;
-}
-
 .footer {
-  padding: 2rem 1rem;
-  text-align: center;
   font-family: 'Segoe UI', sans-serif;
-  background-color: var(--bg-color-dark);
-  color: var(--text-color-dark);
-  border-top: 3px solid var(--border-color-dark);
+  background-color: var(--bg-color-dark, #243d32);
+  color: var(--text-color-dark, #d8ebe3);
+  text-align: center;
+  padding: 1.5rem 1rem;
+  border-top: 3px solid var(--border-color-dark, #4b7964);
 }
 
-/* Enlaces generales */
-.footer a {
-  color: var(--link-color-dark);
+.footer-content a {
+  color: var(--link-color-dark, #98c3b0);
   text-decoration: none;
-  margin: 0 12px;
-  font-weight: 500;
+  margin: 0 10px;
+  font-size: 0.9rem;
   transition: color 0.3s ease;
 }
 
-.footer a:hover {
-  color: var(--link-hover-dark);
+.footer-content a:hover {
+  color: var(--link-hover-dark, #b7e0cb);
 }
 
-/* Íconos sociales */
+/* Eliminar morado en enlaces visitados */
+.footer-content a:visited {
+  color: var(--link-color-dark, #98c3b0);
+}
+
 .social-icons {
-  margin-top: 15px;
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
 }
 
 .social-icons a {
-  color: var(--text-color-dark);
-  margin: 0 12px;
-  font-size: 1.4rem;
+  color: var(--link-color-dark, #98c3b0);
+  font-size: 1.2rem;
   transition: color 0.3s ease, transform 0.3s ease;
 }
 
 .social-icons a:hover {
-  color: var(--link-color-dark);
-  transform: scale(1.2);
+  color: var(--link-hover-dark, #b7e0cb);
+  transform: scale(1.15);
 }
 
-/* Modo claro automático */
+/* Light mode */
 @media (prefers-color-scheme: light) {
   .footer {
-    background-color: var(--bg-color-light);
-    color: var(--text-color-light);
-    border-top-color: var(--border-color-light);
+    background-color: var(--bg-color-light, #f1f8f4);
+    color: var(--text-color-light, #2d4739);
+    border-top-color: var(--border-color-light, #b5d2c4);
   }
 
-  .footer a {
-    color: var(--link-color-light);
+  .footer-content a,
+  .footer-content a:visited {
+    color: var(--link-color-light, #5f8f7b);
   }
 
-  .footer a:hover {
-    color: var(--link-hover-light);
+  .footer-content a:hover {
+    color: var(--link-hover-light, #3b6b5a);
   }
 
   .social-icons a {
-    color: var(--text-color-light);
+    color: var(--link-color-light, #5f8f7b);
   }
 
   .social-icons a:hover {
-    color: var(--link-color-light);
-  }
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  .footer a,
-  .social-icons a {
-    margin: 0 8px;
-    font-size: 1.2rem;
-  }
-
-  .footer {
-    padding: 1.5rem 0.5rem;
+    color: var(--link-hover-light, #3b6b5a);
   }
 }
