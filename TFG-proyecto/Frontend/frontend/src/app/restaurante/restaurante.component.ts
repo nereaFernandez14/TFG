@@ -65,7 +65,7 @@ export class RestauranteComponent implements OnInit {
       direccion: ['', Validators.required],
       telefono: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      /*password: ['', [Validators.required, Validators.minLength(6)]],*/
       tipoCocina: ['', Validators.required],
       tipoCocinaPersonalizado: [''],
       barrio: ['', Validators.required],

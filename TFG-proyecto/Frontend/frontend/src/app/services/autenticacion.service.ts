@@ -44,7 +44,6 @@ export class AutenticacionService {
           };
           this.setUsuario(usuario);
 
-          // 🛡️ Obtén el token CSRF después del login
           this.obtenerCsrfToken().subscribe({
             next: () => {
               console.log('✅ Token CSRF obtenido y almacenado por Angular');
@@ -181,7 +180,12 @@ export class AutenticacionService {
   /**
    * Convierte un string a RolNombre validado
    */
-  private mapearRol(rol: string): RolNombre {
+  private mapearRol(rol: string | undefined | null): RolNombre {
+    if (!rol || typeof rol !== 'string') {
+      console.warn(`⚠️ Rol inválido recibido: ${rol}. Se asignará 'USUARIO' por defecto.`);
+      return RolNombre.USUARIO;
+    }
+
     const rolFormateado = rol.toUpperCase();
     if (Object.values(RolNombre).includes(rolFormateado as RolNombre)) {
       return rolFormateado as RolNombre;

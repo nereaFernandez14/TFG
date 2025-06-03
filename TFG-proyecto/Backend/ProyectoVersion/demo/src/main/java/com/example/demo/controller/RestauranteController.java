@@ -73,10 +73,11 @@ public class RestauranteController {
             @RequestParam(required = false) Barrio barrio,
             @RequestParam(required = false) RangoPrecio rangoPrecio,
             @RequestParam(required = false) Double minPuntuacion,
-            @RequestParam(required = false) List<RestriccionDietetica> restricciones) {
+            @RequestParam(required = false) List<RestriccionDietetica> restricciones,
+            @RequestParam(required = false) String nombre) {
 
         return restauranteService.filtrarRestaurantesAvanzado(
-                tipoCocina, barrio, rangoPrecio, minPuntuacion, restricciones);
+                tipoCocina, barrio, rangoPrecio, minPuntuacion, restricciones,nombre);
     }
 
     // ✅ Endpoint para dashboard

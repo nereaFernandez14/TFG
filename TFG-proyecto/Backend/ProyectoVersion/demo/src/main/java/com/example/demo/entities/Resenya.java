@@ -1,5 +1,8 @@
 package com.example.demo.entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -7,9 +10,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"autor_id", "restaurante_id"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "autor_id", "restaurante_id" }))
 @Data
-public class Resenya{
+public class Resenya {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +32,9 @@ public class Resenya{
     @ManyToOne
     @NotNull(message = "El restaurante es obligatorio.")
     private Restaurante restaurante;
+
+    @OneToMany(mappedBy = "resenya", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ImagenResenya> imagenes = new ArrayList<>();
 
     public Resenya(String contenido,
             @NotNull(message = "La valoración es obligatoria.") @Min(value = 1, message = "La valoración mínima es 1.") @Max(value = 5, message = "La valoración máxima es 5.") Integer valoracion,

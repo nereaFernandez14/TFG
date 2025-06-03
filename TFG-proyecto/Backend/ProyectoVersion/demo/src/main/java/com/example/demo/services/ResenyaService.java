@@ -1,14 +1,19 @@
 package com.example.demo.services;
 
+import com.example.demo.entities.ImagenResenya;
 import com.example.demo.entities.Resenya;
 import com.example.demo.entities.Restaurante;
 import com.example.demo.entities.Usuario;
 import com.example.demo.repositories.ResenyaRepository;
 import com.example.demo.repositories.RestauranteRepository;
 import com.example.demo.repositories.UsuarioRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,7 +26,9 @@ public class ResenyaService {
 
     private static final List<String> PALABRAS_PROHIBIDAS = List.of("tonto", "gilipollas", "idiota");
 
-    public Resenya guardarResenya(String contenido, int valoracion, Long restauranteId, String email) {
+    @Transactional
+    public Resenya guardarResenya(String contenido, int valoracion, Long restauranteId, String email,
+            MultipartFile[] imagenes) {
         Usuario autor = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
         Restaurante restaurante = restauranteRepository.findById(restauranteId)
@@ -33,8 +40,25 @@ public class ResenyaService {
 
         validarContenido(contenido);
 
-        Resenya nueva = new Resenya(contenido, valoracion, autor, restaurante);
-        return resenyaRepository.save(nueva);
+        Resenya resenya = new Resenya(contenido, valoracion, autor, restaurante);
+
+        List<ImagenResenya> imagenEntities = new ArrayList<>();
+        for (MultipartFile imagen : imagenes) {
+            try {
+                ImagenResenya img = new ImagenResenya();
+                img.setResenya(resenya);
+                img.setNombreArchivo(imagen.getOriginalFilename());
+                img.setTipo(imagen.getContentType());
+                img.setDatos(imagen.getBytes());
+                imagenEntities.add(img);
+            } catch (IOException e) {
+                throw new IllegalStateException("Error procesando imagen: " + imagen.getOriginalFilename());
+            }
+        }
+
+        resenya.setImagenes(imagenEntities);
+
+        return resenyaRepository.save(resenya);
     }
 
     public Resenya actualizarResenya(Long restauranteId, String email, String contenido, Integer nuevaValoracion) {
@@ -63,8 +87,8 @@ public class ResenyaService {
             }
         }
     }
+
     public List<Resenya> obtenerResenyasPorRestaurante(Long restauranteId) {
         return resenyaRepository.findByRestauranteId(restauranteId);
     }
-
 }

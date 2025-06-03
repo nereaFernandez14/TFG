@@ -45,7 +45,8 @@ export class RestauranteService {
     barrio: string | null,
     rangoPrecio: string | null,
     minPuntuacion: number | null,
-    restricciones: string[]
+    restricciones: string[],
+    nombre: string | null
   ): Observable<Restaurante[]> {
     const params: any = {};
 
@@ -58,6 +59,7 @@ export class RestauranteService {
     if (restricciones && restricciones.length > 0) {
       params.restricciones = restricciones;
     }
+    if (nombre) params.nombre = nombre; 
 
     return this.http.get<Restaurante[]>('/api/restaurantes/filtrar-avanzado', {
       params,

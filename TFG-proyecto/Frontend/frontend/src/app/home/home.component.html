@@ -3,53 +3,61 @@
   <h1>Encuentra tu próximo favorito 🍽️</h1>
 
   <div class="search-bar">
-    <input type="text" placeholder="Buscar por nombre..." [(ngModel)]="searchQuery" />
+    <input
+      type="text"
+      placeholder="Buscar por nombre..."
+      [(ngModel)]="searchQuery"
+    />
     <button (click)="buscar()">Buscar</button>
   </div>
 
   <!-- 🔽 NUEVA BARRA DE FILTROS -->
   <div class="filtros-bar">
-    <select [(ngModel)]="filtros.tipoCocina">
+    <!-- 🔁 Tipo de cocina -->
+    <select [(ngModel)]="filtros.tipoCocina" (change)="buscar()">
       <option value="">Tipo de cocina</option>
       <option *ngFor="let t of tiposCocina" [value]="t">{{ t }}</option>
     </select>
 
-    <select [(ngModel)]="filtros.barrio">
+    <!-- 🔁 Barrio -->
+    <select [(ngModel)]="filtros.barrio" (change)="buscar()">
       <option value="">Barrio</option>
       <option *ngFor="let b of barrios" [value]="b">{{ b }}</option>
     </select>
 
-    <select [(ngModel)]="filtros.rangoPrecio">
+    <!-- 🔁 Rango de precio -->
+    <select [(ngModel)]="filtros.rangoPrecio" (change)="buscar()">
       <option value="">Rango de precio</option>
       <option *ngFor="let r of rangosPrecio" [value]="r">{{ r }}</option>
     </select>
 
     <!-- 🔽 Dropdown de restricciones dietéticas -->
-<div class="dropdown-wrapper">
-  <button class="dropdown-toggle" (click)="toggleRestricciones()">
-    Restricciones Dietéticas
-    <span [class.open]="restriccionesAbierto">▼</span>
-  </button>
+    <div class="dropdown-wrapper">
+      <button class="dropdown-toggle" (click)="toggleRestricciones()">
+        Restricciones Dietéticas
+        <span [class.open]="restriccionesAbierto">▼</span>
+      </button>
 
-    <div class="dropdown-panel" *ngIf="restriccionesAbierto">
-      <div class="dropdown-checkbox" *ngFor="let restriccion of restricciones">
-        <label>
-          <input
-            type="checkbox"
-            [value]="restriccion"
-            [checked]="filtros.restricciones.includes(restriccion)"
-            (change)="onCheckboxChange($event)"
-          />
-          {{ restriccion }}
-        </label>
+      <div class="dropdown-panel" *ngIf="restriccionesAbierto">
+        <div class="dropdown-checkbox" *ngFor="let restriccion of restricciones">
+          <label>
+            <input
+              type="checkbox"
+              [value]="restriccion"
+              [checked]="filtros.restricciones.includes(restriccion)"
+              (change)="onCheckboxChange($event)"
+            />
+            {{ restriccion }}
+          </label>
+        </div>
       </div>
     </div>
-  </div>
 
-
-    <button class="btn-filtrar" (click)="buscar()">Aplicar filtros</button>
+    <!-- ❌ Botón eliminado porque ya todo es automático -->
+    <!-- <button class="btn-filtrar" (click)="buscar()">Aplicar filtros</button> -->
   </div>
 </section>
+
 <!-- 🎯 Restaurantes destacados si no hay búsqueda -->
 <div *ngIf="!busquedaRealizada" class="resultados-container">
   <h2>Destacados de la semana</h2>
@@ -60,29 +68,30 @@
   </div>
 </div>
 
-  <div *ngIf="restaurantes.length > 0" class="resultados-container">
-    <h2>Restaurantes encontrados</h2>
+<!-- 🧾 Resultados -->
+<div *ngIf="restaurantes.length > 0" class="resultados-container">
+  <h2>Restaurantes encontrados</h2>
 
-    <div
-      *ngFor="let restaurante of restaurantes"
-      class="restaurante-card clickable"
-      (click)="verPerfil(restaurante.id!)">
-      
-      <h3>{{ restaurante.nombre }}</h3>
-      <p>{{ restaurante.descripcion || 'Sin descripción disponible' }}</p>
-      <p><strong>Dirección:</strong> {{ restaurante.direccion }}</p>
-      <p><strong>Teléfono:</strong> {{ restaurante.telefono }}</p>
+  <div
+    *ngFor="let restaurante of restaurantes"
+    class="restaurante-card clickable"
+    (click)="verPerfil(restaurante.id!)"
+  >
+    <h3>{{ restaurante.nombre }}</h3>
+    <p>{{ restaurante.descripcion || 'Sin descripción disponible' }}</p>
+    <p><strong>Dirección:</strong> {{ restaurante.direccion }}</p>
+    <p><strong>Teléfono:</strong> {{ restaurante.telefono }}</p>
 
-      <div class="etiquetas">
-        <span class="etiqueta">{{ restaurante.tipoCocina }}</span>
-        <span class="etiqueta">{{ restaurante.barrio }}</span>
-        <span class="etiqueta">{{ restaurante.rangoPrecio }}</span>
-        <span
-          *ngFor="let restriccion of restaurante.restriccionesDieteticas"
-          class="etiqueta"
-        >
-          {{ restriccion }}
-        </span>
-      </div>
+    <div class="etiquetas">
+      <span class="etiqueta">{{ restaurante.tipoCocina }}</span>
+      <span class="etiqueta">{{ restaurante.barrio }}</span>
+      <span class="etiqueta">{{ restaurante.rangoPrecio }}</span>
+      <span
+        *ngFor="let restriccion of restaurante.restriccionesDieteticas"
+        class="etiqueta"
+      >
+        {{ restriccion }}
+      </span>
     </div>
+  </div>
 </div>

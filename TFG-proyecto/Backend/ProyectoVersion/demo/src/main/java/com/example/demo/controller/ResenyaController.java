@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+
 @CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 @RestController
 @RequiredArgsConstructor
@@ -30,12 +31,14 @@ public class ResenyaController {
         String email = auth.getName();
 
         try {
-            resenyaService.guardarResenya(
+            Resenya nueva = resenyaService.guardarResenya(
                     request.getContenido(),
                     request.getValoracion(),
                     request.getRestauranteId(),
-                    email);
-            return ResponseEntity.ok(Map.of("message", "Reseña guardada con éxito"));
+                    email,
+                    request.getImagenes() // 👈 ahora sí
+            );
+            return ResponseEntity.ok(Map.of("message", "Reseña guardada con éxito", "id", nueva.getId()));
         } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
         }
@@ -52,16 +55,17 @@ public class ResenyaController {
         String email = auth.getName();
 
         try {
-            resenyaService.actualizarResenya(
+            Resenya actualizada = resenyaService.actualizarResenya(
                     request.getRestauranteId(),
                     email,
                     request.getContenido(),
                     request.getValoracion());
-            return ResponseEntity.ok(Map.of("message", "Reseña actualizada con éxito"));
+            return ResponseEntity.ok(Map.of("message", "Reseña actualizada con éxito", "id", actualizada.getId()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
         }
     }
+
     @GetMapping("/restaurantes/{id}/resenas")
     public ResponseEntity<?> obtenerResenyasDeRestaurante(@PathVariable Long id) {
         try {
@@ -71,5 +75,4 @@ public class ResenyaController {
             return ResponseEntity.status(500).body(Map.of("error", "Error al obtener reseñas"));
         }
     }
-
 }
