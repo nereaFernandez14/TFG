@@ -43,9 +43,7 @@ public class SecurityConfig {
                                                                 "/restaurantes/buscar",
                                                                 "/restaurantes/**",
                                                                 "/roles",
-                                                                "/change-password"
-                                                // 👈 NO agregues "/resenyas" aquí
-                                                ))
+                                                                "/change-password"))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                 .requestMatchers(
@@ -63,8 +61,10 @@ public class SecurityConfig {
                                                                 "/restaurantes/filtrar-avanzado",
                                                                 "/restaurantes/**")
                                                 .permitAll()
-                                                .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO")
+                                                .requestMatchers(HttpMethod.POST, "/resenyas")
+                                                .hasRole("USUARIO") // ✅
                                                 .anyRequest().authenticated())
+
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                                 .formLogin(form -> form.disable())
@@ -87,7 +87,7 @@ public class SecurityConfig {
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration config = new CorsConfiguration();
-                config.setAllowedOrigins(List.of("http://localhost:4200")); // ✅ corregido
+                config.setAllowedOrigins(List.of("https://localhost:4200"));
                 config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "X-XSRF-TOKEN"));
                 config.setExposedHeaders(List.of("Authorization", "X-XSRF-TOKEN", "Set-Cookie"));
