@@ -43,7 +43,9 @@ public class SecurityConfig {
                                                                 "/restaurantes/buscar",
                                                                 "/restaurantes/**",
                                                                 "/roles",
-                                                                "/change-password"))
+                                                                "/change-password"
+                                                // 👈 NO agregues "/resenyas" aquí
+                                                ))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                 .requestMatchers(
@@ -59,12 +61,10 @@ public class SecurityConfig {
                                                                 "/change-password",
                                                                 "/error",
                                                                 "/restaurantes/filtrar-avanzado",
-                                                                "/restaurantes/**" )
+                                                                "/restaurantes/**")
                                                 .permitAll()
-                                                .requestMatchers(HttpMethod.POST, "/resenyas")
-                                                .hasRole("USUARIO") // ✅
+                                                .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO")
                                                 .anyRequest().authenticated())
-
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                                 .formLogin(form -> form.disable())
@@ -87,7 +87,7 @@ public class SecurityConfig {
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration config = new CorsConfiguration();
-                config.setAllowedOrigins(List.of("https://localhost:4200"));
+                config.setAllowedOrigins(List.of("http://localhost:4200")); // ✅ corregido
                 config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "X-XSRF-TOKEN"));
                 config.setExposedHeaders(List.of("Authorization", "X-XSRF-TOKEN", "Set-Cookie"));
