@@ -11,10 +11,7 @@
     <span class="etiqueta">{{ restaurante.tipoCocina }}</span>
     <span class="etiqueta">{{ restaurante.barrio }}</span>
     <span class="etiqueta">{{ restaurante.rangoPrecio }}</span>
-    <span
-      *ngFor="let restriccion of restaurante.restriccionesDieteticas"
-      class="etiqueta"
-    >
+    <span *ngFor="let restriccion of restaurante.restriccionesDieteticas" class="etiqueta">
       {{ restriccion }}
     </span>
   </div>
@@ -47,18 +44,18 @@
     <div *ngIf="resenas.length === 0">No hay reseñas aún.</div>
     <div *ngFor="let resena of resenas" class="resena-card">
       <div class="estrellas">
-        <span *ngFor="let star of [].constructor(5); let i = index">
-          <span [class.activa]="i < resena.valoracion">★</span>
-        </span>
+        <ng-container *ngFor="let i of [1,2,3,4,5]">
+          <span [class.activa]="i <= resena.valoracion">★</span>
+        </ng-container>
       </div>
       <p *ngIf="resena.contenido"><em>{{ resena.contenido }}</em></p>
 
-      <!-- 🖼️ Imágenes -->
       <div *ngIf="resena.imagenes && resena.imagenes.length > 0" class="imagenes-resena">
         <img
           *ngFor="let img of resena.imagenes"
-          [src]="'/uploads/' + img.nombreArchivo"
-          alt="Imagen de reseña"
+          [src]="'/api/imagenes/' + img.id"
+          [alt]="img.nombreArchivo"
+          [title]="img.nombreArchivo"
           class="img-resena"
         />
       </div>

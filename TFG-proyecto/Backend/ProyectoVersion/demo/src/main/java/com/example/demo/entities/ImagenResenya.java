@@ -1,26 +1,28 @@
 package com.example.demo.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
 @Data
 public class ImagenResenya {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String tipo;
     private String nombreArchivo;
 
+    private String tipo;
+
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] datos;
+
     @ManyToOne
-    @JoinColumn(name = "resenya_id")
+    @JsonBackReference
     private Resenya resenya;
+
 }

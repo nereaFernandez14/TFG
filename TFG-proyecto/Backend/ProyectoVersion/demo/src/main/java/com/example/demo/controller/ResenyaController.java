@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.ResenyaRequest;
+import com.example.demo.dto.ResenyaResponse;
 import com.example.demo.entities.Resenya;
 import com.example.demo.services.ResenyaService;
 import jakarta.transaction.Transactional;
@@ -36,17 +37,20 @@ public class ResenyaController {
                     request.getValoracion(),
                     request.getRestauranteId(),
                     email,
-                    request.getImagenes() // 👈 ahora sí
-            );
+                    request.getImagenes());
             return ResponseEntity.ok(Map.of("message", "Reseña guardada con éxito", "id", nueva.getId()));
-        } catch (IllegalArgumentException | IllegalStateException e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(409).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Error interno al guardar la reseña"));
         }
     }
 
     @PutMapping("/resenyas")
     @Transactional
-    public ResponseEntity<?> actualizarResenya(@RequestBody ResenyaRequest request) {
+    public ResponseEntity<?> actualizarResenya(@ModelAttribute ResenyaRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
             return ResponseEntity.status(401).body(Map.of("error", "No autenticado"));
@@ -59,7 +63,7 @@ public class ResenyaController {
                     request.getRestauranteId(),
                     email,
                     request.getContenido(),
-                    request.getValoracion());
+                    request.getImagenes());
             return ResponseEntity.ok(Map.of("message", "Reseña actualizada con éxito", "id", actualizada.getId()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
@@ -69,10 +73,34 @@ public class ResenyaController {
     @GetMapping("/restaurantes/{id}/resenas")
     public ResponseEntity<?> obtenerResenyasDeRestaurante(@PathVariable Long id) {
         try {
-            List<Resenya> resenyas = resenyaService.obtenerResenyasPorRestaurante(id);
+            List<ResenyaResponse> resenyas = resenyaService.obtenerResenyasPorRestaurante(id);
             return ResponseEntity.ok(resenyas);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", "Error al obtener reseñas"));
+        }
+    }
+
+    @GetMapping("/resenyas/usuario/{restauranteId}")
+    public ResponseEntity<?> revisarResenyaUsuario(@PathVariable Long restauranteId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body(Map.of("error", "No autenticado"));
+        }
+
+        String email = auth.getName();
+        boolean existe = resenyaService.usuarioYaHaResenyado(restauranteId, email);
+        return ResponseEntity.ok(Map.of("yaExiste", existe));
+    }
+
+    @GetMapping("/imagenes/{id}")
+    public ResponseEntity<byte[]> obtenerImagen(@PathVariable Long id) {
+        try {
+            var imagen = resenyaService.obtenerImagenPorId(id);
+            return ResponseEntity.ok()
+                    .header("Content-Type", imagen.getTipo())
+                    .body(imagen.getDatos());
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
         }
     }
 }

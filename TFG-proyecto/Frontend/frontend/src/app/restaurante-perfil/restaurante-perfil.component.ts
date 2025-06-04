@@ -32,9 +32,7 @@ export class RestaurantePerfilComponent implements OnInit {
       this.restaurante = data;
     });
 
-    this.http.get<any[]>(`/api/restaurantes/${this.restauranteId}/resenas`).subscribe(data => {
-      this.resenas = data;
-    });
+    this.recargarResenas();
 
     this.mostrarFormularioResena = this.authService.isAuthenticated();
   }
@@ -48,8 +46,10 @@ export class RestaurantePerfilComponent implements OnInit {
   }
 
   recargarResenas() {
-    this.http.get<any[]>(`/api/restaurantes/${this.restauranteId}/resenas`).subscribe(data => {
-      this.resenas = data;
-    });
-  }
+  this.http.get<any[]>(`/api/restaurantes/${this.restauranteId}/resenas`).subscribe(data => {
+    this.resenas = data;
+    console.log('🖼️ Reseñas recibidas con imágenes:', this.resenas);
+  });
+}
+
 }
