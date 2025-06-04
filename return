@@ -1,0 +1,115 @@
+[33mcommit 1ac317ba448730b3a1bf5af261e2e89991346b81[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mRama_Alexandra[m[33m, [m[1;31morigin/Rama_alvaro2[m[33m)[m
+Author: alexandracotiga <cotigaalexandra@gmail.com>
+Date:   Tue Jun 3 19:14:56 2025 +0200
+
+    Agregado footer
+
+[33mcommit 73903137c84cf8af88cc7b2c240a52b9955ffdb5[m[33m ([m[1;32mRama_alvaro2[m[33m)[m
+Author: alexandracotiga <cotigaalexandra@gmail.com>
+Date:   Tue Jun 3 14:30:18 2025 +0200
+
+    Actualizacion
+
+[33mcommit addcc242f495645910f96f2e5613d2b47d3ea6cc[m
+Merge: ffcbaeb c32cce6
+Author: alexandracotiga <cotigaalexandra@gmail.com>
+Date:   Tue Jun 3 14:23:14 2025 +0200
+
+    Merge remote-tracking branch 'origin/Rama_Nerea' into Rama_alvaro2
+
+[33mcommit c32cce6a069f6a1e4d16f8c8560e58946c56ab35[m[33m ([m[1;31morigin/Rama_Nerea[m[33m, [m[1;31morigin/Rama_Alexandra[m[33m, [m[1;32mRama_Nerea[m[33m)[m
+Author: Nerea <nerea.fernandez14@educa.madrid.org>
+Date:   Mon Jun 2 22:06:46 2025 +0200
+
+    Mejoras en la busqueda de restaurantes
+
+[33mcommit 79787882c3211b55ab50e043d3f15004f074d85d[m
+Author: alexandracotiga <cotigaalexandra@gmail.com>
+Date:   Mon Jun 2 20:54:46 2025 +0200
+
+    commit Alexandra reseña
+
+[33mcommit ffcbaeb0001a335ab1ae13da2cc427d11414d450[m
+Author: alexandracotiga <cotigaalexandra@gmail.com>
+Date:   Mon Jun 2 20:21:23 2025 +0200
+
+    commit de prueba
+
+[33mcommit 939b603255dbfc5d2604d412f91d6516eafb63d5[m
+Author: Nerea <nerea.fernandez14@educa.madrid.org>
+Date:   Mon Jun 2 18:54:09 2025 +0200
+
+    Intento de subir resenya
+
+[33mcommit 50f842a0d8058b1eb6473452d603bc69d717179c[m
+Author: Nerea <nerea.fernandez14@educa.madrid.org>
+Date:   Sun Jun 1 21:38:02 2025 +0200
+
+    Creacion del perfil restaurante y las reseñas(aun no funciona el añadir resenya)
+
+[33mcommit a47291cf584ffcecad622c79267596902b73dc39[m[33m ([m[1;32mback_up_rama[m[33m)[m
+Author: alexandracotiga <cotigaalexandra@gmail.com>
+Date:   Sat May 31 22:26:35 2025 +0200
+
+    Contrasenya funcionando
+
+[33mcommit 7c8d104c259c894f5a9e7fb4a732b3c5bd83c1a0[m
+Author: Nerea <nerea.fernandez14@educa.madrid.org>
+Date:   Sat May 31 18:43:54 2025 +0200
+
+    Creacion de restaurantes, filtros y mejora del home
+
+[33mcommit 3ee1e6ea4831496cc03c4d79d77a37d7eab49960[m
+Author: Nerea <nerea.fernandez14@educa.madrid.org>
+Date:   Fri May 30 22:17:26 2025 +0200
+
+    cambios de alexandra introducidos y redirección a crear restaurante
+
+[33mcommit c406a600c0925fa6184a6557ccd5ba15719cbab0[m
+Merge: 87df8bf 8463465
+Author: Nerea <nerea.fernandez14@educa.madrid.org>
+Date:   Fri May 30 22:16:01 2025 +0200
+
+    Merge remote-tracking branch 'origin/Rama_alexandra' into Rama_Nerea
+
+[33mcommit 84634651b5fa89136150cd4e2c65eab776eaae09[m
+Author: alexandracotiga <cotigaalexandra@gmail.com>
+Date:   Fri May 30 17:53:59 2025 +0200
+
+    commit alexandra t
+
+[33mcommit 5476236b86d581c4dac3aea48048246848a294c2[m
+Author: alexandracotiga <cotigaalexandra@gmail.com>
+Date:   Fri May 30 14:04:19 2025 +0200
+
+    guardar cambios Alexandra
+
+[33mcommit 383fa23e1cfeafc638f87f39278faf2090bd3768[m
+Author: alexandracotiga <cotigaalexandra@gmail.com>
+Date:   Fri May 30 13:08:49 2025 +0200
+
+    guardar cambios Alexandra
+
+[33mcommit c277b66550458ab3f0c23cb126a79724746c32be[m
+Author: alexandracotiga <cotigaalexandra@gmail.com>
+Date:   Fri May 30 12:07:12 2025 +0200
+
+    Primer commit
+
+[33mcommit 87df8bf56502202d3ca0db493fe45f81c51b55d7[m
+Author: Nerea <nerea.fernandez14@educa.madrid.org>
+Date:   Thu May 29 19:12:25 2025 +0200
+
+    cambio de conytraseña (aun no funciona)
+
+[33mcommit 729698a55dda0dba9699ebd2c48ee4e1821a9834[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m
+Author: alexandracotiga <cotigaalexandra@gmail.com>
+Date:   Wed May 28 22:23:31 2025 +0200
+
+    commit de prueba alvaro
+
+[33mcommit 852ac02f6af59edcdf55dbb3488394c3a1809b79[m
+Author: Nerea <nerea.fernandez14@educa.madrid.org>
+Date:   Wed May 28 20:26:27 2025 +0200
+
+    primmer commit

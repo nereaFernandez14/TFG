@@ -1,69 +1,33 @@
 .footer {
-  font-family: 'Segoe UI', sans-serif;
-  background-color: var(--bg-color-dark, #243d32);
-  color: var(--text-color-dark, #d8ebe3);
+  background-color:#046b3c;
+  color: white;
+  padding: 2rem 1rem;
   text-align: center;
-  padding: 1.5rem 1rem;
-  border-top: 3px solid var(--border-color-dark, #4b7964);
 }
 
-.footer-content a {
-  color: var(--link-color-dark, #98c3b0);
+.footer a {
+  color: #ccc;
   text-decoration: none;
-  margin: 0 10px;
-  font-size: 0.9rem;
-  transition: color 0.3s ease;
 }
 
-.footer-content a:hover {
-  color: var(--link-hover-dark, #b7e0cb);
+.footer a:hover {
+  text-decoration: underline;
 }
 
-/* Eliminar morado en enlaces visitados */
-.footer-content a:visited {
-  color: var(--link-color-dark, #98c3b0);
+.footer .footer-content {
+  max-width: 800px;
+  margin: auto;
 }
 
-.social-icons {
-  margin-top: 0.5rem;
-  display: flex;
-  justify-content: center;
-  gap: 1.2rem;
+.footer .contact-info {
+  margin: 1rem 0;
 }
 
-.social-icons a {
-  color: var(--link-color-dark, #98c3b0);
+.footer .social-icons {
+  margin-top: 1rem;
+}
+
+.footer .social-icons a {
+  margin: 0 0.5rem;
   font-size: 1.2rem;
-  transition: color 0.3s ease, transform 0.3s ease;
-}
-
-.social-icons a:hover {
-  color: var(--link-hover-dark, #b7e0cb);
-  transform: scale(1.15);
-}
-
-/* Light mode */
-@media (prefers-color-scheme: light) {
-  .footer {
-    background-color: var(--bg-color-light, #f1f8f4);
-    color: var(--text-color-light, #2d4739);
-    border-top-color: var(--border-color-light, #b5d2c4);
-  }
-
-  .footer-content a,
-  .footer-content a:visited {
-    color: var(--link-color-light, #5f8f7b);
-  }
-
-  .footer-content a:hover {
-    color: var(--link-hover-light, #3b6b5a);
-  }
-
-  .social-icons a {
-    color: var(--link-color-light, #5f8f7b);
-  }
-
-  .social-icons a:hover {
-    color: var(--link-hover-light, #3b6b5a);
-  }
 }

@@ -17,10 +17,6 @@ public class ImagenResenya {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Lob
-    @Column(name = "datos", columnDefinition = "LONGBLOB")
-    private byte[] datos;
-
     private String tipo;
     private String nombreArchivo;
 

@@ -19,7 +19,6 @@ export class RestaurantePerfilComponent implements OnInit {
   mostrarFormularioResena: boolean = false;
   modalAbierto: boolean = false;
 
-
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient,
@@ -27,33 +26,30 @@ export class RestaurantePerfilComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-  this.restauranteId = +this.route.snapshot.paramMap.get('id')!;
+    this.restauranteId = +this.route.snapshot.paramMap.get('id')!;
 
-  // Cargar restaurante
-  this.http.get(`/api/restaurantes/${this.restauranteId}`).subscribe(data => {
-    this.restaurante = data;
-  });
+    this.http.get(`/api/restaurantes/${this.restauranteId}`).subscribe(data => {
+      this.restaurante = data;
+    });
 
-  // Cargar reseñas
-  this.http.get<any[]>(`/api/restaurantes/${this.restauranteId}/resenas`).subscribe(data => {
-    this.resenas = data;
-  });
-
-  // ✅ Verificar si el usuario está autenticado
-  this.mostrarFormularioResena = this.authService.isAuthenticated();
-}
-    abrirModalResena() {
-    this.modalAbierto = true;
-    }
-
-    cerrarModal() {
-    this.modalAbierto = false;
-    }
-    recargarResenas() {
     this.http.get<any[]>(`/api/restaurantes/${this.restauranteId}/resenas`).subscribe(data => {
       this.resenas = data;
     });
-}
 
+    this.mostrarFormularioResena = this.authService.isAuthenticated();
+  }
 
+  abrirModalResena() {
+    this.modalAbierto = true;
+  }
+
+  cerrarModal() {
+    this.modalAbierto = false;
+  }
+
+  recargarResenas() {
+    this.http.get<any[]>(`/api/restaurantes/${this.restauranteId}/resenas`).subscribe(data => {
+      this.resenas = data;
+    });
+  }
 }

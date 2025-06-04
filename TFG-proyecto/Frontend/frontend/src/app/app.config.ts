@@ -66,6 +66,13 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./restaurante-perfil/restaurante-perfil.component').then((m) => m.RestaurantePerfilComponent)
   },
+  {
+    path: 'resenyas/nueva',
+    loadComponent: () =>
+      import('./resenya/resenya.component').then((m) => m.ResenyaComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { rol: 'USUARIO' }
+  },
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' }
@@ -84,7 +91,7 @@ export const appConfig: ApplicationConfig = {
       HttpClientXsrfModule.withOptions({
         cookieName: 'XSRF-TOKEN',
         headerName: 'X-XSRF-TOKEN'
-      }) // 👈 activamos protección CSRF para Angular
+      }) // 👈 protección CSRF para Angular
     )
   ]
 };

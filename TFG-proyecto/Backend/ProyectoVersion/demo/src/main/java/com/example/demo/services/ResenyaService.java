@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,8 +32,10 @@ public class ResenyaService {
     @Transactional
     public Resenya guardarResenya(String contenido, int valoracion, Long restauranteId, String email,
             MultipartFile[] imagenes) {
+
         Usuario autor = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
         Restaurante restaurante = restauranteRepository.findById(restauranteId)
                 .orElseThrow(() -> new IllegalArgumentException("Restaurante no encontrado"));
 
@@ -43,21 +48,39 @@ public class ResenyaService {
         Resenya resenya = new Resenya(contenido, valoracion, autor, restaurante);
 
         List<ImagenResenya> imagenEntities = new ArrayList<>();
-        for (MultipartFile imagen : imagenes) {
-            try {
-                ImagenResenya img = new ImagenResenya();
-                img.setResenya(resenya);
-                img.setNombreArchivo(imagen.getOriginalFilename());
-                img.setTipo(imagen.getContentType());
-                img.setDatos(imagen.getBytes());
-                imagenEntities.add(img);
-            } catch (IOException e) {
-                throw new IllegalStateException("Error procesando imagen: " + imagen.getOriginalFilename());
+
+        if (imagenes != null && imagenes.length > 0) {
+            for (MultipartFile imagen : imagenes) {
+                if (!imagen.isEmpty()) {
+                    try {
+                        // Crear carpeta uploads si no existe
+                        Path carpetaUploads = Paths.get("uploads");
+                        Files.createDirectories(carpetaUploads);
+
+                        // Generar nombre único
+                        String nombreArchivo = System.currentTimeMillis() + "_" + imagen.getOriginalFilename();
+
+                        // Ruta completa
+                        Path rutaArchivo = carpetaUploads.resolve(nombreArchivo);
+
+                        // Guardar archivo en disco
+                        Files.copy(imagen.getInputStream(), rutaArchivo);
+
+                        // Crear entidad ImagenResenya
+                        ImagenResenya img = new ImagenResenya();
+                        img.setResenya(resenya);
+                        img.setNombreArchivo(nombreArchivo);
+                        img.setTipo(imagen.getContentType());
+
+                        imagenEntities.add(img);
+                    } catch (IOException e) {
+                        throw new IllegalStateException("Error guardando imagen: " + imagen.getOriginalFilename(), e);
+                    }
+                }
             }
         }
 
         resenya.setImagenes(imagenEntities);
-
         return resenyaRepository.save(resenya);
     }
 
@@ -81,6 +104,9 @@ public class ResenyaService {
     }
 
     private void validarContenido(String contenido) {
+        if (contenido == null)
+            return; // Comentario opcional
+
         for (String palabra : PALABRAS_PROHIBIDAS) {
             if (contenido.toLowerCase().contains(palabra)) {
                 throw new IllegalArgumentException("El comentario contiene palabras inapropiadas.");

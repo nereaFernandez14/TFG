@@ -14,7 +14,7 @@ import { FooterComponent } from './footer/footer.component';
     CommonModule,
     RouterModule,
     RouterOutlet,
-    HeaderComponent, 
+    HeaderComponent,
     FooterComponent
   ],
   template: `
