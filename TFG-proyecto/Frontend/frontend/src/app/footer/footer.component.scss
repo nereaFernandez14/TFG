@@ -1,0 +1,33 @@
+.footer {
+  background-color:#046b3c;
+  color: white;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.footer a {
+  color: #ccc;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.footer .footer-content {
+  max-width: 800px;
+  margin: auto;
+}
+
+.footer .contact-info {
+  margin: 1rem 0;
+}
+
+.footer .social-icons {
+  margin-top: 1rem;
+}
+
+.footer .social-icons a {
+  margin: 0 0.5rem;
+  font-size: 1.2rem;
+}

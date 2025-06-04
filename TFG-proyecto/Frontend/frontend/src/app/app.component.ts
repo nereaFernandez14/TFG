@@ -5,6 +5,7 @@ import { HeaderComponent } from './header/header.component';
 import { MensajeService } from './services/mensaje.service';
 import { AutenticacionService } from './services/autenticacion.service';
 import { DebugRoutingService } from './services/debug-routing.service';
+import { FooterComponent } from './footer/footer.component';
 
 @Component({
   selector: 'app-root',
@@ -13,11 +14,13 @@ import { DebugRoutingService } from './services/debug-routing.service';
     CommonModule,
     RouterModule,
     RouterOutlet,
-    HeaderComponent
+    HeaderComponent,
+    FooterComponent
   ],
   template: `
     <app-header></app-header>
     <router-outlet></router-outlet>
+    <app-footer></app-footer>
 
     <div class="mensajes" *ngIf="mensajes.length > 0; else noMensajes">
       <h2>Mensajes desde el backend:</h2>
