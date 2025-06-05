@@ -94,6 +94,12 @@ export class UsuarioService {
       new Error(error.error?.message || 'Error inesperado en la petición.')
     );
   }
+
+  
+  subirMenu(formData: FormData) {
+    return this.http.post(`${environment.apiUrl}/restaurantes/subir-menu`, formData);
+  }
+
 }
 
 export { Usuario };

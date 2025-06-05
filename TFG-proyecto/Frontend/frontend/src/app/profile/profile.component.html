@@ -31,7 +31,15 @@
         <p>¿Tienes un restaurante? ¡Añádelo ahora para empezar a recibir reseñas!</p>
         <button type="button" (click)="irACrearRestaurante()">Añadir restaurante</button>
       </div>-->
-
+      <!-- ✅ Sección para subir menú (solo restaurantes) -->
+      <div *ngIf="usuario?.rol === 'RESTAURANTE'" class="menu-upload-section">
+        <h3>Sube tu menú</h3>
+        <form (submit)="subirArchivo($event)">
+          <input type="file" accept=".pdf,image/*" (change)="onFileSelected($event)" required />
+          <button type="submit">Subir archivo</button>
+          <p *ngIf="nombreArchivo">Archivo seleccionado: {{ nombreArchivo }}</p>
+        </form>
+      </div>
       <!-- ✅ Sección para USUARIO -->
       <div *ngIf="usuario?.rol === 'USUARIO'" class="extra-section">
         <h3>Preferencias dietéticas</h3>

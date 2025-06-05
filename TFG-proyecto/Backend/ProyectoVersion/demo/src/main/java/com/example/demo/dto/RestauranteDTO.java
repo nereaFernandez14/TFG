@@ -42,6 +42,8 @@ public class RestauranteDTO {
     private List<RestriccionDietetica> restricciones;
 
     private List<String> comentarios;
+    private String rutaMenu; 
+ 
 
     // ✅ NUEVOS CAMPOS PARA DASHBOARD
     private int visitas;
@@ -76,6 +78,8 @@ public class RestauranteDTO {
         // 👇 Datos nuevos del dashboard
         this.visitas = restaurante.getVisitas();
         this.cantidadComentarios = restaurante.getResenyas() != null ? restaurante.getResenyas().size() : 0;
+        this.rutaMenu = restaurante.getRutaMenu();
+
     }
 
     public RestauranteDTO() {

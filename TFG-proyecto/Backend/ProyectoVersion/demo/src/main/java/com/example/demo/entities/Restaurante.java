@@ -20,6 +20,9 @@ public class Restaurante {
 
     @Column(unique = true, nullable = false)
     private String nombre;
+    @Column(name = "ruta_menu")
+    private String rutaMenu;
+
 
     private String direccion;
     private String telefono;

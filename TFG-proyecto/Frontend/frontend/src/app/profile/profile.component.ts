@@ -12,6 +12,8 @@ import { Router } from '@angular/router';
 })
 export class ProfileComponent implements OnInit {
   usuario: Usuario | null = null;
+  archivoSeleccionado: File | null = null;
+  nombreArchivo: string = '';
 
   constructor(
     private usuarioService: UsuarioService,
@@ -48,6 +50,33 @@ export class ProfileComponent implements OnInit {
       error: (err) => {
         console.error('❌ Error al cerrar sesión desde perfil', err);
         this.router.navigate(['/login']); // Incluso si falla, navega
+      }
+    });
+  }
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.archivoSeleccionado = input.files[0];
+      this.nombreArchivo = this.archivoSeleccionado.name;
+    }
+  }
+
+  subirArchivo(event: Event): void {
+    event.preventDefault();
+    if (!this.archivoSeleccionado || !this.usuario) return;
+
+    const formData = new FormData();
+    formData.append('archivo', this.archivoSeleccionado);
+    formData.append('email', this.usuario.email); // o ID si lo tienes mejor
+
+    this.usuarioService.subirMenu(formData).subscribe({
+      next: (resp) => {
+        console.log('📤 Archivo subido correctamente', resp);
+        alert('Menú subido correctamente ✅');
+      },
+      error: (err) => {
+        console.error('❌ Error al subir archivo', err);
+        alert('Error al subir el menú ❌');
       }
     });
   }

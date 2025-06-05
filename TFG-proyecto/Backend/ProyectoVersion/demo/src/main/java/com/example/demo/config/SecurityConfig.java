@@ -42,7 +42,7 @@ public class SecurityConfig {
                                                                 "/api/sesion",
                                                                 "/restaurantes/buscar",
                                                                 "/restaurantes/**",
-                                                                "/resenyas/**", // ✅ Añadido igual que restaurante
+                                                                "/resenyas/**",
                                                                 "/roles",
                                                                 "/change-password"))
                                 .authorizeHttpRequests(auth -> auth
@@ -61,7 +61,8 @@ public class SecurityConfig {
                                                                 "/error",
                                                                 "/restaurantes/filtrar-avanzado",
                                                                 "/restaurantes/**",
-                                                                "/resenyas/**" // ✅ Igual que restaurante
+                                                                "/resenyas/**",
+                                                                "/restaurantes/menus/**"
                                                 ).permitAll()
                                                 .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO") // ✅
                                                                                                                   // Mantiene

@@ -33,47 +33,48 @@ public class RestauranteService {
      * Crear restaurante y asignar usuario, con validación de tipo de cocina y
      * filtro de palabras ofensivas.
      */
-   public Restaurante crearRestaurante(Long idUsuario, Restaurante restaurante) {
+    public Restaurante crearDesdeDTO(Long idUsuario, RestauranteDTO dto) {
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         if (usuario.getRol() != RolNombre.RESTAURANTE) {
-            throw new RuntimeException("No puede agregar un restaurante porque no tiene el rol RESTAURANTE.");
+            throw new RuntimeException("No tiene permisos para crear restaurante.");
         }
 
+        Restaurante restaurante = new Restaurante();
         restaurante.setUsuario(usuario);
+        restaurante.setNombre(dto.getNombre());
+        restaurante.setDireccion(dto.getDireccion());
+        restaurante.setTelefono(dto.getTelefono());
+        restaurante.setTipoCocina(dto.getTipoCocina());
+        restaurante.setBarrio(dto.getBarrio());
+        restaurante.setRangoPrecio(dto.getRangoPrecio());
+        restaurante.setTipoCocinaPersonalizado(dto.getTipoCocinaPersonalizado());
+        restaurante.setRestriccionesDieteticas(dto.getRestricciones());
 
-        // 🔒 Encriptar la contraseña si viene del frontend
-        if (restaurante.getPassword() != null && !restaurante.getPassword().isBlank()) {
-            String passwordHasheada = passwordEncoder.encode(restaurante.getPassword());
-            restaurante.setPassword(passwordHasheada);
+        // Solo si quieres aceptar la contraseña desde el DTO (poco común)
+        if (dto.getTelefono() != null && !dto.getTelefono().isBlank()) {
+            restaurante.setPassword(passwordEncoder.encode(dto.getTelefono()));
         }
 
-        // ✅ Validación de tipo cocina personalizado
+        // Validación de palabras ofensivas si es OTRO
         if (restaurante.getTipoCocina() == TipoCocina.OTRO) {
             String personalizada = restaurante.getTipoCocinaPersonalizado();
-
             if (personalizada == null || personalizada.isBlank()) {
-                throw new RuntimeException("Si se selecciona 'OTRO' como tipo de cocina, se debe especificar un valor personalizado.");
+                throw new RuntimeException("Si el tipo de cocina es 'OTRO', debes especificar uno personalizado.");
             }
 
-            List<String> palabrasProhibidas = List.of("mierda", "puta", "gilipollas", "cabron", "joder", "idiota",
-                    "coño", "imbécil", "hijo de puta", "hijos de puta", "imbéciles");
-            String normalizado = personalizada.toLowerCase().replaceAll("[^a-záéíóúüñ]", "");
-
-            for (String prohibida : palabrasProhibidas) {
-                if (normalizado.contains(prohibida)) {
-                    throw new RuntimeException("El tipo de cocina contiene lenguaje inapropiado. Por favor, elige otro término.");
+            List<String> malasPalabras = List.of("mierda", "puta", "gilipollas", "cabron", "joder", "idiota", "imbécil");
+            String texto = personalizada.toLowerCase().replaceAll("[^a-z]", "");
+            for (String mala : malasPalabras) {
+                if (texto.contains(mala)) {
+                    throw new RuntimeException("El nombre personalizado contiene palabras ofensivas.");
                 }
             }
-
-        } else {
-            restaurante.setTipoCocinaPersonalizado(null);
         }
 
         return restauranteRepository.save(restaurante);
     }
-
 
     public List<Restaurante> obtenerTodosLosRestaurantes() {
         return restauranteRepository.findAll();
@@ -93,7 +94,8 @@ public class RestauranteService {
      */
     public Restaurante obtenerYIncrementarVisitas(Long id) {
         Restaurante restaurante = obtenerRestaurantePorId(id);
-        restaurante.setVisitas(restaurante.getVisitas() + 1);
+        restaurante.incrementarVisitas();
+        //restaurante.setVisitas(restaurante.getVisitas() + 1);
         return restauranteRepository.save(restaurante);
     }
 
@@ -129,5 +131,11 @@ public class RestauranteService {
                 .map(RestauranteDTO::new)
                 .collect(Collectors.toList());
     }
+    public Restaurante obtenerRestaurantePorEmailUsuario(String email) {
+        return restauranteRepository.findByUsuarioEmail(email)
+                .orElse(null); // o lanza una excepción personalizada si prefieres
+    }
+
+
 
 }
