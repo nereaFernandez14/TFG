@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,7 +32,6 @@ public class RestauranteController {
     public Restaurante crearRestaurante(@RequestParam Long idUsuario, @RequestBody RestauranteDTO dto) {
         return restauranteService.crearDesdeDTO(idUsuario, dto);
     }
-
 
     // ✅ Obtener todos
     @GetMapping
@@ -151,6 +151,13 @@ public class RestauranteController {
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + recurso.getFilename() + "\"")
                 .body(recurso);
+    }
+
+    @PreAuthorize("hasRole('RESTAURANTE')")
+    @PutMapping("/{id}/solicitar-baja")
+    public ResponseEntity<Restaurante> solicitarBaja(@PathVariable Long id) {
+        Restaurante actualizado = restauranteService.solicitarBaja(id);
+        return ResponseEntity.ok(actualizado);
     }
 
 }

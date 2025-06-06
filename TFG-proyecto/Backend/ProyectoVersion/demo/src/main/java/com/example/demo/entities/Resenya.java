@@ -38,6 +38,8 @@ public class Resenya {
     @OneToMany(mappedBy = "resenya", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<ImagenResenya> imagenes = new ArrayList<>();
+    @Column
+    private boolean ofensivo = false;
 
     public Resenya(String contenido,
             @NotNull(message = "La valoración es obligatoria.") @Min(value = 1, message = "La valoración mínima es 1.") @Max(value = 5, message = "La valoración máxima es 5.") Integer valoracion,

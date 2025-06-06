@@ -10,6 +10,9 @@ import com.example.demo.enums.TipoCocina;
 import com.example.demo.enums.RolNombre;
 import com.example.demo.repositories.RestauranteRepository;
 import com.example.demo.repositories.UsuarioRepository;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -64,7 +67,8 @@ public class RestauranteService {
                 throw new RuntimeException("Si el tipo de cocina es 'OTRO', debes especificar uno personalizado.");
             }
 
-            List<String> malasPalabras = List.of("mierda", "puta", "gilipollas", "cabron", "joder", "idiota", "imbécil");
+            List<String> malasPalabras = List.of("mierda", "puta", "gilipollas", "cabron", "joder", "idiota",
+                    "imbécil");
             String texto = personalizada.toLowerCase().replaceAll("[^a-z]", "");
             for (String mala : malasPalabras) {
                 if (texto.contains(mala)) {
@@ -95,7 +99,7 @@ public class RestauranteService {
     public Restaurante obtenerYIncrementarVisitas(Long id) {
         Restaurante restaurante = obtenerRestaurantePorId(id);
         restaurante.incrementarVisitas();
-        //restaurante.setVisitas(restaurante.getVisitas() + 1);
+        // restaurante.setVisitas(restaurante.getVisitas() + 1);
         return restauranteRepository.save(restaurante);
     }
 
@@ -126,16 +130,23 @@ public class RestauranteService {
                 .filter(r -> restricciones == null || restricciones.isEmpty()
                         || r.getRestriccionesDieteticas().containsAll(restricciones))
                 .filter(r -> nombre == null || r.getNombre() != null &&
-                        r.getNombre().toLowerCase().contains(nombre.toLowerCase())) 
+                        r.getNombre().toLowerCase().contains(nombre.toLowerCase()))
                 .sorted(Comparator.comparingDouble(Restaurante::getMediaPuntuacion).reversed())
                 .map(RestauranteDTO::new)
                 .collect(Collectors.toList());
     }
+
     public Restaurante obtenerRestaurantePorEmailUsuario(String email) {
         return restauranteRepository.findByUsuarioEmail(email)
                 .orElse(null); // o lanza una excepción personalizada si prefieres
     }
 
+    public Restaurante solicitarBaja(Long idRestaurante) {
+        Restaurante restaurante = restauranteRepository.findById(idRestaurante)
+                .orElseThrow(() -> new RuntimeException("Restaurante no encontrado"));
 
+        restaurante.setSolicitudBaja(true);
+        return restauranteRepository.save(restaurante);
+    }
 
 }

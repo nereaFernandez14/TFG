@@ -1,0 +1,29 @@
+<h2>Peticiones pendientes de revisar</h2>
+
+<table *ngIf="peticiones.length > 0">
+  <thead>
+    <tr>
+      <th>Tipo</th>
+      <th>Restaurante (ID)</th>
+      <th>Ir al perfil</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let p of peticiones">
+      <td>{{ p.tipo }}</td>
+      <td>{{ p.nombreRestaurante }} ({{ p.restauranteId }})</td>
+      <td>
+        <a [routerLink]="['/restaurantes', p.restauranteId]" [fragment]="p.idResenya ? 'resena-' + p.idResenya : ''">
+          Ver
+        </a>
+      </td>
+      <td>
+        <button (click)="aprobar(p.id)">✅</button>
+        <button (click)="rechazar(p.id)">❌</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<p *ngIf="peticiones.length === 0">🎉 No hay peticiones pendientes.</p>

@@ -1,4 +1,10 @@
 <div *ngIf="restaurante" class="perfil-restaurante">
+
+  <!-- 👑 Solo para admin -->
+  <button *ngIf="rol === 'ADMIN'" (click)="eliminarRestaurante()" class="btn-admin">
+    🗑️ Eliminar restaurante
+  </button>
+
   <h2>{{ restaurante.nombre }}</h2>
   <p>{{ restaurante.descripcion || 'Sin descripción disponible' }}</p>
 
@@ -19,8 +25,6 @@
   <!-- ✅ Sección de Menú del Restaurante -->
   <div *ngIf="restaurante.rutaMenu" class="menu-restaurante">
     <h3>Menú del restaurante</h3>
-
-    <!-- Botón de descarga -->
     <a
       [href]="'https://localhost:8443/restaurantes/menus/' + obtenerNombreArchivo(restaurante.rutaMenu)"
       target="_blank"
@@ -31,17 +35,16 @@
     </a>
   </div>
 
-  <!-- ✅ Botón para abrir el modal -->
+  <!-- ✅ Botón para abrir el modal de reseña -->
   <button class="btn-resena" *ngIf="mostrarFormularioResena" (click)="abrirModalResena()">
     Añadir reseña
   </button>
 
-  <!-- ❌ Mostrar mensaje si no está logueado -->
   <p *ngIf="!mostrarFormularioResena" class="aviso-login">
     🔒 Debes iniciar sesión para dejar una reseña.
   </p>
 
-  <!-- ✅ Modal con reseña -->
+  <!-- ✅ Modal de añadir reseña -->
   <div class="modal-backdrop" *ngIf="modalAbierto" (click)="cerrarModal()">
     <div class="modal" (click)="$event.stopPropagation()">
       <app-resenya
@@ -57,12 +60,20 @@
   <div class="resenas">
     <h3>Reseñas</h3>
     <div *ngIf="resenas.length === 0">No hay reseñas aún.</div>
+
     <div *ngFor="let resena of resenas" class="resena-card">
+
+      <!-- 👑 Solo admin puede eliminar -->
+      <button *ngIf="rol === 'ADMIN'" (click)="eliminarResena(resena.id)" class="btn-admin-resena">
+        🗑️
+      </button>
+
       <div class="estrellas">
         <ng-container *ngFor="let i of [1, 2, 3, 4, 5]">
           <span [class.activa]="i <= resena.valoracion">★</span>
         </ng-container>
       </div>
+
       <p *ngIf="resena.contenido"><em>{{ resena.contenido }}</em></p>
 
       <div *ngIf="resena.imagenes?.length > 0" class="imagenes-resena">
@@ -74,6 +85,31 @@
           class="img-resena"
         />
       </div>
+
+      <!-- 🍽 Solo restaurante puede denunciar -->
+      <button *ngIf="rol === 'RESTAURANTE'" (click)="abrirModalDenuncia(resena)" class="btn-bandera">
+        🚩
+      </button>
     </div>
   </div>
+
+  <!-- 🍽️ Modal para denuncia de reseña -->
+  <div class="modal-backdrop" *ngIf="mostrarModalDenuncia" (click)="cerrarModalDenuncia()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>Denunciar reseña</h2>
+      <p><strong>Contenido:</strong> {{ resenaSeleccionada?.contenido }}</p>
+
+      <div *ngIf="resenaSeleccionada?.imagenes?.length > 0">
+        <img
+          [src]="'/api/imagenes/' + resenaSeleccionada.imagenes[0].id"
+          [alt]="resenaSeleccionada.imagenes[0].nombreArchivo"
+          style="width: 200px;"
+        />
+      </div>
+
+      <button (click)="enviarDenuncia()">Enviar denuncia</button>
+      <button (click)="cerrarModalDenuncia()">Cancelar</button>
+    </div>
+  </div>
+
 </div>

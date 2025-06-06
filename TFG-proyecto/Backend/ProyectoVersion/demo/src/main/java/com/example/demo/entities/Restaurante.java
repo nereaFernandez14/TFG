@@ -23,6 +23,8 @@ public class Restaurante {
     @Column(name = "ruta_menu")
     private String rutaMenu;
 
+    @Column
+    private boolean solicitudBaja = false;
 
     private String direccion;
     private String telefono;
