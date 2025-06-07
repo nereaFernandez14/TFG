@@ -67,11 +67,8 @@ public class SecurityConfig {
                                                         "/resenyas/**"
                                                         ).permitAll()
 
-                                                .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO") // ✅
-                                                                                                                  // Mantiene
-                                                                                                                  // lógica
-                                                                                                                  // de
-                                                                                                                  // seguridad
+                                                .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO")
+                                                .requestMatchers(HttpMethod.POST, "/restaurantes/subir-menu").hasRole("RESTAURANTE")
                                                 .anyRequest().authenticated())
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))

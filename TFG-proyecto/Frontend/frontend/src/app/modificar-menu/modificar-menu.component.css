@@ -1,0 +1,56 @@
+.menu-container {
+  max-width: 600px;
+  margin: auto;
+  padding: 2rem;
+  background: #fdfdfd;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.menu-actual {
+  margin-bottom: 1.5rem;
+}
+
+.menu-link {
+  display: inline-block;
+  background-color: #00695c;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.menu-link:hover {
+  background-color: #004d40;
+}
+
+.upload-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+button {
+  padding: 0.6rem 1.2rem;
+  background-color: #00796b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #004d40;
+}
+
+.mensaje {
+  color: green;
+  font-weight: bold;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+}

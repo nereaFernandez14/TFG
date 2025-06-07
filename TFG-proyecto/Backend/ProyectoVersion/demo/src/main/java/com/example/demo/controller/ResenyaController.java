@@ -6,7 +6,10 @@ import com.example.demo.entities.Resenya;
 import com.example.demo.services.ResenyaService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -38,15 +41,24 @@ public class ResenyaController {
                     request.getRestauranteId(),
                     email,
                     request.getImagenes());
-            return ResponseEntity.ok(Map.of("message", "Reseña guardada con éxito", "id", nueva.getId()));
+
+            return ResponseEntity
+                    .status(201)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Map.of(
+                            "message", "Reseña guardada con éxito ✅",
+                            "id", nueva.getId()
+                    ));
+
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (IllegalStateException e) {
             return ResponseEntity.status(409).body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", "Error interno al guardar la reseña"));
         }
     }
+
 
     @PutMapping("/resenyas")
     @Transactional
@@ -103,4 +115,15 @@ public class ResenyaController {
             return ResponseEntity.notFound().build();
         }
     }
+    @PostMapping("/resenyas/{id}/denunciar")
+    @PreAuthorize("hasRole('RESTAURANTE')")
+    public ResponseEntity<?> denunciarResenya(@PathVariable Long id) {
+        try {
+            resenyaService.enviarDenunciaAlAdmin(id); // este método deberás implementarlo
+            return ResponseEntity.ok(Map.of("mensaje", "Denuncia enviada con éxito"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "No se pudo enviar la denuncia"));
+        }
+    }
+
 }

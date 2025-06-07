@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { Resenya } from '../models/resenya.model';
 
 export interface RestauranteDashboardDatos {
   visitas: number;
@@ -22,4 +23,12 @@ export class RestauranteDashboardService {
       { withCredentials: true } // 👈 NECESARIO PARA ENVIAR COOKIES
     );
   }
+  // src/app/services/restaurante-dashboard.service.ts
+  obtenerMisComentarios(): Observable<Resenya[]> {
+    return this.http.get<Resenya[]>(
+       `${this.baseUrl}/mis-resenyas`,
+      { withCredentials: true }
+    );
+  }
+
 }

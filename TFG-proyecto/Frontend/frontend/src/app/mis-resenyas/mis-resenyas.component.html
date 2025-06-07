@@ -1,0 +1,18 @@
+<div class="mis-resenyas-container">
+  <h2>Reseñas de tus clientes 🍽️</h2>
+
+  <div *ngIf="resenyas.length === 0">
+    <p>Este restaurante aún no tiene reseñas.</p>
+  </div>
+
+  <div class="resenya-card" *ngFor="let res of resenyas">
+    <h3>Valoración: {{ res.valoracion }} ⭐</h3>
+    <p><strong>Comentario:</strong> {{ res.contenido }}</p>
+
+    <div class="imagenes" *ngIf="res.id && imagenesMap[res.id]">
+      <img *ngFor="let img of imagenesMap[res.id]" [src]="img" alt="Imagen reseña" />
+    </div>
+
+    <button class="denunciar-btn" (click)="denunciarResenya(res)">🚨 Enviar Denuncia</button>
+  </div>
+</div>

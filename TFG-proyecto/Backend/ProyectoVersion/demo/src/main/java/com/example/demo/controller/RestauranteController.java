@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.RestauranteDTO;
 import com.example.demo.dto.RestauranteDashboardDatos;
+import com.example.demo.entities.Resenya;
 import com.example.demo.entities.Restaurante;
 import com.example.demo.enums.Barrio;
 import com.example.demo.enums.RangoPrecio;
@@ -10,6 +11,7 @@ import com.example.demo.enums.TipoCocina;
 import com.example.demo.services.RestauranteService;
 
 import jakarta.annotation.security.PermitAll;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -177,5 +179,21 @@ public class RestauranteController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + recurso.getFilename() + "\"")
                 .body(recurso);
     }
+    @PreAuthorize("hasRole('RESTAURANTE')")
+    @GetMapping("/mis-resenyas")
+    public ResponseEntity<List<Resenya>> obtenerMisResenyas(HttpSession session) {
+        String email = (String) session.getAttribute("usuario");
+        if (email == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Restaurante restaurante = restauranteService.obtenerRestaurantePorEmailUsuario(email);
+        if (restaurante == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(restaurante.getResenyas());
+    }
+
 
 }

@@ -157,4 +157,14 @@ public class ResenyaService {
             }
         }
     }
+    public void enviarDenunciaAlAdmin(Long resenyaId) {
+        Resenya resenya = resenyaRepository.findById(resenyaId)
+            .orElseThrow(() -> new RuntimeException("Reseña no encontrada"));
+
+        // Simulación: enviar email/log, notificación admin...
+        System.out.println("📢 Denuncia enviada al admin sobre la reseña: " + resenya.getContenido());
+
+        // Aquí podrías guardarlo en una tabla de denuncias o enviar un correo real
+    }
+
 }

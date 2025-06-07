@@ -26,4 +26,5 @@ export interface Restaurante {
   resenyas?: Resenya[];
   mediaPuntuacion?: number;
   descripcion?: string;
+  rutaMenu?: string; // Ruta al menú del restaurante
 }

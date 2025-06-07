@@ -1,26 +1,30 @@
 <div class="dashboard-container" *ngIf="datos; else cargando">
   <h2>Panel de Control del Restaurante</h2>
 
-  <div class="cards-grid">
-    <div class="card">
+  <!-- Fila 1: Informativas -->
+  <div class="cards-row">
+    <div class="card info-card">
       <h3>Visitas</h3>
       <p>{{ datos.visitas }}</p>
     </div>
 
-    <div class="card">
-      <h3>Comentarios</h3>
-      <p>{{ datos.comentarios }}</p>
-    </div>
-
-    <div class="card">
+    <div class="card info-card">
       <h3>Valoración Promedio</h3>
       <p>{{ datos.valoracionPromedio | number:'1.1-2' }} ⭐</p>
     </div>
+  </div>
 
-    <div class="card link-card" routerLink="/menu/modificar">
+  <!-- Fila 2: Acciones -->
+  <div class="cards-row">
+    <a class="card link-card" routerLink="/comentarios">
+      <h3>Ver Comentarios</h3>
+      <p>{{ datos.comentarios }}</p>
+    </a>
+
+    <a class="card link-card" routerLink="/menu/modificar">
       <h3>Modificar Menú</h3>
-      <p>Haz clic aquí para editar tu carta</p>
-    </div>
+      <p>Haz clic aquí para editar tu menú</p>
+    </a>
   </div>
 </div>
 

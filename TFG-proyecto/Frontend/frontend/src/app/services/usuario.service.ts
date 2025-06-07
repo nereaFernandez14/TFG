@@ -97,9 +97,10 @@ export class UsuarioService {
 
   
   subirMenu(formData: FormData) {
-    return this.http.post(`${environment.apiUrl}/restaurantes/subir-menu`, formData);
+      return this.http.post(`${environment.apiUrl}/restaurantes/subir-menu`, formData, {
+      withCredentials: true
+    });
   }
 
 }
-
 export { Usuario };

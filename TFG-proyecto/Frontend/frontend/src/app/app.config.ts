@@ -18,6 +18,9 @@ import { RoleGuard } from './guards/role.guard';
 import { RedirectIfAuthenticatedGuard } from './guards/redirect-if-authenticated.guard';
 import { ChangePasswordComponent } from './change-password/change-password.component';
 import { redirectRestauranteGuard } from './guards/redirect-restaurante.guard';
+import { MisResenyasComponent } from './mis-resenyas/mis-resenyas.component';
+
+
 
 export const routes: Routes = [
   { path: 'header', component: HeaderComponent },
@@ -79,6 +82,20 @@ export const routes: Routes = [
     path: 'dashboard',
     loadComponent: () =>
       import('./dashboard/dashboard.component').then((m) => m.DashboardComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { rol: 'RESTAURANTE' }
+  },
+  {
+    path: 'comentarios',
+    loadComponent: () =>
+      import('./mis-resenyas/mis-resenyas.component').then(m => m.MisResenyasComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { rol: 'RESTAURANTE' }
+  },
+  {
+    path: 'menu/modificar',
+    loadComponent: () =>
+      import('./modificar-menu/modificar-menu.component').then(m => m.ModificarMenuComponent),
     canActivate: [AuthGuard, RoleGuard],
     data: { rol: 'RESTAURANTE' }
   },
