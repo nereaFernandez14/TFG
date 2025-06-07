@@ -7,6 +7,9 @@ import com.example.demo.enums.RangoPrecio;
 import com.example.demo.enums.RestriccionDietetica;
 import com.example.demo.enums.TipoCocina;
 import com.example.demo.services.RestauranteService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -28,10 +31,9 @@ public class RestauranteController {
 
     // ✅ Crear restaurante
     @PostMapping
-    public Restaurante crearRestaurante(@RequestParam Long idUsuario, @RequestBody RestauranteDTO dto) {
+    public Restaurante crearRestaurante(@RequestParam Long idUsuario, @RequestBody @Valid RestauranteDTO dto) {
         return restauranteService.crearDesdeDTO(idUsuario, dto);
     }
-
 
     // ✅ Obtener todos
     @GetMapping

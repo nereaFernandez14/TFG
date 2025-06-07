@@ -5,6 +5,8 @@ import { RouterModule } from '@angular/router';
 import { AutenticacionService } from '../services/autenticacion.service';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
+import { RestauranteService } from '../services/restaurante.service';
+
 
 @Component({
   selector: 'app-login',
@@ -21,6 +23,7 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AutenticacionService,
+    private restauranteService: RestauranteService,
     private router: Router
   ) {
     this.loginForm = this.fb.group({
@@ -66,8 +69,28 @@ export class LoginComponent {
                 this.router.navigate(['/admin']);
                 break;
               case 'restaurante':
-                this.router.navigate(['/restaurantes']);
-                break;
+              const usuario = this.authService.obtenerUsuario();
+
+              if (!usuario || !usuario.id) {
+                console.error('❌ Usuario no válido tras login');
+                this.router.navigate(['/login']);
+                return;
+              }
+
+              this.restauranteService.obtenerRestaurantePorUsuario(usuario.id).subscribe({
+                next: (restaurante) => {
+                  if (restaurante && restaurante.id) {
+                    this.router.navigate(['/dashboard']); // ✅ Ya tiene restaurante
+                  } else {
+                    this.router.navigate(['/home']); 
+                  }
+                },
+                error: (err) => {
+                  console.error('❌ Error verificando restaurante:', err);
+                  this.router.navigate(['/restaurante']);
+                }
+              });
+              break;
               case 'usuario':
                 this.router.navigate(['/home']);
                 break;

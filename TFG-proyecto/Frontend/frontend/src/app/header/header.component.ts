@@ -69,10 +69,15 @@ export class HeaderComponent implements OnInit {
         const registrado = restaurante && restaurante.id != null;
         this.puedeRegistrarRestaurante.set(!registrado);
       },
-      error: () => {
-        console.log("ℹ️ No hay restaurante, se puede registrar");
+      error: (err) => {
+        if (err.status === 404) {
+          console.info("ℹ️ No hay restaurante, se puede registrar");
+        } else {
+          console.error("❌ Error inesperado consultando restaurante:", err);
+        }
         this.puedeRegistrarRestaurante.set(true);
       }
+
     });
   }
 

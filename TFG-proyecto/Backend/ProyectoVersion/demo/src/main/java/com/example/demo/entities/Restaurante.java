@@ -63,13 +63,12 @@ public class Restaurante {
     public Restaurante() {
     }
 
-    public Restaurante(String nombre, String direccion, String telefono, String email, String password,
+    public Restaurante(String nombre, String direccion, String telefono, String email,
             TipoCocina tipoCocina, Barrio barrio, RangoPrecio rangoPrecio) {
         this.nombre = nombre;
         this.direccion = direccion;
         this.telefono = telefono;
         this.email = email;
-        this.password = password;
         this.tipoCocina = tipoCocina;
         this.barrio = barrio;
         this.rangoPrecio = rangoPrecio;
