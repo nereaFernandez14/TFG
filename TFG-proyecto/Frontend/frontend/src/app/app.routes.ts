@@ -10,6 +10,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
 import { RedirectIfAuthenticatedGuard } from './guards/redirect-if-authenticated.guard';
 import { RestauranteComponent } from './restaurante/restaurante.component';
+import { redirectRestauranteGuard } from './guards/redirect-restaurante.guard';
 
 export const routes: Routes = [
   { path: 'header', component: HeaderComponent },
@@ -25,7 +26,8 @@ export const routes: Routes = [
   },
   {
     path: 'home',
-    component: HomeComponent
+    component: HomeComponent,
+    canActivate: [redirectRestauranteGuard]
   },
   {
     path: 'admin',

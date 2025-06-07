@@ -46,6 +46,7 @@ public class RestauranteService {
         restaurante.setNombre(dto.getNombre());
         restaurante.setDireccion(dto.getDireccion());
         restaurante.setTelefono(dto.getTelefono());
+        restaurante.setEmail(dto.getEmail());
         restaurante.setTipoCocina(dto.getTipoCocina());
         restaurante.setBarrio(dto.getBarrio());
         restaurante.setRangoPrecio(dto.getRangoPrecio());
@@ -135,7 +136,5 @@ public class RestauranteService {
         return restauranteRepository.findByUsuarioEmail(email)
                 .orElse(null); // o lanza una excepción personalizada si prefieres
     }
-
-
 
 }

@@ -1,7 +1,7 @@
-<div class="dashboard-container">
+<div class="dashboard-container" *ngIf="datos; else cargando">
   <h2>Panel de Control del Restaurante</h2>
 
-  <div class="cards-grid" *ngIf="datos">
+  <div class="cards-grid">
     <div class="card">
       <h3>Visitas</h3>
       <p>{{ datos.visitas }}</p>
@@ -14,7 +14,7 @@
 
     <div class="card">
       <h3>Valoración Promedio</h3>
-      <p>{{ datos.valoracionPromedio }} ⭐</p>
+      <p>{{ datos.valoracionPromedio | number:'1.1-2' }} ⭐</p>
     </div>
 
     <div class="card link-card" routerLink="/menu/modificar">
@@ -23,3 +23,7 @@
     </div>
   </div>
 </div>
+
+<ng-template #cargando>
+  <p>🔄 Cargando datos del dashboard...</p>
+</ng-template>

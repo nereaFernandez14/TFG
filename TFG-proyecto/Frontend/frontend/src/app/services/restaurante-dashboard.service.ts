@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 export interface RestauranteDashboardDatos {
@@ -8,13 +8,18 @@ export interface RestauranteDashboardDatos {
   valoracionPromedio: number;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class RestauranteDashboardService {
-  private baseUrl = 'http://localhost:8443/api/restaurantes';
+  private baseUrl = 'https://localhost:8443/restaurantes';
 
   constructor(private http: HttpClient) {}
 
   obtenerResumen(idUsuario: number): Observable<RestauranteDashboardDatos> {
-    return this.http.get<RestauranteDashboardDatos>(`${this.baseUrl}/resumen/${idUsuario}`);
+    return this.http.get<RestauranteDashboardDatos>(
+      `${this.baseUrl}/resumen/${idUsuario}`,
+      { withCredentials: true } // 👈 NECESARIO PARA ENVIAR COOKIES
+    );
   }
 }

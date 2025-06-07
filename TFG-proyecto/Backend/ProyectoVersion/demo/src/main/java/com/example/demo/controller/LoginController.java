@@ -9,6 +9,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -63,10 +63,20 @@ public class LoginController {
             session.setAttribute("usuario", loginRequest.getUsername());
             session.setAttribute("rol", rol);
 
+            // ✅ El rol se establece correctamente con ROLE_ prefijo
             GrantedAuthority authority = (GrantedAuthority) () -> "ROLE_" + rol.name();
-            User userDetails = new User(loginRequest.getUsername(), "", Collections.singletonList(authority));
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails,
-                    null, userDetails.getAuthorities());
+
+            User userDetails = new User(
+                    loginRequest.getUsername(),
+                    "",
+                    Collections.singletonList(authority)
+            );
+
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails,
+                    null,
+                    userDetails.getAuthorities()
+            );
 
             SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
             securityContext.setAuthentication(authentication);
@@ -80,7 +90,9 @@ public class LoginController {
                     "role", rol.name(),
                     "email", loginRequest.getUsername(),
                     "nombre", nombre,
-                    "id", id));
+                    "id", id
+            ));
+
         } catch (Exception ex) {
             ex.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

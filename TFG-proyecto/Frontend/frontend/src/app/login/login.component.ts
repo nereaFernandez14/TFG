@@ -6,6 +6,9 @@ import { AutenticacionService } from '../services/autenticacion.service';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RestauranteService } from '../services/restaurante.service';
+import { switchMap, tap } from 'rxjs/operators';
+import { of, throwError } from 'rxjs';
+
 
 
 @Component({
@@ -52,75 +55,49 @@ export class LoginComponent {
   }
 
   private hacerLogin(username: string, password: string): void {
-    this.authService.login(username, password).subscribe({
-      next: () => {
-        this.authService.verificarSesion().subscribe({
-          next: (respuesta) => {
-            const rol = (respuesta?.role ?? respuesta?.rol ?? '').toLowerCase(); // 🔁 Convertir a minúscula
+    this.authService.login(username, password).pipe(
+      switchMap(() => this.authService.verificarSesion()),
+      switchMap((respuesta) => {
+        const rol = (respuesta?.rol ?? respuesta?.role ?? '').toUpperCase();
+        const usuario = this.authService.obtenerUsuario();
 
-            if (!rol) {
-              this.error = 'No se pudo determinar el rol del usuario.';
-              this.cargando = false;
-              return;
-            }
-
-            switch (rol) {
-              case 'admin':
-                this.router.navigate(['/admin']);
-                break;
-              case 'restaurante':
-              const usuario = this.authService.obtenerUsuario();
-
-              if (!usuario || !usuario.id) {
-                console.error('❌ Usuario no válido tras login');
-                this.router.navigate(['/login']);
-                return;
-              }
-
-              this.restauranteService.obtenerRestaurantePorUsuario(usuario.id).subscribe({
-                next: (restaurante) => {
-                  if (restaurante && restaurante.id) {
-                    this.router.navigate(['/dashboard']); // ✅ Ya tiene restaurante
-                  } else {
-                    this.router.navigate(['/home']); 
-                  }
-                },
-                error: (err) => {
-                  console.error('❌ Error verificando restaurante:', err);
-                  this.router.navigate(['/restaurante']);
-                }
-              });
-              break;
-              case 'usuario':
-                this.router.navigate(['/home']);
-                break;
-              default:
-                console.warn(`⚠️ Rol desconocido (${rol}). Redirigiendo a /home.`);
-                this.router.navigate(['/home']);
-                break;
-            }
-
-            this.cargando = false;
-          },
-          error: () => {
-            this.error = 'Error al verificar la sesión del usuario.';
-            this.cargando = false;
-          }
-        });
-      },
-      error: (err) => {
-        console.error('Login error:', err);
-
-        if (err?.status === 401) {
-          this.error = '⚠️ Usuario o contraseña incorrectos.';
-        } else if (err?.status === 0) {
-          this.error = '❌ No se pudo conectar con el servidor.';
-        } else {
-          this.error = '❌ Error inesperado. Intenta de nuevo más tarde.';
+        if (!rol || !usuario?.id) {
+          this.error = 'No se pudo determinar el rol o el ID del usuario.';
+          return throwError(() => new Error('Rol o usuario no disponible'));
         }
 
+        if (rol === 'RESTAURANTE') {
+          return this.restauranteService.obtenerRestaurantePorUsuario(usuario.id).pipe(
+            tap((restaurante) => {
+              if (restaurante && restaurante.id) {
+                this.router.navigate(['/dashboard']);
+              } else {
+                this.router.navigate(['/restaurantes/crear']);
+              }
+            })
+          );
+        }
+
+        if (rol === 'ADMIN') {
+          this.router.navigate(['/admin']);
+          return of(null);
+        }
+
+        // Default: usuario normal
+        this.router.navigate(['/home']);
+        return of(null);
+      })
+    ).subscribe({
+      error: (err) => {
+        console.error('❌ Error al iniciar sesión:', err);
+        this.error = 'Error al iniciar sesión';
+        this.cargando = false;
+      },
+      complete: () => {
         this.cargando = false;
       }
     });
   }
+
+
 }

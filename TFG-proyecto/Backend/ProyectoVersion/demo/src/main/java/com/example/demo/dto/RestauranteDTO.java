@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 public class RestauranteDTO {
 
     private Long id;
+    private String email;
 
     @NotBlank(message = "El nombre es obligatorio.")
     private String nombre;
@@ -61,6 +62,7 @@ public class RestauranteDTO {
         this.id = restaurante.getId();
         this.nombre = restaurante.getNombre();
         this.direccion = restaurante.getDireccion();
+        this.email = restaurante.getEmail();
         this.tipoCocina = restaurante.getTipoCocina();
         this.barrio = restaurante.getBarrio();
         this.telefono = restaurante.getTelefono();

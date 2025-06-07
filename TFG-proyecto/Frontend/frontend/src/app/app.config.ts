@@ -17,6 +17,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
 import { RedirectIfAuthenticatedGuard } from './guards/redirect-if-authenticated.guard';
 import { ChangePasswordComponent } from './change-password/change-password.component';
+import { redirectRestauranteGuard } from './guards/redirect-restaurante.guard';
 
 export const routes: Routes = [
   { path: 'header', component: HeaderComponent },
@@ -32,7 +33,8 @@ export const routes: Routes = [
   },
   {
     path: 'home',
-    component: HomeComponent
+    component: HomeComponent,
+    canActivate: [redirectRestauranteGuard]
   },
   {
     path: 'admin',
@@ -72,6 +74,13 @@ export const routes: Routes = [
       import('./resenya/resenya.component').then((m) => m.ResenyaComponent),
     canActivate: [AuthGuard, RoleGuard],
     data: { rol: 'USUARIO' }
+  },
+  {
+    path: 'dashboard',
+    loadComponent: () =>
+      import('./dashboard/dashboard.component').then((m) => m.DashboardComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { rol: 'RESTAURANTE' }
   },
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },

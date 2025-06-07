@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -20,11 +21,13 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+
 import java.io.PrintWriter;
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
         @Bean
@@ -47,23 +50,23 @@ public class SecurityConfig {
                                                                 "/change-password"))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                                .requestMatchers(
-                                                                "/register",
-                                                                "/api/register",
-                                                                "/api/csrf",
-                                                                "/api/login",
-                                                                "/api/logout",
-                                                                "/api/rol",
-                                                                "/api/sesion",
-                                                                "/restaurantes/buscar",
-                                                                "/roles",
-                                                                "/change-password",
-                                                                "/error",
-                                                                "/restaurantes/filtrar-avanzado",
-                                                                "/restaurantes/**",
-                                                                "/resenyas/**",
-                                                                "/restaurantes/menus/**"
-                                                ).permitAll()
+                                               .requestMatchers(
+                                                        "/register",
+                                                        "/api/register",
+                                                        "/api/csrf",
+                                                        "/api/login",
+                                                        "/api/logout",
+                                                        "/api/rol",
+                                                        "/api/sesion",
+                                                        "/restaurantes/buscar",
+                                                        "/roles",
+                                                        "/change-password",
+                                                        "/error",
+                                                        "/restaurantes/filtrar-avanzado",
+                                                        "/restaurantes/menus/**",
+                                                        "/resenyas/**"
+                                                        ).permitAll()
+
                                                 .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO") // ✅
                                                                                                                   // Mantiene
                                                                                                                   // lógica

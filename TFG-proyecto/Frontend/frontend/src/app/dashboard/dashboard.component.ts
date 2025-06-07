@@ -21,6 +21,7 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     const restaurante = this.authService.obtenerUsuario();
+    console.log('🧠 Usuario actual:', restaurante); 
     if (restaurante?.id) {
       this.dashboardService.obtenerResumen(restaurante.id).subscribe({
         next: (data) => (this.datos = data),

@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.RestauranteDTO;
+import com.example.demo.dto.RestauranteDashboardDatos;
 import com.example.demo.entities.Restaurante;
 import com.example.demo.enums.Barrio;
 import com.example.demo.enums.RangoPrecio;
@@ -8,12 +9,15 @@ import com.example.demo.enums.RestriccionDietetica;
 import com.example.demo.enums.TipoCocina;
 import com.example.demo.services.RestauranteService;
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -100,6 +104,25 @@ public class RestauranteController {
         }
         RestauranteDTO dto = new RestauranteDTO(restaurante);
         return ResponseEntity.ok(dto);
+    }
+    // RestauranteController.java
+    @PreAuthorize("hasRole('RESTAURANTE')")
+    @GetMapping("/resumen/{idUsuario}")
+    public ResponseEntity<RestauranteDashboardDatos> obtenerResumen(@PathVariable Long idUsuario) {
+        Restaurante restaurante = restauranteService.obtenerRestaurantePorUsuario(idUsuario);
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("👤 Usuario autenticado: " + auth.getName());
+        System.out.println("🔐 Roles: " + auth.getAuthorities());
+        if (restaurante == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        RestauranteDashboardDatos datos = new RestauranteDashboardDatos();
+        datos.setVisitas(restaurante.getVisitas());
+        datos.setComentarios(restaurante.getResenyas().size());
+        datos.setValoracionPromedio(restaurante.getMediaPuntuacion());
+
+        return ResponseEntity.ok(datos);
     }
 
     // ✅ Subir menú (PDF o imagen)
