@@ -10,7 +10,7 @@ export interface RestauranteDashboardDatos {
 
 @Injectable({ providedIn: 'root' })
 export class RestauranteDashboardService {
-  private baseUrl = 'http://localhost:8080/api/restaurantes';
+  private baseUrl = 'http://localhost:8443/api/restaurantes';
 
   constructor(private http: HttpClient) {}
 
