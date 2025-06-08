@@ -22,4 +22,7 @@ public interface ResenyaRepository extends JpaRepository<Resenya, Long> {
     List<Resenya> findByRestauranteId(Long restauranteId);
 
     Optional<ImagenResenya> findImagenById(Long id);
+    
+    List<Resenya> findByDenunciadoTrue();
+
 }

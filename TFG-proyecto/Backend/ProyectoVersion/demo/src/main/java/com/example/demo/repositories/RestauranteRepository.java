@@ -13,6 +13,8 @@ public interface RestauranteRepository extends JpaRepository<Restaurante, Long> 
     List<Restaurante> findTop5ByOrderByIdDesc();
     List<Restaurante> findByNombreContainingIgnoreCase(String nombre);
     Optional<Restaurante> findByUsuarioEmail(String email);
+    List<Restaurante> findBySolicitaBajaTrue();
+
 
 
 }

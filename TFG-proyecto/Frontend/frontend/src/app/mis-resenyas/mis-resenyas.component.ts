@@ -1,21 +1,20 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Resenya } from '../models/resenya.model';
 import { ResenyaService } from '../services/resenya.service';
 import { AutenticacionService } from '../services/autenticacion.service';
-import { CommonModule } from '@angular/common'; // 👈 Necesario para directivas estructurales
 
 @Component({
   selector: 'app-mis-resenyas',
   standalone: true,
-  imports: [CommonModule], // 👈 Necesario para directivas estructurales
+  imports: [CommonModule],
   templateUrl: './mis-resenyas.component.html',
   styleUrls: ['./mis-resenyas.component.css']
 })
-
 export class MisResenyasComponent implements OnInit {
   resenyas: Resenya[] = [];
   imagenesMap: { [resenyaId: number]: string[] } = {};
-  idRestaurante!: number;
+  cargando: boolean = true;
 
   constructor(
     private resenyaService: ResenyaService,
@@ -23,53 +22,54 @@ export class MisResenyasComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const usuario = this.authService.obtenerUsuario();
+    this.cargarMisResenyas();
+  }
 
-    if (usuario?.id) {
-      this.idRestaurante = usuario.id;
+  cargarMisResenyas(): void {
+    this.resenyaService.obtenerMisResenyas().subscribe({
+      next: (resenyas) => {
+        this.resenyas = resenyas || [];
+        this.cargando = false;
 
-      this.resenyaService.obtenerResenyasDeRestaurante(this.idRestaurante).subscribe({
-        next: (resenyas) => {
-          this.resenyas = resenyas;
+        this.resenyas.forEach(res => {
+          const id = res.id;
+          if (id && res.imagenes?.length) {
+            this.imagenesMap[id] = [];
 
-          // Cargar imágenes de cada reseña
-          resenyas.forEach((res) => {
-            if (res.imagenes && res.imagenes.length > 0) {
-              this.imagenesMap[res.id!] = [];
-
-              res.imagenes.forEach((imagen) => {
-                this.resenyaService.obtenerImagen(imagen.id!).subscribe({
+            res.imagenes.forEach(imagen => {
+              if (imagen.id) {
+                this.resenyaService.obtenerImagen(imagen.id).subscribe({
                   next: (blob) => {
                     const url = URL.createObjectURL(blob);
-                    this.imagenesMap[res.id!].push(url);
+                    this.imagenesMap[id].push(url);
                   },
                   error: (err) => {
-                    console.error(`❌ Error cargando imagen con ID ${imagen.id}:`, err);
+                    console.error(`❌ Error al cargar imagen ID ${imagen.id}:`, err);
                   }
                 });
-              });
-            }
-          });
-        },
-        error: (err) => {
-          console.error('❌ Error cargando reseñas del restaurante:', err);
-        }
-      });
-    }
-  }
-  denunciarResenya(resenya: Resenya): void {
-    if (!resenya.id) return;
-
-    const confirmado = confirm(`¿Estás seguro de que quieres denunciar este comentario?\n\n"${resenya.contenido}"`);
-    if (!confirmado) return;
-
-    this.resenyaService.enviarDenuncia(resenya.id).subscribe({
-      next: () => alert('✅ Denuncia enviada al administrador'),
+              }
+            });
+          }
+        });
+      },
       error: (err) => {
-        console.error('❌ Error al enviar denuncia:', err);
-        alert('❌ Hubo un error al enviar la denuncia');
+        this.cargando = false;
+        console.error('❌ Error al obtener tus reseñas:', err);
       }
     });
   }
 
+  denunciarResenya(id: number): void {
+    if (!id) return;
+
+    this.resenyaService.denunciar(id).subscribe({
+      next: () => {
+        alert('🚨 La reseña fue denunciada correctamente.');
+      },
+      error: (err) => {
+        console.error('❌ Error al denunciar reseña:', err);
+        alert('Error al denunciar la reseña.');
+      }
+    });
+  }
 }

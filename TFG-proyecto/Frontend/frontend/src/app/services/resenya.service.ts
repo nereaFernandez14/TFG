@@ -1,13 +1,11 @@
-// src/app/services/resenya.service.ts
-
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Resenya } from '../models/resenya.model';
 
 @Injectable({ providedIn: 'root' })
 export class ResenyaService {
-  private baseUrl = 'https://localhost:8443';
+  private baseUrl = '/api'; // ✅ Utiliza proxy
 
   constructor(private http: HttpClient) {}
 
@@ -33,7 +31,7 @@ export class ResenyaService {
   }
 
   /**
-   * Obtiene reseñas de un restaurante específico (solo lectura)
+   * Obtiene reseñas públicas de un restaurante por ID
    */
   obtenerResenyasPorRestaurante(restauranteId: number): Observable<Resenya[]> {
     return this.http.get<Resenya[]>(
@@ -51,22 +49,46 @@ export class ResenyaService {
       withCredentials: true
     });
   }
+
   /**
- * Reseñas hechas por usuarios al restaurante del usuario autenticado
- */
-    obtenerMisResenyas(): Observable<Resenya[]> {
+   * Obtiene reseñas asociadas al restaurante autenticado
+   */
+  obtenerMisResenyas(): Observable<Resenya[]> {
     return this.http.get<Resenya[]>(
-            `${this.baseUrl}/restaurantes/mis-resenyas`,
-            { withCredentials: true }
-        );
-    }
-    // obtenerResenyasDeRestaurante
-    obtenerResenyasDeRestaurante(idRestaurante: number): Observable<Resenya[]> {
-        return this.http.get<Resenya[]>(`${this.baseUrl}/restaurantes/${idRestaurante}/resenas`, { withCredentials: true });
-    }
-    enviarDenuncia(resenyaId: number): Observable<any> {
-        return this.http.post(`/api/resenyas/${resenyaId}/denunciar`, {});
-    }
+      `${this.baseUrl}/restaurantes/mis-resenyas`,
+      { withCredentials: true }
+    );
+  }
 
+  /**
+   * Versión redundante (puedes eliminar si no se usa)
+   */
+  obtenerResenyasDeRestaurante(idRestaurante: number): Observable<Resenya[]> {
+    return this.http.get<Resenya[]>(
+      `${this.baseUrl}/restaurantes/${idRestaurante}/resenas`,
+      { withCredentials: true }
+    );
+  }
 
+  /**
+   * Denunciar una reseña (visible para el administrador)
+   */
+  denunciar(id: number): Observable<any> {
+    return this.http.post(
+      `${this.baseUrl}/resenyas/${id}/denunciar`,
+      {},
+      { withCredentials: true }
+    );
+  }
+
+  /**
+   * Otra forma de denuncia (puedes unificar con `denunciar`)
+   */
+  enviarDenuncia(resenyaId: number): Observable<any> {
+    return this.http.post(
+      `${this.baseUrl}/resenyas/${resenyaId}/denunciar`,
+      {},
+      { withCredentials: true }
+    );
+  }
 }

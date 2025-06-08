@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -166,5 +167,13 @@ public class ResenyaService {
 
         // Aquí podrías guardarlo en una tabla de denuncias o enviar un correo real
     }
+    public Optional<Resenya> obtenerPorId(Long id) {
+        return resenyaRepository.findById(id);
+    }
+
+    public Resenya guardar(Resenya resenya) {
+        return resenyaRepository.save(resenya);
+    }
+
 
 }

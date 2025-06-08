@@ -7,6 +7,7 @@ import com.example.demo.services.ResenyaService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 @RestController
@@ -115,15 +117,20 @@ public class ResenyaController {
             return ResponseEntity.notFound().build();
         }
     }
-    @PostMapping("/resenyas/{id}/denunciar")
     @PreAuthorize("hasRole('RESTAURANTE')")
+    @PostMapping("/resenyas/{id}/denunciar")
     public ResponseEntity<?> denunciarResenya(@PathVariable Long id) {
-        try {
-            resenyaService.enviarDenunciaAlAdmin(id); // este método deberás implementarlo
-            return ResponseEntity.ok(Map.of("mensaje", "Denuncia enviada con éxito"));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "No se pudo enviar la denuncia"));
+        Optional<Resenya> optional = resenyaService.obtenerPorId(id);
+        if (optional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Reseña no encontrada"));
         }
+
+        Resenya resenya = optional.get();
+        resenya.setDenunciado(true);
+        resenyaService.guardar(resenya); // guardar actualiza
+
+        return ResponseEntity.ok(Map.of("message", "La reseña ha sido denunciada correctamente"));
     }
+
 
 }

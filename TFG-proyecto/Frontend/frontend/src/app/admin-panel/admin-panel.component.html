@@ -1,0 +1,37 @@
+<div class="admin-container">
+  <h1>Panel de Administración 🛠️</h1>
+
+  <!-- DENUNCIAS -->
+  <section>
+    <h2>📣 Denuncias de Comentarios</h2>
+    <div *ngIf="denuncias.length === 0">No hay denuncias pendientes.</div>
+    <div *ngFor="let denuncia of denuncias" class="admin-card">
+      <p><strong>Comentario:</strong> "{{ denuncia.contenido }}"</p>
+      <p><strong>Restaurante:</strong> {{ denuncia.restaurante.nombre }}</p>
+      <button (click)="aceptarDenuncia(denuncia.id)">✅ Aceptar</button>
+      <button (click)="rechazarDenuncia(denuncia.id)">❌ Rechazar</button>
+    </div>
+  </section>
+
+  <!-- BAJAS RESTAURANTES -->
+  <section>
+    <h2>🔻 Peticiones de Baja de Restaurantes</h2>
+    <div *ngIf="bajasRestaurantes.length === 0">No hay peticiones de baja de restaurantes.</div>
+    <div *ngFor="let r of bajasRestaurantes" class="admin-card">
+      <p><strong>Restaurante:</strong> {{ r.nombre }}</p>
+      <p><strong>Email:</strong> {{ r.email }}</p>
+      <button (click)="eliminarRestaurante(r.id)">🗑️ Eliminar Restaurante</button>
+    </div>
+  </section>
+
+  <!-- BAJAS USUARIOS -->
+  <section>
+    <h2>🚫 Peticiones de Baja de Usuarios</h2>
+    <div *ngIf="bajasUsuarios.length === 0">No hay peticiones de baja de usuarios.</div>
+    <div *ngFor="let u of bajasUsuarios" class="admin-card">
+      <p><strong>Usuario:</strong> {{ u.nombre }} {{ u.apellidos }}</p>
+      <p><strong>Email:</strong> {{ u.email }}</p>
+      <button (click)="eliminarUsuario(u.id)">🗑️ Eliminar Usuario</button>
+    </div>
+  </section>
+</div>

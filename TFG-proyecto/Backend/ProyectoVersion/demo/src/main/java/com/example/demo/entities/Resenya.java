@@ -21,6 +21,8 @@ public class Resenya {
     private Long id;
 
     private String contenido;
+    @Column
+    private boolean denunciado = false;
 
     @NotNull(message = "La valoración es obligatoria.")
     @Min(value = 1, message = "La valoración mínima es 1.")

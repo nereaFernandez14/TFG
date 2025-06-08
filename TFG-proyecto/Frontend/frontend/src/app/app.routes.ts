@@ -4,7 +4,7 @@ import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { HeaderComponent } from './header/header.component';
-import { AdminComponent } from './Admin/admin.component';
+import { AdminPanelComponent } from './admin-panel/admin-panel-component';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { AuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
@@ -12,6 +12,7 @@ import { RedirectIfAuthenticatedGuard } from './guards/redirect-if-authenticated
 import { RestauranteComponent } from './restaurante/restaurante.component';
 import { redirectRestauranteGuard } from './guards/redirect-restaurante.guard';
 import { MisResenyasComponent } from './mis-resenyas/mis-resenyas.component';
+import { AdminGuard } from './guards/admin.guard';
 
 
 export const routes: Routes = [
@@ -32,10 +33,9 @@ export const routes: Routes = [
     canActivate: [redirectRestauranteGuard]
   },
   {
-    path: 'admin',
-    component: AdminComponent,
-    canActivate: [AuthGuard, RoleGuard],
-    data: { rol: 'admin' }
+    path: 'admin-panel',
+    loadComponent: () => import('./admin-panel/admin-panel-component').then(m => m.AdminPanelComponent),
+    canActivate: [AdminGuard] 
   },
   {
     path: 'profile',

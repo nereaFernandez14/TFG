@@ -49,6 +49,9 @@ public class Restaurante {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RangoPrecio rangoPrecio;
+    @Column(nullable = false)
+    private boolean solicitaBaja = false;
+
 
     @ElementCollection(targetClass = RestriccionDietetica.class)
     @Enumerated(EnumType.STRING)

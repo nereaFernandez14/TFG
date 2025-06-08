@@ -56,38 +56,37 @@ export class LoginComponent {
 
   private hacerLogin(username: string, password: string): void {
     this.authService.login(username, password).pipe(
-      switchMap(() => this.authService.verificarSesion()),
       switchMap((respuesta) => {
-        const rol = (respuesta?.rol ?? respuesta?.role ?? '').toUpperCase();
-        const usuario = this.authService.obtenerUsuario();
+      const rol = (respuesta?.rol ?? respuesta?.role ?? '').toUpperCase();
+      const usuario = this.authService.obtenerUsuario();
 
-        if (!rol || !usuario?.id) {
-          this.error = 'No se pudo determinar el rol o el ID del usuario.';
-          return throwError(() => new Error('Rol o usuario no disponible'));
-        }
+      if (!rol || !usuario?.id) {
+        this.error = 'No se pudo determinar el rol o el ID del usuario.';
+        return throwError(() => new Error('Rol o usuario no disponible'));
+      }
 
-        if (rol === 'RESTAURANTE') {
-          return this.restauranteService.obtenerRestaurantePorUsuario(usuario.id).pipe(
-            tap((restaurante) => {
-              if (restaurante && restaurante.id) {
-                this.router.navigate(['/dashboard']);
-              } else {
-                this.router.navigate(['/restaurantes/crear']);
-              }
-            })
-          );
-        }
+      this.authService.actualizarRol(rol); // ✅ MUY IMPORTANTE
 
-        if (rol === 'ADMIN') {
-          this.router.navigate(['/admin']);
-          return of(null);
-        }
+      if (rol === 'RESTAURANTE') {
+        return this.restauranteService.obtenerRestaurantePorUsuario(usuario.id).pipe(
+          tap((restaurante) => {
+            if (restaurante && restaurante.id) {
+              this.router.navigate(['/dashboard']);
+            } else {
+              this.router.navigate(['/restaurantes/crear']);
+            }
+          })
+        );
+      }
 
-        // Default: usuario normal
-        this.router.navigate(['/home']);
+      if (rol === 'ADMIN') {
+        this.router.navigate(['/admin-panel']);
         return of(null);
-      })
-    ).subscribe({
+      }
+      this.router.navigate(['/home']);
+      return of(null);
+    })
+      ).subscribe({
       error: (err) => {
         console.error('❌ Error al iniciar sesión:', err);
         this.error = 'Error al iniciar sesión';

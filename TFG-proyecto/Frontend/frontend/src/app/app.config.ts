@@ -9,7 +9,7 @@ import {
 import { LoginComponent } from './login/login.component';
 import { HomeComponent } from './home/home.component';
 import { HeaderComponent } from './header/header.component';
-import { AdminComponent } from './Admin/admin.component';
+import { AdminPanelComponent } from './admin-panel/admin-panel-component';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { RegisterComponent } from './register/register.component';
 
@@ -19,6 +19,7 @@ import { RedirectIfAuthenticatedGuard } from './guards/redirect-if-authenticated
 import { ChangePasswordComponent } from './change-password/change-password.component';
 import { redirectRestauranteGuard } from './guards/redirect-restaurante.guard';
 import { MisResenyasComponent } from './mis-resenyas/mis-resenyas.component';
+import { AdminGuard } from './guards/admin.guard';
 
 
 
@@ -40,10 +41,9 @@ export const routes: Routes = [
     canActivate: [redirectRestauranteGuard]
   },
   {
-    path: 'admin',
-    component: AdminComponent,
-    canActivate: [AuthGuard, RoleGuard],
-    data: { rol: 'admin' }
+      path: 'admin-panel',
+      loadComponent: () => import('./admin-panel/admin-panel-component').then(m => m.AdminPanelComponent),
+      canActivate: [AdminGuard] 
   },
   {
     path: 'change-password',

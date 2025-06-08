@@ -47,7 +47,8 @@ public class SecurityConfig {
                                                                 "/restaurantes/**",
                                                                 "/resenyas/**",
                                                                 "/roles",
-                                                                "/change-password"))
+                                                                "/change-password",
+                                                                 "/admin/**"))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                .requestMatchers(
@@ -69,6 +70,7 @@ public class SecurityConfig {
 
                                                 .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO")
                                                 .requestMatchers(HttpMethod.POST, "/restaurantes/subir-menu").hasRole("RESTAURANTE")
+                                                .requestMatchers("/admin/**").hasRole("ADMIN")
                                                 .anyRequest().authenticated())
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
