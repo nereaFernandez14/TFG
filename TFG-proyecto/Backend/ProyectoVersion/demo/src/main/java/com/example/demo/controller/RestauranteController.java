@@ -194,6 +194,16 @@ public class RestauranteController {
 
         return ResponseEntity.ok(restaurante.getResenyas());
     }
+    @PreAuthorize("hasRole('RESTAURANTE')")
+    @PostMapping("/{idUsuario}/solicitar-baja")
+    public ResponseEntity<?> solicitarBaja(@PathVariable Long idUsuario) {
+        Restaurante restaurante = restauranteService.obtenerRestaurantePorUsuario(idUsuario);
+        if (restaurante == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Restaurante no encontrado");
+        }
 
-
+        restaurante.setSolicitaBaja(true);
+        restauranteService.guardar(restaurante);
+        return ResponseEntity.ok().build();
+    }
 }

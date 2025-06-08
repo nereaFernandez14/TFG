@@ -1,41 +1,43 @@
-/* src/app/dashboard/dashboard.component.css */
 .dashboard-container {
   padding: 2rem;
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
-  color: #333;
+  color: #2c3e50;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 h2 {
   text-align: center;
   margin-bottom: 2rem;
-  font-size: 2.2rem;
-  color: #004d40;
+  font-size: 2.4rem;
+  color: #1a237e;
+  font-weight: 600;
 }
 
-/* Fila personalizada */
 .cards-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 2rem;
-  margin-bottom: 2rem;
+  gap: 1.5rem;
   justify-content: center;
+  margin-bottom: 2rem;
 }
 
-/* Base Card */
+/* Base Card Compacto */
 .card {
-  flex: 1 1 260px;
-  min-width: 260px;
-  max-width: 300px;
-  height: 160px;
+  flex: 1 1 240px;
+  min-width: 220px;
+  max-width: 280px;
+  min-height: 130px;
 
-  background-color: #fff;
+  background: #ffffff;
   border-radius: 12px;
-  padding: 1.6rem;
+  padding: 1.2rem;
   text-align: center;
 
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+  border: 1px solid #e0e0e0;
+
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -43,35 +45,64 @@ h2 {
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
 .card h3 {
-  font-size: 1.2rem;
-  color: #00796b;
-  margin-bottom: 0.6rem;
+  font-size: 1.1rem;
+  color: #1565c0;
+  margin-bottom: 0.4rem;
 }
 
 .card p {
-  font-size: 1.6rem;
-  font-weight: bold;
-  color: #222;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #37474f;
 }
 
-/* Acciones clicables */
+/* Acciones */
 .link-card {
-  background-color: #e0f7fa;
-  border-left: 4px solid #00acc1;
+  background-color: #e3f2fd;
+  border-left: 4px solid #2196f3;
   text-decoration: none;
   cursor: pointer;
 }
 
 .link-card:hover {
-  background-color: #b2ebf2;
+  background-color: #bbdefb;
 }
 
-/* Informativas */
 .info-card {
-  background-color: #ffffff;
+  background-color: #fefefe;
+}
+
+/* Danger Card (dar de baja) */
+.danger-card {
+  background-color: #ffebee;
+  border-left: 4px solid #c62828;
+  color: #b71c1c;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 1.2rem 1.5rem;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  width: 100%;
+  max-width: 280px;
+  text-align: center;
+  border: 1px solid #ffcdd2;
+}
+
+.danger-card:hover {
+  background-color: #ffcdd2;
+  transform: scale(1.02);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .card {
+    min-width: 95%;
+    height: auto;
+  }
 }

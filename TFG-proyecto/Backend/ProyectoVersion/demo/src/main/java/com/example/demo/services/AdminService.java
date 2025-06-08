@@ -39,9 +39,11 @@ public class AdminService {
     }
 
     public void eliminarRestaurante(Long id) {
-        restauranteRepository.deleteById(id);
+        Restaurante restaurante = restauranteRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Restaurante no encontrado"));
+        restauranteRepository.delete(restaurante);
     }
-
+    
     public List<Usuario> obtenerUsuariosParaBaja() {
         return usuarioRepository.findBySolicitaBajaTrue();
     }

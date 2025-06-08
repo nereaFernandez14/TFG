@@ -29,4 +29,22 @@ export class DashboardComponent implements OnInit {
       });
     }
   }
+  pedirBajaRestaurante() {
+    const confirmado = confirm('¿Estás seguro de que deseas solicitar la baja del restaurante?');
+    if (!confirmado) return;
+
+    const usuario = this.authService.obtenerUsuario();
+    if (!usuario?.id) return;
+
+    this.dashboardService.solicitarBaja(usuario.id).subscribe({
+      next: () => alert('Solicitud de baja enviada al administrador ✅'),
+      error: (err) => {
+        console.error('❌ Error solicitando baja', err);
+        alert('Ocurrió un error al solicitar la baja.');
+      }
+    });
+  }
+
+
+  
 }

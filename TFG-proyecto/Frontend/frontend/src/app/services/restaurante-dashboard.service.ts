@@ -30,5 +30,9 @@ export class RestauranteDashboardService {
       { withCredentials: true }
     );
   }
-
+  solicitarBaja(idUsuario: number): Observable<any> {
+    return this.http.post(`/api/restaurantes/${idUsuario}/solicitar-baja`, {}, {
+      withCredentials: true
+    });
+  }
 }
