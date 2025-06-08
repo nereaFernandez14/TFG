@@ -1,4 +1,3 @@
-/* 🔲 Contenedor general */
 .perfil-wrapper {
   padding: 3rem 1rem;
   background-color: #f9f9f2;
@@ -19,7 +18,7 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
-/* 🧑 Perfil encabezado */
+/* 👤 Usuario */
 .perfil-card {
   border-bottom: 1px solid #e6e6e6;
   padding-bottom: 1.5rem;
@@ -44,57 +43,60 @@
   margin: 0;
 }
 
-/* 📨 Información del perfil */
 .perfil-info p {
   margin: 0.4rem 0;
   font-size: 1rem;
   color: #444;
-  display: flex;
-  align-items: center;
 }
 
 .perfil-info strong {
   color: #222;
 }
 
-.icon-inline {
-  margin-right: 0.5rem;
-  color: #555;
-}
-
-/* 🔽 Subida de menú */
-.menu-upload-wrapper {
-  display: flex;
-  justify-content: flex-start;
-}
-
-.menu-upload-section {
-  background-color: #eefaf3;
-  padding: 1.5rem 2rem;
-  border-left: 5px solid #28a745;
+/* 🍽️ Restaurante */
+.restaurante-info-section {
+  background-color: #e3f2fd;
+  padding: 1.5rem;
+  border-left: 5px solid #0d6efd;
   border-radius: 10px;
-  width: 100%;
-  max-width: 500px;
   margin-bottom: 2rem;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+}
+
+.restaurante-info-section h3 {
+  margin-bottom: 1rem;
+  color: #0d47a1;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.restaurante-grid p {
+  margin: 0.3rem 0;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+/* 📁 Subida de menú */
+.menu-upload-section {
+  background-color: #f1f8f4;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 2rem;
 }
 
 .menu-upload-section h3 {
-  font-size: 1.2rem;
-  color: #2e7d32;
   margin-bottom: 1rem;
+  color: #1b5e20;
   display: flex;
   align-items: center;
-}
-
-.menu-upload-section h3 i {
-  margin-right: 0.5rem;
+  gap: 0.5rem;
 }
 
 .menu-upload-section form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .menu-upload-section input[type="file"] {
@@ -112,95 +114,27 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: bold;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-}
-
-.menu-upload-section button i {
-  margin-right: 0.5rem;
 }
 
 .menu-upload-section button:hover {
   background-color: #218838;
 }
 
-.menu-upload-section p {
-  font-size: 0.9rem;
-  color: #333;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-/* 🔐 Botones de acción */
-.perfil-actions {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 1.5rem;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.perfil-actions button {
-  padding: 10px 22px;
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  display: flex;
-  align-items: center;
-}
-
-.perfil-actions button i {
-  margin-right: 0.5rem;
-}
-
-.perfil-actions button:hover {
-  background-color: #0056b3;
-}
-
-/* ✅ Botón rojo personalizado */
-.perfil-actions .baja-btn {
-  background-color: #dc3545 !important;
-  color: #fff;
-  padding: 10px 22px;
-  border: none;
-  border-radius: 6px;
-  font-weight: bold;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.perfil-actions .baja-btn:hover {
-  background-color: #b02a37 !important;
-}
-
-.perfil-actions .baja-btn i {
-  margin-right: 0.5rem;
-}
-
-
-/* 🌱 Preferencias para USUARIO (opcional) */
+/* 🌱 Preferencias dietéticas */
 .extra-section {
   background-color: #fffbea;
   padding: 1.5rem;
   border-radius: 10px;
+  margin-bottom: 2rem;
 }
 
 .extra-section h3 {
-  margin-top: 0;
   font-size: 1.3rem;
-  margin-bottom: 0.8rem;
   color: #444;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .extra-section label {
@@ -214,7 +148,6 @@
   border: 1px solid #ccc;
   border-radius: 6px;
   padding: 10px;
-  font-family: inherit;
   resize: vertical;
 }
 
@@ -226,40 +159,110 @@
   padding: 10px 16px;
   border-radius: 6px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-}
-
-.extra-section button i {
-  margin-right: 0.5rem;
 }
 
 .extra-section button:hover {
   background-color: #ff8f00;
 }
 
-/* 📱 Responsive */
-@media (max-width: 600px) {
-  .perfil-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+/* ⚙️ Acciones */
+.perfil-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
 
-  .perfil-header h2 {
-    font-size: 1.5rem;
-  }
+.perfil-actions button {
+  padding: 10px 22px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
 
-  .perfil-actions {
-    flex-direction: column;
-    align-items: center;
-  }
+.perfil-actions button:hover {
+  background-color: #0056b3;
+}
 
-  .perfil-actions button {
-    width: 100%;
-    justify-content: center;
-  }
+.baja-btn {
+  background-color: #dc3545 !important;
+  color: white;
+}
 
-  .menu-upload-wrapper {
-    justify-content: center;
-  }
+.baja-btn:hover {
+  background-color: #c82333 !important;
+}
+.uploads-section {
+  background-color: #f4f6f8;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+}
+
+.uploads-section h3 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.uploads-grid {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.upload-card {
+  flex: 1 1 45%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.upload-card label {
+  font-weight: 600;
+  color: #444;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.upload-card input[type="file"] {
+  border: 1px dashed #bbb;
+  padding: 10px;
+  border-radius: 6px;
+  background-color: #fefefe;
+  cursor: pointer;
+}
+
+.upload-card button {
+  background-color: #28a745;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.upload-card button:hover {
+  background-color: #218838;
+}
+
+.upload-card p {
+  font-size: 0.85rem;
+  color: #555;
+  margin: 0;
+  word-break: break-all;
 }

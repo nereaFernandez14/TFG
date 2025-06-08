@@ -1,6 +1,6 @@
 <!-- 🎯 BANNER ORIGINAL -->
 <section class="banner">
-  <h1>Encuentra tu próximo favorito 🍽️</h1>
+  <h1><i class="fas fa-star"></i> Encuentra tu próximo favorito</h1>
 
   <div class="search-bar">
     <input
@@ -8,11 +8,12 @@
       placeholder="Buscar por nombre..."
       [(ngModel)]="searchQuery"
     />
-    <button (click)="buscar()">Buscar</button>
+    <button (click)="buscar()"><i class="fas fa-search"></i> Buscar</button>
   </div>
 
   <!-- 🔽 NUEVA BARRA DE FILTROS -->
   <div class="filtros-bar">
+
     <!-- 🔁 Tipo de cocina -->
     <select [(ngModel)]="filtros.tipoCocina" (change)="buscar()">
       <option value="">Tipo de cocina</option>
@@ -34,7 +35,7 @@
     <!-- 🔽 Dropdown de restricciones dietéticas -->
     <div class="dropdown-wrapper">
       <button class="dropdown-toggle" (click)="toggleRestricciones()">
-        Restricciones Dietéticas
+         Restricciones Dietéticas
         <span [class.open]="restriccionesAbierto">▼</span>
       </button>
 
@@ -52,45 +53,42 @@
         </div>
       </div>
     </div>
-
-    <!-- ❌ Botón eliminado porque ya todo es automático -->
-    <!-- <button class="btn-filtrar" (click)="buscar()">Aplicar filtros</button> -->
   </div>
 </section>
 
-<!-- 🎯 Restaurantes destacados si no hay búsqueda -->
+<!-- ⭐ DESTACADOS -->
 <div *ngIf="!busquedaRealizada" class="resultados-container">
-  <h2>Destacados de la semana</h2>
+  <h2><i class="fas fa-fire"></i> Destacados de la semana</h2>
 
   <div *ngFor="let destacado of destacados" class="restaurante-card">
-    <h3>{{ destacado.nombre }}</h3>
+    <h3><i class="fas fa-store-alt"></i> {{ destacado.nombre }}</h3>
     <p>{{ destacado.descripcion }}</p>
   </div>
 </div>
 
-<!-- 🧾 Resultados -->
+<!-- 📋 RESULTADOS -->
 <div *ngIf="restaurantes.length > 0" class="resultados-container">
-  <h2>Restaurantes encontrados</h2>
+  <h2><i class="fas fa-utensils"></i> Restaurantes encontrados</h2>
 
   <div
     *ngFor="let restaurante of restaurantes"
     class="restaurante-card clickable"
     (click)="verPerfil(restaurante.id!)"
   >
-    <h3>{{ restaurante.nombre }}</h3>
-    <p>{{ restaurante.descripcion || 'Sin descripción disponible' }}</p>
-    <p><strong>Dirección:</strong> {{ restaurante.direccion }}</p>
-    <p><strong>Teléfono:</strong> {{ restaurante.telefono }}</p>
+    <h3><i class="fas fa-store"></i> {{ restaurante.nombre }}</h3>
+    <p><i class="fas fa-info-circle"></i> {{ restaurante.descripcion || 'Sin descripción disponible' }}</p>
+    <p><i class="fas fa-map-marker-alt"></i> <strong>Dirección:</strong> {{ restaurante.direccion }}</p>
+    <p><i class="fas fa-phone"></i> <strong>Teléfono:</strong> {{ restaurante.telefono }}</p>
 
     <div class="etiquetas">
-      <span class="etiqueta">{{ restaurante.tipoCocina }}</span>
-      <span class="etiqueta">{{ restaurante.barrio }}</span>
-      <span class="etiqueta">{{ restaurante.rangoPrecio }}</span>
+      <span class="etiqueta"><i class="fas fa-utensils"></i> {{ restaurante.tipoCocina }}</span>
+      <span class="etiqueta"><i class="fas fa-city"></i> {{ restaurante.barrio }}</span>
+      <span class="etiqueta"><i class="fas fa-euro-sign"></i> {{ restaurante.rangoPrecio }}</span>
       <span
         *ngFor="let restriccion of restaurante.restriccionesDieteticas"
         class="etiqueta"
       >
-        {{ restriccion }}
+        <i class="fas fa-leaf"></i> {{ restriccion }}
       </span>
     </div>
   </div>

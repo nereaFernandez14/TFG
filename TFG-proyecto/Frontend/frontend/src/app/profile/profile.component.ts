@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UsuarioService, Usuario } from '../services/usuario.service';
 import { Router } from '@angular/router';
+import { Restaurante } from '../models/restaurante.model';
+import { RestauranteService } from '../services/restaurante.service';
 
 @Component({
   selector: 'app-profile',
@@ -12,20 +14,35 @@ import { Router } from '@angular/router';
 })
 export class ProfileComponent implements OnInit {
   usuario: Usuario | null = null;
+  restaurante: Restaurante | null = null;
   archivoSeleccionado: File | null = null;
   nombreArchivo: string = '';
+  imagenesSeleccionadas: File[] = [];
+  nombresImagenes: string[] = [];
 
   constructor(
     private usuarioService: UsuarioService,
+    private restauranteService: RestauranteService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    console.log('✅ ProfileComponent cargado');
     this.usuarioService.obtenerPerfil().subscribe({
       next: (data) => {
-        console.log('📦 Datos del perfil recibidos', data);
         this.usuario = data;
+
+        // ✅ Cargar datos del restaurante si aplica
+        if (this.usuario.rol === 'RESTAURANTE') {
+          this.restauranteService.obtenerRestaurantePorUsuario(this.usuario.id).subscribe({
+            next: (restaurante) => {
+              this.restaurante = restaurante;
+            },
+            error: (err) => {
+              console.error('❌ Error al cargar restaurante', err);
+              this.restaurante = null;
+            }
+          });
+        }
       },
       error: (err) => console.error('❌ Error al obtener perfil:', err)
     });
@@ -98,5 +115,38 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
+
+  onImagenesSeleccionadas(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.imagenesSeleccionadas = Array.from(input.files);
+      this.nombresImagenes = this.imagenesSeleccionadas.map(file => file.name);
+    }
+  }
+
+  subirImagenes(event: Event): void {
+    event.preventDefault();
+    if (!this.usuario || this.imagenesSeleccionadas.length === 0) return;
+
+    const formData = new FormData();
+    this.imagenesSeleccionadas.forEach(file => {
+      formData.append('imagenes', file);
+    });
+    formData.append('email', this.usuario.email); // Puedes usar ID si lo prefieres
+
+    // Aquí deberías tener un método en tu servicio que haga el POST
+    this.usuarioService.subirImagenes(formData).subscribe({
+      next: () => {
+        alert('✅ Imágenes subidas correctamente');
+        this.nombresImagenes = [];
+        this.imagenesSeleccionadas = [];
+      },
+      error: (err) => {
+        console.error('❌ Error al subir imágenes', err);
+        alert('Ocurrió un error al subir las imágenes');
+      }
+    });
+  }
+
 
 }

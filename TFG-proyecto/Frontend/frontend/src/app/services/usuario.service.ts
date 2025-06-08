@@ -107,6 +107,11 @@ export class UsuarioService {
     });
 
   }
+  subirImagenes(formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/usuarios/subir-imagenes`, formData, {
+      withCredentials: true
+    });
+  }
 
 }
 export { Usuario };

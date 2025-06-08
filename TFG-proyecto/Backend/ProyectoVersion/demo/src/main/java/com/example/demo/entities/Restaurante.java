@@ -51,6 +51,11 @@ public class Restaurante {
     private RangoPrecio rangoPrecio;
     @Column(nullable = false)
     private boolean solicitaBaja = false;
+    @ElementCollection
+    @CollectionTable(name = "restaurante_imagenes", joinColumns = @JoinColumn(name = "restaurante_id"))
+    @Column(name = "nombre_imagen")
+    private List<String> imagenes = new ArrayList<>();
+
 
 
     @ElementCollection(targetClass = RestriccionDietetica.class)

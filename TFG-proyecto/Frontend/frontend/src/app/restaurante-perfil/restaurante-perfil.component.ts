@@ -19,7 +19,7 @@ export class RestaurantePerfilComponent implements OnInit {
   resenas: any[] = [];
   mostrarFormularioResena: boolean = false;
   modalAbierto: boolean = false;
-
+  imagenActual: number = 0;
   menuSanitizado: SafeResourceUrl | null = null;
 
   constructor(
@@ -66,4 +66,17 @@ export class RestaurantePerfilComponent implements OnInit {
   obtenerNombreArchivo(ruta: string): string {
     return ruta.split(/[/\\]/).pop() || '';
   }
+  
+  anteriorImagen() {
+    if (this.restaurante?.imagenes?.length) {
+      this.imagenActual = (this.imagenActual - 1 + this.restaurante.imagenes.length) % this.restaurante.imagenes.length;
+    }
+  }
+
+  siguienteImagen() {
+    if (this.restaurante?.imagenes?.length) {
+      this.imagenActual = (this.imagenActual + 1) % this.restaurante.imagenes.length;
+    }
+  }
+
 }
