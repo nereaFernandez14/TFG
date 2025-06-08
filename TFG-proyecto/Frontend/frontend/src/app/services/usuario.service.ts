@@ -101,6 +101,12 @@ export class UsuarioService {
       withCredentials: true
     });
   }
+  solicitarBaja(id: number) {
+    return this.http.post(`${this.apiUrl}/usuarios/${id}/solicitar-baja`, {}, {
+      withCredentials: true
+    });
+
+  }
 
 }
 export { Usuario };

@@ -48,6 +48,8 @@ public class SecurityConfig {
                                                                 "/resenyas/**",
                                                                 "/roles",
                                                                 "/change-password",
+                                                                "/usuarios/*/solicitar-baja",     // cuando el proxy lo reescribe
+                                                                "/api/usuarios/*/solicitar-baja",
                                                                  "/admin/**"))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

@@ -1,3 +1,4 @@
+/* 🔲 Contenedor general */
 .perfil-wrapper {
   padding: 3rem 1rem;
   background-color: #f9f9f2;
@@ -18,6 +19,7 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
+/* 🧑 Perfil encabezado */
 .perfil-card {
   border-bottom: 1px solid #e6e6e6;
   padding-bottom: 1.5rem;
@@ -42,55 +44,57 @@
   margin: 0;
 }
 
+/* 📨 Información del perfil */
 .perfil-info p {
   margin: 0.4rem 0;
   font-size: 1rem;
   color: #444;
+  display: flex;
+  align-items: center;
 }
 
 .perfil-info strong {
   color: #222;
 }
 
-.perfil-actions {
+.icon-inline {
+  margin-right: 0.5rem;
+  color: #555;
+}
+
+/* 🔽 Subida de menú */
+.menu-upload-wrapper {
   display: flex;
-  justify-content: center;
-  margin-bottom: 2rem;
+  justify-content: flex-start;
 }
 
-.perfil-actions button {
-  padding: 10px 22px;
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-.perfil-actions button:hover {
-  background-color: #0056b3;
-}
-
-/* 📁 Subida de menú para restaurantes */
 .menu-upload-section {
-  background-color: #f1f8f4;
-  padding: 1.5rem;
+  background-color: #eefaf3;
+  padding: 1.5rem 2rem;
+  border-left: 5px solid #28a745;
   border-radius: 10px;
+  width: 100%;
+  max-width: 500px;
   margin-bottom: 2rem;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
 }
 
 .menu-upload-section h3 {
-  margin-top: 0;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
+  color: #2e7d32;
   margin-bottom: 1rem;
-  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.menu-upload-section h3 i {
+  margin-right: 0.5rem;
 }
 
 .menu-upload-section form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .menu-upload-section input[type="file"] {
@@ -108,17 +112,84 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  font-weight: bold;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
 }
+
+.menu-upload-section button i {
+  margin-right: 0.5rem;
+}
+
 .menu-upload-section button:hover {
   background-color: #218838;
 }
 
 .menu-upload-section p {
   font-size: 0.9rem;
-  color: #555;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-/* 🌱 Preferencias para usuarios */
+/* 🔐 Botones de acción */
+.perfil-actions {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.perfil-actions button {
+  padding: 10px 22px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.perfil-actions button i {
+  margin-right: 0.5rem;
+}
+
+.perfil-actions button:hover {
+  background-color: #0056b3;
+}
+
+/* ✅ Botón rojo personalizado */
+.perfil-actions .baja-btn {
+  background-color: #dc3545 !important;
+  color: #fff;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.perfil-actions .baja-btn:hover {
+  background-color: #b02a37 !important;
+}
+
+.perfil-actions .baja-btn i {
+  margin-right: 0.5rem;
+}
+
+
+/* 🌱 Preferencias para USUARIO (opcional) */
 .extra-section {
   background-color: #fffbea;
   padding: 1.5rem;
@@ -155,7 +226,14 @@
   padding: 10px 16px;
   border-radius: 6px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
 }
+
+.extra-section button i {
+  margin-right: 0.5rem;
+}
+
 .extra-section button:hover {
   background-color: #ff8f00;
 }
@@ -178,5 +256,10 @@
 
   .perfil-actions button {
     width: 100%;
+    justify-content: center;
+  }
+
+  .menu-upload-wrapper {
+    justify-content: center;
   }
 }

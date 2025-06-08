@@ -51,4 +51,12 @@ public class AdminService {
     public void eliminarUsuario(Long id) {
         usuarioRepository.deleteById(id);
     }
+    public Usuario obtenerUsuarioPorId(Long id) {
+        return usuarioRepository.findById(id).orElse(null);
+    }
+
+    public void guardarUsuario(Usuario usuario) {
+        usuarioRepository.save(usuario);
+    }
+
 }

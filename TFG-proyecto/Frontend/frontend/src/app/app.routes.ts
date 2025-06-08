@@ -13,6 +13,7 @@ import { RestauranteComponent } from './restaurante/restaurante.component';
 import { redirectRestauranteGuard } from './guards/redirect-restaurante.guard';
 import { MisResenyasComponent } from './mis-resenyas/mis-resenyas.component';
 import { AdminGuard } from './guards/admin.guard';
+import { redirectAdminGuard } from './guards/redirectAdminGuard';
 
 
 export const routes: Routes = [
@@ -30,7 +31,7 @@ export const routes: Routes = [
   {
     path: 'home',
     component: HomeComponent,
-    canActivate: [redirectRestauranteGuard]
+    canActivate: [redirectRestauranteGuard, redirectAdminGuard]
   },
   {
     path: 'admin-panel',

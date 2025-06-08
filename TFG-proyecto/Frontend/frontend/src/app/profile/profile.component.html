@@ -1,17 +1,16 @@
 <div class="perfil-wrapper">
-
-  <!-- Contenido principal del perfil -->
   <section class="perfil-contenido">
     <div class="perfil-container">
+
+      <!-- 🧑 Perfil -->
       <div class="perfil-card">
         <div class="perfil-header">
           <i class="fas fa-user-circle perfil-icon"></i>
           <h2>{{ usuario?.nombre }} {{ usuario?.apellidos }}</h2>
         </div>
-
         <div class="perfil-info">
-          <p><strong>Email:</strong> {{ usuario?.email }}</p>
-          <p><strong>Rol:</strong>
+          <p><i class="fas fa-envelope icon-inline"></i> <strong>Email:</strong> {{ usuario?.email }}</p>
+          <p><i class="fas fa-user-tag icon-inline"></i> <strong>Rol:</strong>
             {{
               usuario?.rol === 'ADMIN' ? 'Administrador' :
               usuario?.rol === 'USUARIO' ? 'Usuario' :
@@ -22,33 +21,32 @@
         </div>
       </div>
 
-      <div class="perfil-actions">
-        <button type="button" (click)="irACambiarPassword()">Cambiar contraseña</button>
+      <!-- 🍽️ Sube tu menú (primero) -->
+      <div *ngIf="usuario?.rol === 'RESTAURANTE'" class="menu-upload-wrapper">
+        <div class="menu-upload-section">
+          <h3><i class="fas fa-utensils"></i> Subir Menú</h3>
+          <form (submit)="subirArchivo($event)">
+            <input type="file" accept=".pdf,image/*" (change)="onFileSelected($event)" required />
+            <button type="submit"><i class="fas fa-upload"></i> Subir archivo</button>
+            <p *ngIf="nombreArchivo">
+              <i class="fas fa-file-alt"></i> {{ nombreArchivo }}
+            </p>
+          </form>
+        </div>
       </div>
 
-      <!-- ✅ Sección para RESTAURANTE -->
-      <!--<div *ngIf="usuario?.rol === 'RESTAURANTE'" class="extra-section">
-        <p>¿Tienes un restaurante? ¡Añádelo ahora para empezar a recibir reseñas!</p>
-        <button type="button" (click)="irACrearRestaurante()">Añadir restaurante</button>
-      </div>-->
-      <!-- ✅ Sección para subir menú (solo restaurantes) -->
-      <div *ngIf="usuario?.rol === 'RESTAURANTE'" class="menu-upload-section">
-        <h3>Sube tu menú</h3>
-        <form (submit)="subirArchivo($event)">
-          <input type="file" accept=".pdf,image/*" (change)="onFileSelected($event)" required />
-          <button type="submit">Subir archivo</button>
-          <p *ngIf="nombreArchivo">Archivo seleccionado: {{ nombreArchivo }}</p>
-        </form>
+      <!-- 🔐 Botón cambiar contraseña -->
+      <div class="perfil-actions">
+        <button (click)="irACambiarPassword()">
+          <i class="fas fa-lock"></i> Cambiar contraseña
+        </button>
       </div>
-      <!-- ✅ Sección para USUARIO -->
-      <div *ngIf="usuario?.rol === 'USUARIO'" class="extra-section">
-        <h3>Preferencias dietéticas</h3>
-        <form>
-          <label for="restricciones">Indica tus alergias o restricciones:</label>
-          <textarea id="restricciones" rows="4" cols="50" placeholder="Ej: Sin gluten, vegano..."></textarea>
-          <br />
-          <button type="button">Guardar preferencias</button>
-        </form>
+
+      <!-- 🚫 Botón baja -->
+      <div *ngIf="usuario?.rol === 'USUARIO' || usuario?.rol === 'RESTAURANTE'" class="perfil-actions">
+        <button class="baja-btn" (click)="solicitarBaja()">
+          <i class="fas fa-user-slash"></i> Solicitar baja de {{ usuario?.rol?.toLowerCase() }}
+        </button>
       </div>
     </div>
   </section>

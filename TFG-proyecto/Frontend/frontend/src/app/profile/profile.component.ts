@@ -80,4 +80,23 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
+  solicitarBaja(): void {
+    if (!this.usuario) return;
+
+    const rol = this.usuario.rol?.toLowerCase();
+    const confirmar = confirm(`¿Seguro que deseas solicitar la baja de tu cuenta (${rol})? Será revisado por un administrador.`);
+    if (!confirmar) return;
+
+    this.usuarioService.solicitarBaja(this.usuario.id!).subscribe({
+      next: () => {
+        alert(`✅ Solicitud de baja como ${rol} enviada correctamente.`);
+        this.usuario!.solicitaBaja = true;
+      },
+      error: (err) => {
+        console.error('❌ Error al solicitar baja', err);
+        alert('Ocurrió un error al enviar la solicitud ❌');
+      }
+    });
+  }
+
 }

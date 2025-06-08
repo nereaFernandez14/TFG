@@ -14,7 +14,11 @@ export class AdminPanelComponent implements OnInit {
   denuncias: any[] = [];
   bajasRestaurantes: any[] = [];
   bajasUsuarios: any[] = [];
-
+  seccionesAbiertas = {
+    denuncias: true,
+    restaurantes: false,
+    usuarios: false
+  };
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
@@ -61,4 +65,16 @@ export class AdminPanelComponent implements OnInit {
       this.bajasUsuarios = this.bajasUsuarios.filter(u => u.id !== id);
     });
   }
+  rechazarBajaUsuario(id: number) {
+    this.http.post(`/api/admin/usuarios/${id}/rechazar-baja`, {}, { withCredentials: true }).subscribe(() => {
+      alert('❌ Solicitud de baja rechazada');
+      this.bajasUsuarios = this.bajasUsuarios.filter(u => u.id !== id);
+    });
+  }
+  
+  toggleSeccion(seccion: 'denuncias' | 'restaurantes' | 'usuarios') {
+    this.seccionesAbiertas[seccion] = !this.seccionesAbiertas[seccion];
+  }
+
+
 }

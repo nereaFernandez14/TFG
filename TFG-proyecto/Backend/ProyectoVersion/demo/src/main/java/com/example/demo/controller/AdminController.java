@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import com.example.demo.repositories.UsuarioRepository;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
+    private final UsuarioRepository usuarioRepository;
 
     // 🗣 Obtener denuncias
     @GetMapping("/denuncias")
@@ -62,6 +64,17 @@ public class AdminController {
     @DeleteMapping("/usuarios/{id}")
     public ResponseEntity<?> eliminarUsuario(@PathVariable Long id) {
         adminService.eliminarUsuario(id);
+        return ResponseEntity.ok().build();
+    }
+    @PostMapping("/usuarios/{id}/rechazar-baja")
+    public ResponseEntity<?> rechazarSolicitudBaja(@PathVariable Long id) {
+        Usuario usuario = adminService.obtenerUsuarioPorId(id);
+        if (usuario == null) {
+            return ResponseEntity.status(404).body("Usuario no encontrado");
+        }
+
+        usuario.setSolicitaBaja(false);
+        adminService.guardarUsuario(usuario);
         return ResponseEntity.ok().build();
     }
 }
