@@ -4,6 +4,7 @@ import { UsuarioService, Usuario } from '../services/usuario.service';
 import { Router } from '@angular/router';
 import { Restaurante } from '../models/restaurante.model';
 import { RestauranteService } from '../services/restaurante.service';
+import { RestriccionDietetica } from '../models/enums/restriccion-dietetica.enum';
 
 @Component({
   selector: 'app-profile',
@@ -20,6 +21,9 @@ export class ProfileComponent implements OnInit {
   imagenesSeleccionadas: File[] = [];
   nombresImagenes: string[] = [];
 
+  restriccionesEnum = Object.values(RestriccionDietetica);
+  restriccionesSeleccionadas: string[] = [];
+
   constructor(
     private usuarioService: UsuarioService,
     private restauranteService: RestauranteService,
@@ -31,7 +35,9 @@ export class ProfileComponent implements OnInit {
       next: (data) => {
         this.usuario = data;
 
-        // ✅ Cargar datos del restaurante si aplica
+        // Si decides añadir el atributo restricciones al usuario, aquí puedes cargarlo
+        // this.restriccionesSeleccionadas = data.restricciones || [];
+
         if (this.usuario.rol === 'RESTAURANTE') {
           this.restauranteService.obtenerRestaurantePorUsuario(this.usuario.id).subscribe({
             next: (restaurante) => {
@@ -48,6 +54,27 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  toggleRestriccion(valor: string): void {
+    const index = this.restriccionesSeleccionadas.indexOf(valor);
+    if (index >= 0) {
+      this.restriccionesSeleccionadas.splice(index, 1);
+    } else {
+      this.restriccionesSeleccionadas.push(valor);
+    }
+  }
+
+  formatearRestriccion(valor: string): string {
+    return valor
+      .toLowerCase()
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (l) => l.toUpperCase());
+  }
+
+  guardarPreferencias(): void {
+    alert('✅ Preferencias guardadas: ' + this.restriccionesSeleccionadas.join(', '));
+    // Aquí puedes añadir un POST al backend si decides persistir los datos
+  }
+
   irACambiarPassword(): void {
     this.router.navigate(['/change-password']);
   }
@@ -60,16 +87,16 @@ export class ProfileComponent implements OnInit {
     this.usuarioService.logout().subscribe({
       next: () => {
         console.log('🔒 Sesión cerrada desde perfil');
-        // 🔐 Limpieza opcional de storage (por seguridad)
         localStorage.removeItem('usuario');
         this.router.navigate(['/login']);
       },
       error: (err) => {
         console.error('❌ Error al cerrar sesión desde perfil', err);
-        this.router.navigate(['/login']); // Incluso si falla, navega
+        this.router.navigate(['/login']);
       }
     });
   }
+
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -84,7 +111,7 @@ export class ProfileComponent implements OnInit {
 
     const formData = new FormData();
     formData.append('archivo', this.archivoSeleccionado);
-    formData.append('email', this.usuario.email); // o ID si lo tienes mejor
+    formData.append('email', this.usuario.email);
 
     this.usuarioService.subirMenu(formData).subscribe({
       next: (resp) => {
@@ -97,6 +124,7 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
+
   solicitarBaja(): void {
     if (!this.usuario) return;
 
@@ -132,9 +160,8 @@ export class ProfileComponent implements OnInit {
     this.imagenesSeleccionadas.forEach(file => {
       formData.append('imagenes', file);
     });
-    formData.append('email', this.usuario.email); // Puedes usar ID si lo prefieres
+    formData.append('email', this.usuario.email);
 
-    // Aquí deberías tener un método en tu servicio que haga el POST
     this.usuarioService.subirImagenes(formData).subscribe({
       next: () => {
         alert('✅ Imágenes subidas correctamente');
@@ -147,6 +174,4 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
-
-
 }

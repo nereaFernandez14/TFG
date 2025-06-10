@@ -1,9 +1,14 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.RestauranteUpdateRequest;
+import com.example.demo.entities.Notificacion;
 import com.example.demo.entities.Resenya;
 import com.example.demo.entities.Restaurante;
+import com.example.demo.entities.SolicitudModificacion;
 import com.example.demo.entities.Usuario;
 import com.example.demo.services.AdminService;
+import com.example.demo.services.NotificacionService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,14 +16,16 @@ import org.springframework.web.bind.annotation.*;
 import com.example.demo.repositories.UsuarioRepository;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')") // Protege todos los endpoints de este controlador
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     private final AdminService adminService;
+    private final NotificacionService notificacionService;
     private final UsuarioRepository usuarioRepository;
 
     // 🗣 Obtener denuncias
@@ -66,6 +73,7 @@ public class AdminController {
         adminService.eliminarUsuario(id);
         return ResponseEntity.ok().build();
     }
+
     @PostMapping("/usuarios/{id}/rechazar-baja")
     public ResponseEntity<?> rechazarSolicitudBaja(@PathVariable Long id) {
         Usuario usuario = adminService.obtenerUsuarioPorId(id);
@@ -77,4 +85,18 @@ public class AdminController {
         adminService.guardarUsuario(usuario);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/restaurantes/{id}")
+    public ResponseEntity<?> modificarDatosRestaurante(
+            @PathVariable Long id,
+            @RequestBody RestauranteUpdateRequest request) {
+        adminService.actualizarDatosRestaurante(id, request);
+        return ResponseEntity.ok(Map.of("mensaje", "Actualizado"));
+    }
+
+    @GetMapping("/modificaciones")
+    public ResponseEntity<List<SolicitudModificacion>> obtenerSolicitudesModificacion() {
+        return ResponseEntity.ok(adminService.obtenerSolicitudesModificacion());
+    }
+
 }

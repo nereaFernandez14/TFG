@@ -21,7 +21,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-
 import java.io.PrintWriter;
 import java.util.List;
 
@@ -48,33 +47,56 @@ public class SecurityConfig {
                                                                 "/resenyas/**",
                                                                 "/roles",
                                                                 "/change-password",
-                                                                "/usuarios/*/solicitar-baja",     // cuando el proxy lo reescribe
+                                                                "/usuarios/*/solicitar-baja",
                                                                 "/api/usuarios/*/solicitar-baja",
-                                                                 "/admin/**",
-                                                                 "/api/usuarios/subir-imagenes",
-                                                                 "/usuarios/subir-imagenes"))
+                                                                "/admin/**",
+                                                                "/api/usuarios/subir-imagenes",
+                                                                "/usuarios/subir-imagenes",
+                                                                "/api/restaurantes/*/solicitar-modificacion",
+                                                                "/api/notificaciones/**", // ✅ Ignorar CSRF para
+                                                                                          // notificaciones
+                                                                "/notificaciones/**" // ✅ Incluye también sin prefijo
+                                                                                     // /api
+                                                ))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                               .requestMatchers(
-                                                        "/register",
-                                                        "/api/register",
-                                                        "/api/csrf",
-                                                        "/api/login",
-                                                        "/api/logout",
-                                                        "/api/rol",
-                                                        "/api/sesion",
-                                                        "/restaurantes/buscar",
-                                                        "/roles",
-                                                        "/change-password",
-                                                        "/error",
-                                                        "/restaurantes/filtrar-avanzado",
-                                                        "/restaurantes/menus/**",
-                                                        "/resenyas/**"
-                                                        ).permitAll()
 
+                                                // 👇 Endpoints públicos
+                                                .requestMatchers(
+                                                                "/register",
+                                                                "/api/register",
+                                                                "/api/csrf",
+                                                                "/api/login",
+                                                                "/api/logout",
+                                                                "/api/rol",
+                                                                "/api/sesion",
+                                                                "/restaurantes/buscar",
+                                                                "/roles",
+                                                                "/change-password",
+                                                                "/error",
+                                                                "/restaurantes/filtrar-avanzado",
+                                                                "/restaurantes/menus/**",
+                                                                "/resenyas/**")
+                                                .permitAll()
+
+                                                // 👇 Roles específicos
                                                 .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO")
-                                                .requestMatchers(HttpMethod.POST, "/restaurantes/subir-menu").hasRole("RESTAURANTE")
+                                                .requestMatchers(HttpMethod.POST, "/restaurantes/subir-menu")
+                                                .hasRole("RESTAURANTE")
+                                                .requestMatchers(HttpMethod.POST,
+                                                                "/api/restaurantes/*/solicitar-modificacion")
+                                                .hasRole("RESTAURANTE")
+
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
+
+                                                // ✅ Notificaciones (ADMIN y RESTAURANTE)
+                                                .requestMatchers(HttpMethod.GET, "/api/notificaciones")
+                                                .hasRole("RESTAURANTE")
+                                                .requestMatchers(HttpMethod.GET, "/api/notificaciones/admin")
+                                                .hasRole("ADMIN")
+                                                .requestMatchers(HttpMethod.PUT, "/api/notificaciones/*/marcar-vista")
+                                                .hasAnyRole("RESTAURANTE", "ADMIN")
+
                                                 .anyRequest().authenticated())
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))

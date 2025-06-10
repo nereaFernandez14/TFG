@@ -8,6 +8,7 @@ import com.example.demo.enums.Barrio;
 import com.example.demo.enums.RangoPrecio;
 import com.example.demo.enums.RestriccionDietetica;
 import com.example.demo.enums.TipoCocina;
+import com.example.demo.services.NotificacionService;
 import com.example.demo.services.RestauranteService;
 
 import jakarta.annotation.security.PermitAll;
@@ -34,6 +35,9 @@ public class RestauranteController {
 
     @Autowired
     private RestauranteService restauranteService;
+
+    @Autowired
+    private NotificacionService notificacionService;
 
     // ✅ Crear restaurante
     @PostMapping
@@ -107,6 +111,7 @@ public class RestauranteController {
         RestauranteDTO dto = new RestauranteDTO(restaurante);
         return ResponseEntity.ok(dto);
     }
+
     // RestauranteController.java
     @PreAuthorize("hasRole('RESTAURANTE')")
     @GetMapping("/resumen/{idUsuario}")
@@ -123,6 +128,15 @@ public class RestauranteController {
         datos.setVisitas(restaurante.getVisitas());
         datos.setComentarios(restaurante.getResenyas().size());
         datos.setValoracionPromedio(restaurante.getMediaPuntuacion());
+        datos.setNombre(restaurante.getNombre());
+        datos.setDireccion(restaurante.getDireccion());
+        datos.setTelefono(restaurante.getTelefono());
+        datos.setEmail(restaurante.getEmail());
+        datos.setTipoCocina(restaurante.getTipoCocina());
+        datos.setTipoCocinaPersonalizado(restaurante.getTipoCocinaPersonalizado());
+        datos.setBarrio(restaurante.getBarrio());
+        datos.setRangoPrecio(restaurante.getRangoPrecio());
+        datos.setRestricciones(restaurante.getRestriccionesDieteticas());
 
         return ResponseEntity.ok(datos);
     }
@@ -179,6 +193,7 @@ public class RestauranteController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + recurso.getFilename() + "\"")
                 .body(recurso);
     }
+
     @PreAuthorize("hasRole('RESTAURANTE')")
     @GetMapping("/mis-resenyas")
     public ResponseEntity<List<Resenya>> obtenerMisResenyas(HttpSession session) {
@@ -194,6 +209,7 @@ public class RestauranteController {
 
         return ResponseEntity.ok(restaurante.getResenyas());
     }
+
     @PreAuthorize("hasRole('RESTAURANTE')")
     @PostMapping("/{idUsuario}/solicitar-baja")
     public ResponseEntity<?> solicitarBaja(@PathVariable Long idUsuario) {
@@ -206,5 +222,27 @@ public class RestauranteController {
         restauranteService.guardar(restaurante);
         return ResponseEntity.ok().build();
     }
-    
+
+    @PreAuthorize("hasRole('RESTAURANTE')")
+    @PostMapping("/{id}/solicitar-modificacion")
+    public ResponseEntity<?> solicitarModificacion(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> payload) {
+
+        Restaurante restaurante = restauranteService.obtenerRestaurantePorId(id);
+        if (restaurante == null) {
+            return ResponseEntity.status(404).body("Restaurante no encontrado");
+        }
+
+        String campo = payload.get("campo");
+        String nuevoValor = payload.get("nuevoValor");
+
+        if (campo == null || nuevoValor == null) {
+            return ResponseEntity.badRequest().body("Campo o valor inválido");
+        }
+
+        notificacionService.crearSolicitudConNotificacion(restaurante, campo, nuevoValor);
+        return ResponseEntity.ok(Map.of("mensaje", "Modificación enviada y en espera de revisión"));
+    }
+
 }

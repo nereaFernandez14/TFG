@@ -30,13 +30,15 @@
     </div>
 
     <!-- Email -->
-    <div class="form-group">
-      <label>Email*</label>
-      <input type="email" formControlName="email" />
-      <div *ngIf="restauranteForm.get('email')?.touched && restauranteForm.get('email')?.invalid" class="error">
-        Introduce un email válido.
-      </div>
-    </div>
+    <!-- Email -->
+<div class="form-group">
+  <label>Email*</label>
+  <input type="email" formControlName="email" />
+  <div *ngIf="restauranteForm.get('email')?.touched && restauranteForm.get('email')?.invalid" class="error">
+    Introduce un email válido.
+  </div>
+</div>
+
 
     <!-- Tipo de Cocina -->
     <div class="form-group">

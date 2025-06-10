@@ -48,24 +48,24 @@ export class RestauranteComponent implements OnInit {
       next: (restaurante) => {
         if (restaurante && restaurante.id) {
           this.restauranteId = restaurante.id;
-          this.router.navigate(['/dashboard']); // Aquí redirige a dashboard si ya tiene restaurante
+          this.router.navigate(['/dashboard']);
         } else {
-          this.initForm(); // Si no, muestra formulario
+          this.initForm(usuario?.email); // 👉 Pasamos el email aquí
         }
       },
       error: (err) => {
         console.log('ℹ️ No existe restaurante, permitiendo creación');
-        this.initForm();
+        this.initForm(usuario?.email); // 👉 También lo pasamos aquí
       }
     });
   }
 
-  private initForm(): void {
+  private initForm(emailUsuario?: string): void {
     this.restauranteForm = this.fb.group({
       nombre: ['', Validators.required],
       direccion: ['', Validators.required],
       telefono: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
+      email: [emailUsuario || '', [Validators.required, Validators.email]], // ✅ Email precargado
       tipoCocina: ['', Validators.required],
       tipoCocinaPersonalizado: [''],
       barrio: ['', Validators.required],

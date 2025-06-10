@@ -7,6 +7,17 @@ export interface RestauranteDashboardDatos {
   visitas: number;
   comentarios: number;
   valoracionPromedio: number;
+
+  // 🆕 Añadimos los campos usados en el dashboard
+  nombre?: string;
+  direccion?: string;
+  telefono?: string;
+  email?: string;
+  tipoCocina?: string;
+  tipoCocinaPersonalizado?: string;
+  barrio?: string;
+  rangoPrecio?: string;
+  restricciones?: string[];
 }
 
 @Injectable({
@@ -23,13 +34,14 @@ export class RestauranteDashboardService {
       { withCredentials: true } // 👈 NECESARIO PARA ENVIAR COOKIES
     );
   }
-  // src/app/services/restaurante-dashboard.service.ts
+
   obtenerMisComentarios(): Observable<Resenya[]> {
     return this.http.get<Resenya[]>(
-       `${this.baseUrl}/mis-resenyas`,
+      `${this.baseUrl}/mis-resenyas`,
       { withCredentials: true }
     );
   }
+
   solicitarBaja(idUsuario: number): Observable<any> {
     return this.http.post(`/api/restaurantes/${idUsuario}/solicitar-baja`, {}, {
       withCredentials: true

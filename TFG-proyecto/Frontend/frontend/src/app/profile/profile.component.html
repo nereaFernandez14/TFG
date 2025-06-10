@@ -70,16 +70,27 @@
     </div>
 
 
-      <!-- ✅ Preferencias dietéticas para usuario -->
-      <div *ngIf="usuario?.rol === 'USUARIO'" class="extra-section">
-        <h3><i class="fas fa-carrot"></i> Preferencias dietéticas</h3>
-        <form>
-          <label for="restricciones">Alergias o restricciones:</label>
-          <textarea id="restricciones" rows="4" placeholder="Ej: Sin gluten, vegano..."></textarea>
-          <br />
-          <button type="button">Guardar preferencias</button>
-        </form>
-      </div>
+<!-- ✅ Preferencias dietéticas para usuario (con checkbox y visual amigable) -->
+<div *ngIf="usuario?.rol === 'USUARIO'" class="extra-section">
+  <h3><i class="fas fa-carrot"></i> Preferencias dietéticas</h3>
+  <form>
+    <div *ngFor="let restriccion of restriccionesEnum" class="checkbox-linea">
+      <label>
+        <input
+          type="checkbox"
+          [value]="restriccion"
+          [checked]="restriccionesSeleccionadas.includes(restriccion)"
+          (change)="toggleRestriccion(restriccion)" />
+        {{ formatearRestriccion(restriccion) }}
+      </label>
+    </div>
+    <br />
+    <button type="button" (click)="guardarPreferencias()">Guardar preferencias</button>
+  </form>
+</div>
+
+
+
 
       <!-- ✅ Botones de acción -->
       <div class="perfil-actions">
