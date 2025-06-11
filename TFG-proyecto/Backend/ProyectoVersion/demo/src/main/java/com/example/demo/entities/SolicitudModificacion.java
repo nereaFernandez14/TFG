@@ -1,12 +1,10 @@
 package com.example.demo.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 @Entity
-@Getter
-@Setter
+@Data
 public class SolicitudModificacion {
 
     @Id
@@ -18,4 +16,6 @@ public class SolicitudModificacion {
 
     @ManyToOne
     private Restaurante restaurante;
+
+    private boolean gestionada = false;
 }

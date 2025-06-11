@@ -11,35 +11,34 @@ export interface UsuarioRegistro {
   apellidos: string;
   email: string;
   password: string;
-  rol: string; // El front envía string
+  rol: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsuarioService {
-  private readonly apiUrl = `${environment.apiUrl}/api`;
+
+  private readonly apiUrl = `${environment.apiUrl}`;
 
   constructor(private http: HttpClient) {}
 
   /**
-   * Registra un nuevo usuario.
+   * 🔐 Registra un nuevo usuario
    * POST /api/register
    */
   registrar(usuario: UsuarioRegistro): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, usuario, {
+    return this.http.post(`${this.apiUrl}/api/register`, usuario, {
       withCredentials: true
-    }).pipe(
-      catchError(this.handleError)
-    );
+    }).pipe(catchError(this.handleError));
   }
 
   /**
-   * Obtiene los datos del usuario autenticado.
-   * GET /api/perfil
+   * 👤 Obtiene los datos del usuario autenticado desde el backend
+   * GET /usuarios/perfil ✅ RUTA ACTUALIZADA
    */
   obtenerPerfil(): Observable<Usuario> {
-    return this.http.get<Usuario>(`${this.apiUrl}/perfil`, {
+    return this.http.get<Usuario>(`${this.apiUrl}/usuarios/perfil`, {
       withCredentials: true
     }).pipe(
       map((usuario: any) => ({
@@ -51,42 +50,70 @@ export class UsuarioService {
   }
 
   /**
-   * Cambia la contraseña del usuario autenticado.
-   * POST /change-password
+   * 📦 Obtiene el usuario actual desde localStorage
    */
-  cambiarPassword(passwordActual: string, nuevaPassword: string): Observable<any> {
-  return this.http.post(
-    `${environment.apiUrl}/change-password`,
-    {
-      currentPassword: passwordActual,
-      newPassword: nuevaPassword
-    },
-    {
-      withCredentials: true,
-      responseType: 'json'
-    }
-  );
-}
-
-  private getCookie(name: string): string | null {
-    const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
-    return match ? match[2] : null;
+  obtenerUsuario(): Usuario | null {
+    const data = localStorage.getItem('usuario');
+    return data ? JSON.parse(data) as Usuario : null;
   }
 
   /**
-   * Cierra la sesión del usuario autenticado.
-   * POST /api/logout
+   * 🔒 Cambia la contraseña del usuario autenticado
+   * POST /change-password
    */
-  logout(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/logout`, {}, {
-      withCredentials: true
-    }).pipe(
-      catchError(this.handleError)
+  cambiarPassword(passwordActual: string, nuevaPassword: string): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/change-password`,
+      {
+        currentPassword: passwordActual,
+        newPassword: nuevaPassword
+      },
+      {
+        withCredentials: true,
+        responseType: 'json'
+      }
     );
   }
 
   /**
-   * Manejo centralizado de errores HTTP.
+   * 🔚 Cierra la sesión del usuario
+   * POST /api/logout
+   */
+  logout(): Observable<any> {
+    return this.http.post(`${this.apiUrl}/api/logout`, {}, {
+      withCredentials: true
+    }).pipe(catchError(this.handleError));
+  }
+
+  /**
+   * 📄 Subida de menú para restaurante
+   */
+  subirMenu(formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/restaurantes/subir-menu`, formData, {
+      withCredentials: true
+    });
+  }
+
+  /**
+   * ❌ Solicita la baja del usuario
+   */
+  solicitarBaja(id: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/usuarios/${id}/solicitar-baja`, {}, {
+      withCredentials: true
+    });
+  }
+
+  /**
+   * 🖼️ Subida de imágenes para restaurante
+   */
+  subirImagenes(formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/usuarios/subir-imagenes`, formData, {
+      withCredentials: true
+    });
+  }
+
+  /**
+   * 🚨 Manejo centralizado de errores HTTP
    */
   private handleError(error: HttpErrorResponse) {
     console.error('UsuarioService error ❌', error);
@@ -94,24 +121,6 @@ export class UsuarioService {
       new Error(error.error?.message || 'Error inesperado en la petición.')
     );
   }
-
-  
-  subirMenu(formData: FormData) {
-      return this.http.post(`${environment.apiUrl}/restaurantes/subir-menu`, formData, {
-      withCredentials: true
-    });
-  }
-  solicitarBaja(id: number) {
-    return this.http.post(`${this.apiUrl}/usuarios/${id}/solicitar-baja`, {}, {
-      withCredentials: true
-    });
-
-  }
-  subirImagenes(formData: FormData): Observable<any> {
-    return this.http.post(`${this.apiUrl}/usuarios/subir-imagenes`, formData, {
-      withCredentials: true
-    });
-  }
-
 }
+
 export { Usuario };

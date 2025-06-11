@@ -1,21 +1,26 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UsuarioService, Usuario } from '../services/usuario.service';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Restaurante } from '../models/restaurante.model';
+
+import { UsuarioService, Usuario } from '../services/usuario.service';
 import { RestauranteService } from '../services/restaurante.service';
+import { Restaurante } from '../models/restaurante.model';
 import { RestriccionDietetica } from '../models/enums/restriccion-dietetica.enum';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })
 export class ProfileComponent implements OnInit {
   usuario: Usuario | null = null;
   restaurante: Restaurante | null = null;
+  notificaciones: any[] = [];
+
   archivoSeleccionado: File | null = null;
   nombreArchivo: string = '';
   imagenesSeleccionadas: File[] = [];
@@ -24,10 +29,16 @@ export class ProfileComponent implements OnInit {
   restriccionesEnum = Object.values(RestriccionDietetica);
   restriccionesSeleccionadas: string[] = [];
 
+  mostrarVentanaModificacionUsuario: boolean = false;
+  campoSeleccionadoUsuario: string = '';
+  nuevoValorUsuario: string = '';
+  botonUsuarioDeshabilitado: boolean = false;
+
   constructor(
     private usuarioService: UsuarioService,
     private restauranteService: RestauranteService,
-    private router: Router
+    private router: Router,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -35,14 +46,29 @@ export class ProfileComponent implements OnInit {
       next: (data) => {
         this.usuario = data;
 
-        // Si decides añadir el atributo restricciones al usuario, aquí puedes cargarlo
-        // this.restriccionesSeleccionadas = data.restricciones || [];
+        // 🔔 Cargar notificaciones si rol USUARIO o RESTAURANTE
+        if (this.usuario.rol === 'USUARIO' || this.usuario.rol === 'RESTAURANTE') {
+          const endpoint = this.usuario.rol === 'RESTAURANTE'
+            ? `/api/notificaciones?restauranteId=${this.usuario.id}`
+            : `/api/notificaciones/usuario?usuarioId=${this.usuario.id}`;
 
+          this.http.get<any[]>(endpoint, { withCredentials: true }).subscribe({
+            next: (arr) => (this.notificaciones = Array.isArray(arr) ? arr : []),
+            error: (err) => {
+              if (err.status === 404) {
+                console.warn('ℹ️ No hay notificaciones para este usuario');
+                this.notificaciones = [];
+              } else {
+                console.error('❌ Error al cargar notificaciones', err);
+              }
+            }
+          });
+        }
+
+        // 👨‍🍳 Cargar detalles de restaurante si corresponde
         if (this.usuario.rol === 'RESTAURANTE') {
           this.restauranteService.obtenerRestaurantePorUsuario(this.usuario.id).subscribe({
-            next: (restaurante) => {
-              this.restaurante = restaurante;
-            },
+            next: (r) => (this.restaurante = r),
             error: (err) => {
               console.error('❌ Error al cargar restaurante', err);
               this.restaurante = null;
@@ -54,25 +80,31 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  cerrarNotificacion(id: number): void {
+    if (!id || !this.notificaciones.length) return;
+
+    this.http.put(`/api/notificaciones/${id}/marcar-vista`, {}, { withCredentials: true }).subscribe({
+      next: () => {
+        this.notificaciones = this.notificaciones.filter(n => n.id !== id);
+      },
+      error: (err) => {
+        console.warn(`❌ Error al cerrar notificación con id ${id}`, err);
+      }
+    });
+  }
+
   toggleRestriccion(valor: string): void {
-    const index = this.restriccionesSeleccionadas.indexOf(valor);
-    if (index >= 0) {
-      this.restriccionesSeleccionadas.splice(index, 1);
-    } else {
-      this.restriccionesSeleccionadas.push(valor);
-    }
+    const idx = this.restriccionesSeleccionadas.indexOf(valor);
+    if (idx >= 0) this.restriccionesSeleccionadas.splice(idx, 1);
+    else this.restriccionesSeleccionadas.push(valor);
   }
 
   formatearRestriccion(valor: string): string {
-    return valor
-      .toLowerCase()
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, (l) => l.toUpperCase());
+    return valor.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   }
 
   guardarPreferencias(): void {
     alert('✅ Preferencias guardadas: ' + this.restriccionesSeleccionadas.join(', '));
-    // Aquí puedes añadir un POST al backend si decides persistir los datos
   }
 
   irACambiarPassword(): void {
@@ -86,21 +118,17 @@ export class ProfileComponent implements OnInit {
   logout(): void {
     this.usuarioService.logout().subscribe({
       next: () => {
-        console.log('🔒 Sesión cerrada desde perfil');
         localStorage.removeItem('usuario');
         this.router.navigate(['/login']);
       },
-      error: (err) => {
-        console.error('❌ Error al cerrar sesión desde perfil', err);
-        this.router.navigate(['/login']);
-      }
+      error: () => this.router.navigate(['/login'])
     });
   }
 
   onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.archivoSeleccionado = input.files[0];
+    const inp = event.target as HTMLInputElement;
+    if (inp.files?.length) {
+      this.archivoSeleccionado = inp.files[0];
       this.nombreArchivo = this.archivoSeleccionado.name;
     }
   }
@@ -114,52 +142,39 @@ export class ProfileComponent implements OnInit {
     formData.append('email', this.usuario.email);
 
     this.usuarioService.subirMenu(formData).subscribe({
-      next: (resp) => {
-        console.log('📤 Archivo subido correctamente', resp);
-        alert('Menú subido correctamente ✅');
-      },
-      error: (err) => {
-        console.error('❌ Error al subir archivo', err);
-        alert('Error al subir el menú ❌');
-      }
+      next: () => alert('✅ Menú subido correctamente'),
+      error: () => alert('❌ Error al subir el menú')
     });
   }
 
   solicitarBaja(): void {
     if (!this.usuario) return;
-
-    const rol = this.usuario.rol?.toLowerCase();
-    const confirmar = confirm(`¿Seguro que deseas solicitar la baja de tu cuenta (${rol})? Será revisado por un administrador.`);
+    const confirmar = confirm(`¿Seguro que deseas solicitar la baja de tu cuenta (${this.usuario.rol.toLowerCase()})?`);
     if (!confirmar) return;
 
     this.usuarioService.solicitarBaja(this.usuario.id!).subscribe({
       next: () => {
-        alert(`✅ Solicitud de baja como ${rol} enviada correctamente.`);
+        alert('✅ Solicitud enviada correctamente.');
         this.usuario!.solicitaBaja = true;
       },
-      error: (err) => {
-        console.error('❌ Error al solicitar baja', err);
-        alert('Ocurrió un error al enviar la solicitud ❌');
-      }
+      error: () => alert('❌ Error al solicitar baja')
     });
   }
 
   onImagenesSeleccionadas(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.imagenesSeleccionadas = Array.from(input.files);
-      this.nombresImagenes = this.imagenesSeleccionadas.map(file => file.name);
+    const inp = event.target as HTMLInputElement;
+    if (inp.files?.length) {
+      this.imagenesSeleccionadas = Array.from(inp.files);
+      this.nombresImagenes = this.imagenesSeleccionadas.map(f => f.name);
     }
   }
 
   subirImagenes(event: Event): void {
     event.preventDefault();
-    if (!this.usuario || this.imagenesSeleccionadas.length === 0) return;
+    if (!this.usuario || !this.imagenesSeleccionadas.length) return;
 
     const formData = new FormData();
-    this.imagenesSeleccionadas.forEach(file => {
-      formData.append('imagenes', file);
-    });
+    this.imagenesSeleccionadas.forEach(f => formData.append('imagenes', f));
     formData.append('email', this.usuario.email);
 
     this.usuarioService.subirImagenes(formData).subscribe({
@@ -168,9 +183,69 @@ export class ProfileComponent implements OnInit {
         this.nombresImagenes = [];
         this.imagenesSeleccionadas = [];
       },
+      error: () => alert('❌ Error al subir imágenes')
+    });
+  }
+
+  abrirVentanaModificacionUsuario(): void {
+    this.mostrarVentanaModificacionUsuario = true;
+    this.campoSeleccionadoUsuario = '';
+    this.nuevoValorUsuario = '';
+    this.botonUsuarioDeshabilitado = false;
+  }
+
+  cerrarVentanaModificacionUsuario(): void {
+    this.mostrarVentanaModificacionUsuario = false;
+    this.campoSeleccionadoUsuario = '';
+    this.nuevoValorUsuario = '';
+    this.botonUsuarioDeshabilitado = false;
+  }
+
+  enviarModificacionUsuario(): void {
+    const usuario = this.usuarioService.obtenerUsuario();
+    const usuarioId = usuario?.id;
+
+    if (!this.campoSeleccionadoUsuario || !usuarioId) {
+      alert('⚠️ Faltan datos para enviar la solicitud');
+      return;
+    }
+
+    const campo = this.campoSeleccionadoUsuario;
+    const nuevo = this.nuevoValorUsuario?.trim();
+    const actual = (this.usuario as any)[campo];
+
+    if (!campo || !nuevo) {
+      alert('⚠️ Selecciona un campo y un nuevo valor');
+      return;
+    }
+
+    if (actual?.toString().trim().toLowerCase() === nuevo.toLowerCase()) {
+      alert('⚠️ El nuevo valor no puede ser igual al actual');
+      return;
+    }
+
+    const malasPalabras = ['xxx', 'tonto', 'idiota'];
+    if (malasPalabras.some(p => nuevo.toLowerCase().includes(p))) {
+      alert('🚫 Valor no permitido');
+      return;
+    }
+
+    this.botonUsuarioDeshabilitado = true;
+
+    const payload = { campo, nuevoValor: nuevo };
+    const endpoint = usuario?.rol === 'RESTAURANTE'
+      ? `/api/restaurantes/${usuarioId}/solicitar-modificacion`
+      : `/api/usuarios/${usuarioId}/solicitar-modificacion`;
+
+    this.http.post(endpoint, payload, { withCredentials: true }).subscribe({
+      next: () => {
+        alert('✅ Solicitud enviada al administrador');
+        this.cerrarVentanaModificacionUsuario();
+      },
       error: (err) => {
-        console.error('❌ Error al subir imágenes', err);
-        alert('Ocurrió un error al subir las imágenes');
+        console.error('❌ Error al enviar modificación', err);
+        alert('❌ Error al enviar la solicitud');
+        this.botonUsuarioDeshabilitado = false;
       }
     });
   }

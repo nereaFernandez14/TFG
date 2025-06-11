@@ -44,7 +44,7 @@ export const routes: Routes = [
   {
       path: 'admin-panel',
       loadComponent: () => import('./admin-panel/admin-panel-component').then(m => m.AdminPanelComponent),
-      canActivate: [AdminGuard] 
+      canActivate: [AdminGuard]
   },
   {
     path: 'change-password',

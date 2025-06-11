@@ -4,11 +4,6 @@ import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
-import { TipoCocina } from '../models/enums/tipo-cocina.enum';
-import { Barrio } from '../models/enums/barrio.enum';
-import { RangoPrecio } from '../models/enums/rango-precio.enum';
-import { RestriccionDietetica } from '../models/enums/restriccion-dietetica.enum';
-
 @Component({
   selector: 'app-admin-panel',
   standalone: true,
@@ -21,13 +16,15 @@ export class AdminPanelComponent implements OnInit {
   bajasRestaurantes: any[] = [];
   bajasUsuarios: any[] = [];
   modificaciones: any[] = [];
+  modificacionesUsuario: any[] = [];
   notificaciones: any[] = [];
 
   seccionesAbiertas = {
     denuncias: true,
     restaurantes: false,
     usuarios: false,
-    modificar: false
+    modificar: false,
+    modificacionUsuario: false
   };
 
   camposEditables = [
@@ -41,8 +38,18 @@ export class AdminPanelComponent implements OnInit {
     { label: 'Rango de precio', value: 'rangoPrecio' },
     { label: 'Restricciones dietéticas', value: 'restriccionesDieteticas' }
   ];
+
+  camposUsuario = [
+    { label: 'Nombre', value: 'nombre' },
+    { label: 'Apellidos', value: 'apellido' },
+    { label: 'Email', value: 'email' }
+  ];
+
   campoSeleccionado: { [key: number]: string } = {};
   nuevoValor: { [key: number]: any } = {};
+
+  campoSeleccionadoUsuario: { [key: number]: string } = {};
+  nuevoValorUsuario: { [key: number]: any } = {};
 
   constructor(private http: HttpClient) {}
 
@@ -50,7 +57,12 @@ export class AdminPanelComponent implements OnInit {
     this.cargarDenuncias();
     this.cargarPeticionesBaja();
     this.cargarModificaciones();
+    this.cargarModificacionesUsuarios();
     this.cargarNotificacionesAdmin();
+  }
+
+  eliminarItemPorId(lista: any[], id: number): any[] {
+    return lista.filter(item => item.id !== id);
   }
 
   cargarDenuncias() {
@@ -81,6 +93,18 @@ export class AdminPanelComponent implements OnInit {
     });
   }
 
+  cargarModificacionesUsuarios() {
+    this.http.get<any[]>('/api/admin/modificaciones-usuarios').subscribe(data => {
+      this.modificacionesUsuario = data;
+
+      for (let solicitud of data) {
+        const id = solicitud.usuario.id;
+        this.campoSeleccionadoUsuario[id] = solicitud.campo;
+        this.nuevoValorUsuario[id] = solicitud.nuevoValor;
+      }
+    });
+  }
+
   cargarNotificacionesAdmin() {
     this.http.get<any[]>('/api/notificaciones/admin').subscribe({
       next: (data) => this.notificaciones = data,
@@ -90,74 +114,102 @@ export class AdminPanelComponent implements OnInit {
 
   marcarComoVista(id: number) {
     this.http.put(`/api/notificaciones/${id}/marcar-vista`, {}).subscribe(() => {
-      this.notificaciones = this.notificaciones.filter(n => n.id !== id);
+      this.notificaciones = this.eliminarItemPorId(this.notificaciones, id);
     });
   }
 
   aceptarDenuncia(id: number) {
     this.http.post(`/api/admin/denuncias/${id}/aceptar`, {}).subscribe(() => {
-      this.denuncias = this.denuncias.filter(d => d.id !== id);
+      this.denuncias = this.eliminarItemPorId(this.denuncias, id);
     });
   }
 
   rechazarDenuncia(id: number) {
     this.http.post(`/api/admin/denuncias/${id}/rechazar`, {}).subscribe(() => {
-      this.denuncias = this.denuncias.filter(d => d.id !== id);
+      this.denuncias = this.eliminarItemPorId(this.denuncias, id);
     });
   }
 
   eliminarRestaurante(id: number) {
     this.http.delete(`/api/admin/restaurantes/${id}`).subscribe(() => {
-      this.bajasRestaurantes = this.bajasRestaurantes.filter(r => r.id !== id);
+      this.bajasRestaurantes = this.eliminarItemPorId(this.bajasRestaurantes, id);
     });
   }
 
   eliminarUsuario(id: number) {
     this.http.delete(`/api/admin/usuarios/${id}`).subscribe(() => {
-      this.bajasUsuarios = this.bajasUsuarios.filter(u => u.id !== id);
+      this.bajasUsuarios = this.eliminarItemPorId(this.bajasUsuarios, id);
     });
   }
 
   rechazarBajaUsuario(id: number) {
     this.http.post(`/api/admin/usuarios/${id}/rechazar-baja`, {}).subscribe(() => {
       alert('❌ Solicitud de baja rechazada');
-      this.bajasUsuarios = this.bajasUsuarios.filter(u => u.id !== id);
+      this.bajasUsuarios = this.eliminarItemPorId(this.bajasUsuarios, id);
     });
   }
 
- actualizarCampoRestaurante(id: number) {
-  const campo = this.campoSeleccionado[id];
-  const valor = this.nuevoValor[id];
+  actualizarCampoRestaurante(id: number) {
+    const campo = this.campoSeleccionado[id];
+    const valor = this.nuevoValor[id];
 
-  if (!campo || valor === undefined || valor === '') {
-    alert('⚠️ Debes seleccionar un campo y escribir un valor válido.');
-    return;
-  }
-
-  const payload: any = {};
-
-  if (campo === 'tipoCocinaPersonalizado') {
-    payload['tipoCocina'] = 'OTRO';
-    payload['tipoCocinaPersonalizado'] = valor;
-  } else {
-    payload[campo] = valor;
-  }
-
-  this.http.put(`/api/admin/restaurantes/${id}`, payload).subscribe({
-    next: () => {
-      alert('✅ Restaurante actualizado correctamente');
-      this.modificaciones = this.modificaciones.filter(m => m.restaurante.id !== id);
-      this.campoSeleccionado[id] = '';
-      this.nuevoValor[id] = '';
-    },
-    error: (err) => {
-      console.error('❌ Error al actualizar restaurante', err);
-      alert('⚠️ Error al actualizar el restaurante');
+    if (!campo || valor === undefined || valor === '') {
+      alert('⚠️ Debes seleccionar un campo y escribir un valor válido.');
+      return;
     }
-  });
-}
 
-  toggleSeccion(seccion: 'denuncias' | 'restaurantes' | 'usuarios' | 'modificar') {
+    const payload: any = {};
+
+    if (campo === 'tipoCocinaPersonalizado') {
+      payload['tipoCocina'] = 'OTRO';
+      payload['tipoCocinaPersonalizado'] = valor;
+    } else {
+      payload[campo] = valor;
+    }
+
+    this.http.put(`/api/admin/restaurantes/${id}`, payload).subscribe({
+      next: () => {
+        alert('✅ Restaurante actualizado correctamente');
+        this.cargarModificaciones(); // ✅ recarga la lista desde backend
+        this.campoSeleccionado[id] = '';
+        this.nuevoValor[id] = '';
+      },
+      error: (err) => {
+        console.error('❌ Error al actualizar restaurante', err);
+        alert('⚠️ Error al actualizar el restaurante');
+      }
+    });
+  }
+
+  actualizarCampoUsuario(id: number) {
+    const campo = this.campoSeleccionadoUsuario[id];
+    const valor = this.nuevoValorUsuario[id];
+
+    if (!campo || valor === undefined || valor === '') {
+      alert('⚠️ Debes seleccionar un campo y escribir un valor válido.');
+      return;
+    }
+
+    const payload = {
+      campo: campo,
+      nuevoValor: valor
+    };
+
+    this.http.put(`/api/admin/usuarios/${id}/modificar`, payload).subscribe({
+      next: () => {
+        alert('✅ Usuario actualizado correctamente');
+        this.cargarModificacionesUsuarios(); // ✅ recarga la lista desde backend
+        this.campoSeleccionadoUsuario[id] = '';
+        this.nuevoValorUsuario[id] = '';
+      },
+      error: (err) => {
+        console.error('❌ Error al actualizar usuario', err);
+        alert('⚠️ Error al actualizar el usuario');
+      }
+    });
+  }
+
+  toggleSeccion(seccion: keyof typeof this.seccionesAbiertas) {
     this.seccionesAbiertas[seccion] = !this.seccionesAbiertas[seccion];
   }
 }

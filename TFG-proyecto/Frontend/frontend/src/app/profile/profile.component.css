@@ -266,3 +266,92 @@
   margin: 0;
   word-break: break-all;
 }
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn.primary {
+  background-color: #0069d9;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.btn.secondary {
+  background-color: #ddd;
+  color: #333;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.notificaciones-section {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+}
+
+.notificaciones-section h3 {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.notificaciones-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.notificaciones-section li {
+  background-color: #fff;
+  border-left: 4px solid #007bff;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  color: #444;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.cerrar-noti {
+  float: right;
+  background: transparent;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.cerrar-noti:hover {
+  color: #d00;
+}
+

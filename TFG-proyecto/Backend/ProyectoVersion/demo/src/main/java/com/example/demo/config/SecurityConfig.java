@@ -49,19 +49,18 @@ public class SecurityConfig {
                                                                 "/change-password",
                                                                 "/usuarios/*/solicitar-baja",
                                                                 "/api/usuarios/*/solicitar-baja",
+                                                                "/usuarios/*/solicitar-modificacion", // ✅ NUEVO
+                                                                "/api/usuarios/*/solicitar-modificacion",
+                                                                "/api/restaurantes/*/solicitar-modificacion",
+                                                                "/restaurantes/*/solicitar-modificacion",
                                                                 "/admin/**",
                                                                 "/api/usuarios/subir-imagenes",
                                                                 "/usuarios/subir-imagenes",
-                                                                "/api/restaurantes/*/solicitar-modificacion",
-                                                                "/api/notificaciones/**", // ✅ Ignorar CSRF para
-                                                                                          // notificaciones
-                                                                "/notificaciones/**" // ✅ Incluye también sin prefijo
-                                                                                     // /api
-                                                ))
+                                                                "/api/notificaciones/**",
+                                                                "/notificaciones/**"))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                                                // 👇 Endpoints públicos
                                                 .requestMatchers(
                                                                 "/register",
                                                                 "/api/register",
@@ -79,27 +78,35 @@ public class SecurityConfig {
                                                                 "/resenyas/**")
                                                 .permitAll()
 
-                                                // 👇 Roles específicos
                                                 .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO")
                                                 .requestMatchers(HttpMethod.POST, "/restaurantes/subir-menu")
                                                 .hasRole("RESTAURANTE")
                                                 .requestMatchers(HttpMethod.POST,
                                                                 "/api/restaurantes/*/solicitar-modificacion")
                                                 .hasRole("RESTAURANTE")
+                                                .requestMatchers(HttpMethod.POST,
+                                                                "/restaurantes/*/solicitar-modificacion")
+                                                .hasRole("RESTAURANTE")
+
+                                                // 🔄 Estas son las rutas actualizadas que nos pediste:
+                                                .requestMatchers(HttpMethod.POST,
+                                                                "/api/usuarios/*/solicitar-modificacion")
+                                                .hasRole("USUARIO")
+                                                .requestMatchers(HttpMethod.POST, "/usuarios/*/solicitar-modificacion")
+                                                .hasRole("USUARIO")
 
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                                                // ✅ Notificaciones (ADMIN y RESTAURANTE)
                                                 .requestMatchers(HttpMethod.GET, "/api/notificaciones")
                                                 .hasRole("RESTAURANTE")
                                                 .requestMatchers(HttpMethod.GET, "/api/notificaciones/admin")
                                                 .hasRole("ADMIN")
                                                 .requestMatchers(HttpMethod.PUT, "/api/notificaciones/*/marcar-vista")
-                                                .hasAnyRole("RESTAURANTE", "ADMIN")
+                                                .hasAnyRole("RESTAURANTE", "ADMIN", "USUARIO")
 
                                                 .anyRequest().authenticated())
-                                .sessionManagement(session -> session
-                                                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                                .sessionManagement(
+                                                session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                                 .formLogin(form -> form.disable())
                                 .httpBasic(httpBasic -> httpBasic.disable())
                                 .logout(logout -> logout

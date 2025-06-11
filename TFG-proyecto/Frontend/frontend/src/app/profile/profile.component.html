@@ -1,4 +1,13 @@
 <div class="perfil-wrapper">
+
+  <!-- 🔔 TOASTS DE NOTIFICACIONES -->
+  <div class="toast-container" *ngIf="notificaciones?.length">
+    <div class="toast" *ngFor="let n of notificaciones">
+      <span>{{ n.mensaje }}</span>
+      <button (click)="cerrarNotificacion(n.id)">✖</button>
+    </div>
+  </div>
+
   <section class="perfil-contenido">
     <div class="perfil-container">
 
@@ -22,75 +31,37 @@
         </div>
       </div>
 
-      <!-- 🍽️ Info extendida del restaurante -->
-      <div *ngIf="usuario?.rol === 'RESTAURANTE' && restaurante" class="restaurante-info-section">
-        <h3><i class="fas fa-store"></i> Detalles de tu Restaurante</h3>
-        <div class="restaurante-grid">
-          <p><strong>Nombre:</strong> {{ restaurante.nombre }}</p>
-          <p><strong>Dirección:</strong> {{ restaurante.direccion }}</p>
-          <p><strong>Barrio:</strong> {{ restaurante.barrio }}</p>
-          <p><strong>Teléfono:</strong> {{ restaurante.telefono }}</p>
-          <p><strong>Email:</strong> {{ restaurante.email }}</p>
-          <p><strong>Tipo de Cocina:</strong>
-            {{ restaurante.tipoCocina === 'OTRO' ? restaurante.tipoCocinaPersonalizado : restaurante.tipoCocina }}
-          </p>
-          <p><strong>Rango de Precio:</strong> {{ restaurante.rangoPrecio }}</p>
-          <p *ngIf="restaurante.descripcion"><strong>Descripción:</strong> {{ restaurante.descripcion }}</p>
-          <p *ngIf="restaurante.restriccionesDieteticas?.length">
-            <strong>Restricciones dietéticas:</strong>
-            <span *ngFor="let restriccion of restaurante.restriccionesDieteticas; let last = last">
-              {{ restriccion }}<span *ngIf="!last">, </span>
-            </span>
-          </p>
-        </div>
+      <!-- 🔔 Notificaciones (opcional: duplicado visual del toast si quieres mantener) -->
+      <div *ngIf="notificaciones && notificaciones.length > 0" class="notificaciones-section">
+        <h3><i class="fas fa-bell"></i> Notificaciones</h3>
+        <ul class="notificaciones-list">
+          <li *ngFor="let noti of notificaciones" class="notificacion-item">
+            {{ noti.mensaje }}
+            <button class="cerrar-btn" (click)="cerrarNotificacion(noti.id)">
+              <i class="fas fa-times"></i>
+            </button>
+          </li>
+        </ul>
       </div>
 
-      <!-- ✅ Subida de menú e imágenes para restaurantes -->
-    <div *ngIf="usuario?.rol === 'RESTAURANTE'" class="uploads-section">
-      <h3><i class="fas fa-upload"></i> Subir contenido del restaurante</h3>
-      <div class="uploads-grid">
-
-        <!-- 📄 Subir Menú -->
-        <form class="upload-card" (submit)="subirArchivo($event)">
-          <label><i class="fas fa-file-pdf"></i> Menú (PDF o Imagen)</label>
-          <input type="file" accept=".pdf,image/*" (change)="onFileSelected($event)" required />
-          <button type="submit">Subir menú</button>
-          <p *ngIf="nombreArchivo">📎 {{ nombreArchivo }}</p>
+      <!-- ✅ Preferencias dietéticas para usuario -->
+      <div *ngIf="usuario?.rol === 'USUARIO'" class="extra-section">
+        <h3><i class="fas fa-carrot"></i> Preferencias dietéticas</h3>
+        <form>
+          <div *ngFor="let restriccion of restriccionesEnum" class="checkbox-linea">
+            <label>
+              <input
+                type="checkbox"
+                [value]="restriccion"
+                [checked]="restriccionesSeleccionadas.includes(restriccion)"
+                (change)="toggleRestriccion(restriccion)" />
+              {{ formatearRestriccion(restriccion) }}
+            </label>
+          </div>
+          <br />
+          <button type="button" (click)="guardarPreferencias()">Guardar preferencias</button>
         </form>
-
-        <!-- 🖼️ Subir Imágenes -->
-        <form class="upload-card" (submit)="subirImagenes($event)">
-          <label><i class="fas fa-images"></i> Imágenes del Restaurante</label>
-          <input type="file" accept="image/*" multiple (change)="onImagenesSeleccionadas($event)" />
-          <button type="submit">Subir imágenes</button>
-          <p *ngIf="nombresImagenes.length">📷 {{ nombresImagenes.join(', ') }}</p>
-        </form>
-
       </div>
-    </div>
-
-
-<!-- ✅ Preferencias dietéticas para usuario (con checkbox y visual amigable) -->
-<div *ngIf="usuario?.rol === 'USUARIO'" class="extra-section">
-  <h3><i class="fas fa-carrot"></i> Preferencias dietéticas</h3>
-  <form>
-    <div *ngFor="let restriccion of restriccionesEnum" class="checkbox-linea">
-      <label>
-        <input
-          type="checkbox"
-          [value]="restriccion"
-          [checked]="restriccionesSeleccionadas.includes(restriccion)"
-          (change)="toggleRestriccion(restriccion)" />
-        {{ formatearRestriccion(restriccion) }}
-      </label>
-    </div>
-    <br />
-    <button type="button" (click)="guardarPreferencias()">Guardar preferencias</button>
-  </form>
-</div>
-
-
-
 
       <!-- ✅ Botones de acción -->
       <div class="perfil-actions">
@@ -101,6 +72,43 @@
           (click)="solicitarBaja()">
           <i class="fas fa-user-slash"></i> Solicitar baja de {{ usuario?.rol?.toLowerCase() }}
         </button>
+        <button
+          *ngIf="usuario?.rol === 'USUARIO' || usuario?.rol === 'RESTAURANTE'"
+          class="modificar-btn"
+          (click)="abrirVentanaModificacionUsuario()">
+          <i class="fas fa-edit"></i> Solicitar modificación de mis datos
+        </button>
+      </div>
+
+      <!-- 🌐 Modal de modificación de usuario -->
+      <div class="modal" *ngIf="mostrarVentanaModificacionUsuario">
+        <div class="modal-content">
+          <h3><i class="fas fa-user-edit"></i> Solicitar modificación de usuario</h3>
+
+          <div class="form-group">
+            <label>Campo a modificar:</label>
+            <select [(ngModel)]="campoSeleccionadoUsuario">
+              <option value="" disabled selected>-- Selecciona un campo --</option>
+              <option value="nombre">Nombre</option>
+              <option value="apellidos">Apellidos</option>
+              <option value="email">Email</option>
+            </select>
+          </div>
+
+          <div class="form-group" *ngIf="campoSeleccionadoUsuario">
+            <label>Nuevo valor:</label>
+            <input type="text" [(ngModel)]="nuevoValorUsuario" placeholder="Introduce el nuevo valor" />
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn primary" [disabled]="botonUsuarioDeshabilitado" (click)="enviarModificacionUsuario()">
+              <i class="fas fa-paper-plane"></i> Enviar
+            </button>
+            <button class="btn secondary" (click)="cerrarVentanaModificacionUsuario()">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
+          </div>
+        </div>
       </div>
 
     </div>
