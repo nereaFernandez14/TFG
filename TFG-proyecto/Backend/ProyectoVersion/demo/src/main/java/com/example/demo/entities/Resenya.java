@@ -3,6 +3,7 @@ package com.example.demo.entities;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.*;
@@ -31,14 +32,16 @@ public class Resenya {
 
     @ManyToOne
     @NotNull(message = "El autor es obligatorio.")
+    @JsonBackReference(value = "autor-resenyas")
     private Usuario autor;
 
     @ManyToOne
     @NotNull(message = "El restaurante es obligatorio.")
+    @JsonBackReference(value = "restaurante-resenyas")
     private Restaurante restaurante;
 
     @OneToMany(mappedBy = "resenya", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JsonManagedReference
+    @JsonManagedReference(value = "resenya-imagenes")
     private List<ImagenResenya> imagenes = new ArrayList<>();
 
     public Resenya(String contenido,

@@ -49,10 +49,16 @@ export class RestaurantePerfilComponent implements OnInit {
   obtenerNombreArchivo(ruta: string): string { return ruta.split(/[/\\]/).pop() || ''; }
 
   recargarResenas() {
-    this.http.get<any[]>(`/api/restaurantes/${this.restauranteId}/resenas`).subscribe(data => {
-      this.resenas = data;
+    this.http.get<any[]>(`/api/restaurantes/${this.restauranteId}/resenas`).subscribe({
+      next: data => {
+        this.resenas = data;
+      },
+      error: err => {
+        console.error("❌ Error al recargar reseñas", err);
+      }
     });
   }
+
 
   esAutorDeResena(emailAutor: string): boolean {
   return this.authService.esAutorDeResena(emailAutor);

@@ -82,14 +82,20 @@ public class ResenyaController {
     }
 
     @GetMapping("/restaurantes/{id}/resenas")
-    public ResponseEntity<?> obtenerResenyasDeRestaurante(@PathVariable Long id) {
+    public ResponseEntity<List<ResenyaResponse>> obtenerResenyasDeRestaurante(@PathVariable Long id) {
         try {
             List<ResenyaResponse> resenyas = resenyaService.obtenerResenyasPorRestaurante(id);
-            return ResponseEntity.ok(resenyas);
+            return ResponseEntity
+                .ok()
+                .contentType(MediaType.APPLICATION_JSON) // <- Asegura tipo JSON
+                .body(resenyas);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Error al obtener reseñas"));
+            return ResponseEntity.status(500)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(List.of()); // Devolver lista vacía, o un Map con error
         }
     }
+
 
     @GetMapping("/resenyas/usuario/{restauranteId}")
     public ResponseEntity<?> revisarResenyaUsuario(@PathVariable Long restauranteId) {
