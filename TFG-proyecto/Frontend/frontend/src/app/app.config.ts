@@ -12,6 +12,8 @@ import { HeaderComponent } from './header/header.component';
 import { AdminComponent } from './Admin/admin.component';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { RegisterComponent } from './register/register.component';
+import { SobreNosotrosComponent } from './sobre-nosotros/sobre-nosotros.component';
+
 
 import { AuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
@@ -33,6 +35,10 @@ export const routes: Routes = [
   {
     path: 'home',
     component: HomeComponent
+  },
+   {
+    path: 'sobre-nosotros', 
+    component: SobreNosotrosComponent
   },
   {
     path: 'admin',

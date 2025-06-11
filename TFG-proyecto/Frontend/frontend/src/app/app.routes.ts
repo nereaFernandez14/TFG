@@ -9,6 +9,7 @@ import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { AuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
 import { RedirectIfAuthenticatedGuard } from './guards/redirect-if-authenticated.guard';
+import { SobreNosotrosComponent } from './sobre-nosotros/sobre-nosotros.component';
 import { RestauranteComponent } from './restaurante/restaurante.component';
 
 export const routes: Routes = [
@@ -26,6 +27,10 @@ export const routes: Routes = [
   {
     path: 'home',
     component: HomeComponent
+  },
+  {
+    path: 'sobre-nosotros',
+    component: SobreNosotrosComponent
   },
   {
     path: 'admin',
