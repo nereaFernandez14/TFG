@@ -113,7 +113,7 @@
 
       <div *ngFor="let u of bajasUsuarios" class="admin-card minimal">
         <h3><i class="fas fa-user-clock"></i> Usuario en revisión</h3>
-        <p><strong>Nombre:</strong> {{ u.nombre }} {{ u.apellidos }}</p>
+        <p><strong>Nombre:</strong> {{ u?.nombre }} {{ u?.apellidos }}</p>
         <p><strong>Email:</strong> {{ u.email }}</p>
         <div class="actions">
           <button class="btn danger" (click)="eliminarUsuario(u.id)">
