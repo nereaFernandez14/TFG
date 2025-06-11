@@ -100,6 +100,13 @@ export const routes: Routes = [
     canActivate: [AuthGuard, RoleGuard],
     data: { rol: 'RESTAURANTE' }
   },
+  {
+    path: 'imagenes/modificar',
+    loadComponent: () =>
+      import('./modificar-imagenes/modificar-imagenes.component').then(m => m.ModificarImagenesComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { rol: 'RESTAURANTE' }
+  },
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' }

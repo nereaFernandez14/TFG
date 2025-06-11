@@ -80,7 +80,9 @@ public class SecurityConfig {
                                                                 "/restaurantes/menus/**",
                                                                 "/api/restaurantes/**", // ✅ Ver perfiles de restaurante
                                                                 "/api/imagenes/**", // ✅ Ver imágenes públicas
-                                                                "/resenyas/**")
+                                                                "/resenyas/**",
+                                                                "/api/imagenes/**", 
+                                                                "/uploads/**")
                                                 .permitAll()
 
                                                 // 🔐 Acciones con reseñas (autenticado como USUARIO)
