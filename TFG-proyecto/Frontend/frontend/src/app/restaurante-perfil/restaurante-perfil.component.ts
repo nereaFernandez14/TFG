@@ -22,6 +22,8 @@ export class RestaurantePerfilComponent implements OnInit {
   yaTieneResena: boolean = false;
   imagenActual = 0;
   menuSanitizado: SafeResourceUrl | null = null;
+  resenaDelUsuario: any = null;
+
 
   constructor(
     private route: ActivatedRoute,
@@ -52,12 +54,16 @@ export class RestaurantePerfilComponent implements OnInit {
     this.http.get<any[]>(`/api/restaurantes/${this.restauranteId}/resenas`).subscribe({
       next: data => {
         this.resenas = data;
+        const email = this.authService.getEmailUsuario(); // 👈 asegúrate de tener este método
+        this.resenaDelUsuario = data.find(r => r.autorEmail === email) || null;
+        this.yaTieneResena = !!this.resenaDelUsuario;
       },
       error: err => {
         console.error("❌ Error al recargar reseñas", err);
       }
     });
   }
+
 
 
   esAutorDeResena(emailAutor: string): boolean {
@@ -71,20 +77,6 @@ export class RestaurantePerfilComponent implements OnInit {
     });
   }
 
-  borrarImagenResena(imagenId: number) {
-  this.http.delete(`/api/imagenes/${imagenId}`, { withCredentials: true }).subscribe({
-    next: () => this.recargarResenas(),
-    error: (err) => console.error('❌ Error al borrar imagen', err)
-  });
-}
-borrarContenidoResena(resenaId: number) {
-  this.http.patch(`/api/resenyas/${resenaId}/contenido`, { contenido: '' }, { withCredentials: true })
-    .subscribe({
-      next: () => this.recargarResenas(),
-      error: (err) => console.error('❌ Error al borrar comentario', err)
-    });
-}
-
   anteriorImagen() {
     if (this.restaurante?.imagenes?.length) {
       this.imagenActual = (this.imagenActual - 1 + this.restaurante.imagenes.length) % this.restaurante.imagenes.length;
@@ -95,4 +87,5 @@ borrarContenidoResena(resenaId: number) {
       this.imagenActual = (this.imagenActual + 1) % this.restaurante.imagenes.length;
     }
   }
+  
 }
