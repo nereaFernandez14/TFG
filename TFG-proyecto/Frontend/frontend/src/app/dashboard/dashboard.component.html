@@ -1,25 +1,137 @@
-<div class="dashboard-container">
-  <h2>Panel de Control del Restaurante</h2>
+<!-- 🔔 Toasts de notificación -->
+<!-- 🔔 TOASTS DE NOTIFICACIONES -->
+<div class="toast-container">
+  <div class="toast" *ngFor="let n of notificaciones">
+    <span>{{ n.mensaje }}</span>
+    <button (click)="marcarComoVista(n.id)">✖</button>
+  </div>
+</div>
 
-  <div class="cards-grid" *ngIf="datos">
-    <div class="card">
-      <h3>Visitas</h3>
+
+<div class="dashboard-container" *ngIf="datos; else cargando">
+  <h2><i class="fas fa-tools"></i> Panel de Control del Restaurante</h2>
+
+  <!-- ℹ️ Fila 1: Información -->
+  <div class="cards-row">
+    <div class="card info-card">
+      <h3><i class="fas fa-eye"></i> Visitas</h3>
       <p>{{ datos.visitas }}</p>
     </div>
 
-    <div class="card">
-      <h3>Comentarios</h3>
+    <div class="card info-card">
+      <h3><i class="fas fa-star-half-alt"></i> Valoración Promedio</h3>
+      <p>{{ datos.valoracionPromedio | number:'1.1-2' }} <i class="fas fa-star"></i></p>
+    </div>
+  </div>
+
+  <!-- ✏️ Fila 2: Acciones -->
+  <div class="cards-row">
+    <a class="card link-card" routerLink="/comentarios">
+      <h3><i class="fas fa-comments"></i> Ver Comentarios</h3>
       <p>{{ datos.comentarios }}</p>
+    </a>
+
+    <a class="card link-card" routerLink="/menu/modificar">
+      <h3><i class="fas fa-utensils"></i> Modificar Menú</h3>
+      <p>Haz clic aquí para editar tu menú</p>
+    </a>
+
+    <a class="card link-card" routerLink="/imagenes/modificar">
+      <h3><i class="fas fa-images"></i> Modificar Imágenes</h3>
+      <p>Gestiona las fotos del restaurante</p>
+    </a>
+
+    <!-- ⚙️ Nueva tarjeta: Solicitar modificación -->
+    <button class="card link-card" (click)="abrirVentanaModificacion()">
+      <h3><i class="fas fa-edit"></i> Solicitar modificación</h3>
+      <p>Cambiar información del restaurante</p>
+    </button>
+  </div>
+
+  <!-- ❌ Baja -->
+  <div class="cards-row">
+    <button class="card danger-card" (click)="pedirBajaRestaurante()">
+      <i class="fas fa-user-slash"></i> Solicitar baja del restaurante
+    </button>
+  </div>
+</div>
+
+<ng-template #cargando>
+  <p><i class="fas fa-spinner fa-spin"></i> Cargando datos del dashboard...</p>
+</ng-template>
+
+<!-- 🌐 Modal de modificación -->
+<!-- 🌐 Modal de modificación -->
+<div class="modal" *ngIf="mostrarVentanaModificacion">
+  <div class="modal-content">
+    <h3><i class="fas fa-pencil-alt"></i> Solicitar modificación</h3>
+
+    <!-- Selección de campo -->
+    <div class="form-group">
+      <label for="campo">Campo a modificar: </label>
+      <select id="campo" [(ngModel)]="campoSeleccionado">
+          <option value="" disabled selected>-- Selecciona un campo --</option>
+          <option *ngFor="let campo of camposDisponibles" [value]="campo.value">{{ campo.label }}</option>
+      </select>
     </div>
 
-    <div class="card">
-      <h3>Valoración Promedio</h3>
-      <p>{{ datos.valoracionPromedio }} ⭐</p>
+    <!-- Valor nuevo: tipoCocina -->
+    <div *ngIf="campoSeleccionado === 'tipoCocina'" class="form-group">
+      <label>Nuevo valor: </label>
+      <select [(ngModel)]="nuevoValor">
+        <option value="" disabled>-- Selecciona un tipo --</option>
+        <option *ngFor="let val of tipoCocinaEnum" [value]="val">{{ val }}</option>
+      </select>
+
+      <!-- Si elige OTRO, mostrar campo personalizado -->
+      <div *ngIf="nuevoValor === 'OTRO'" class="form-group">
+        <label>Especifica el tipo personalizado: </label>
+        <input type="text" [(ngModel)]="valorPersonalizado" placeholder="Introduce el tipo de cocina" />
+      </div>
     </div>
 
-    <div class="card link-card" routerLink="/menu/modificar">
-      <h3>Modificar Menú</h3>
-      <p>Haz clic aquí para editar tu carta</p>
+    <!-- Valor nuevo: restricciones dietéticas -->
+    <div *ngIf="campoSeleccionado === 'restriccionesDieteticas'" class="form-group">
+      <label>Nuevo valor: </label>
+      <select multiple [(ngModel)]="nuevoValorMultiple">
+        <option *ngFor="let val of restriccionesEnum" [value]="val">{{ val }}</option>
+      </select>
+    </div>
+
+    <!-- Valor nuevo: barrio -->
+    <div *ngIf="campoSeleccionado === 'barrio'" class="form-group">
+      <label>Nuevo valor: </label>
+      <select [(ngModel)]="nuevoValor">
+        <option value="" disabled>-- Selecciona un barrio --</option>
+        <option *ngFor="let val of barrioEnum" [value]="val">{{ val }}</option>
+      </select>
+    </div>
+
+    <!-- Valor nuevo: rango de precio -->
+    <div *ngIf="campoSeleccionado === 'rangoPrecio'" class="form-group">
+      <label>Nuevo valor: </label>
+      <select [(ngModel)]="nuevoValor">
+        <option value="" disabled>-- Selecciona un rango --</option>
+        <option *ngFor="let val of rangoPrecioEnum" [value]="val">{{ val }}</option>
+      </select>
+    </div>
+
+    <!-- Texto libre: nombre, dirección, teléfono, email -->
+    <div *ngIf="['nombre', 'direccion', 'telefono', 'email'].includes(campoSeleccionado)" class="form-group">
+      <label>Nuevo valor: </label>
+      <input type="text" [(ngModel)]="nuevoValor" placeholder="Introduce el nuevo valor" />
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="modal-actions">
+      <button [disabled]="botonDeshabilitado" (click)="enviarPeticionModificacion()" class="btn primary"> Enviar
+        <i class="fas fa-paper-plane"></i> Enviar
+      </button>
+
+      <button (click)="cerrarVentanaModificacion()" class="btn secondary">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
     </div>
   </div>
 </div>
+

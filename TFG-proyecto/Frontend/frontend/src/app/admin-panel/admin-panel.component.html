@@ -1,0 +1,129 @@
+<div class="admin-container">
+  <!-- 🔔 Notificaciones del ADMIN -->
+  <div *ngIf="notificaciones.length > 0" class="notificaciones-admin">
+    <div *ngFor="let n of notificaciones" class="alert alert-dark d-flex justify-content-between align-items-center shadow-sm">
+      <div>📝 {{ n.mensaje }}</div>
+      <button (click)="marcarComoVista(n.id)" class="btn btn-sm btn-outline-danger">✖</button>
+    </div>
+  </div>
+
+  <h1><i class="fas fa-tools"></i> Panel de Administración</h1>
+
+  <!-- SECCIÓN: DENUNCIAS -->
+  <section class="accordion">
+    <button class="accordion-toggle" (click)="toggleSeccion('denuncias')">
+      <i class="fas fa-comment-dots"></i> Denuncias de Comentarios
+      <i class="fas" [ngClass]="{ 'fa-chevron-down': !seccionesAbiertas.denuncias, 'fa-chevron-up': seccionesAbiertas.denuncias }"></i>
+    </button>
+    <div class="accordion-content" [class.open]="seccionesAbiertas.denuncias">
+      <p *ngIf="denuncias.length === 0" class="empty-message">
+        <i class="fas fa-inbox"></i> No hay denuncias pendientes.
+      </p>
+
+      <div *ngFor="let denuncia of denuncias" class="admin-card minimal">
+        <h3><i class="fas fa-flag"></i> Comentario denunciado</h3>
+        <p><strong>Comentario:</strong> "{{ denuncia.contenido }}"</p>
+        <p><strong>Restaurante:</strong> {{ denuncia.restaurante.nombre }}</p>
+        <div class="actions">
+          <button class="btn primary" (click)="aceptarDenuncia(denuncia.id)">
+            <i class="fas fa-check-circle"></i> Aceptar
+          </button>
+          <button class="btn secondary" (click)="rechazarDenuncia(denuncia.id)">
+            <i class="fas fa-times-circle"></i> Rechazar
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN: BAJAS RESTAURANTES -->
+  <section class="accordion">
+    <button class="accordion-toggle" (click)="toggleSeccion('restaurantes')">
+      <i class="fas fa-store-alt-slash"></i> Bajas de Restaurantes
+      <i class="fas" [ngClass]="{ 'fa-chevron-down': !seccionesAbiertas.restaurantes, 'fa-chevron-up': seccionesAbiertas.restaurantes }"></i>
+    </button>
+    <div class="accordion-content" [class.open]="seccionesAbiertas.restaurantes">
+      <p *ngIf="bajasRestaurantes.length === 0" class="empty-message">
+        <i class="fas fa-inbox"></i> No hay peticiones.
+      </p>
+
+      <div *ngFor="let r of bajasRestaurantes" class="admin-card minimal">
+        <h3><i class="fas fa-utensils"></i> Restaurante en revisión</h3>
+        <p><strong>Nombre:</strong> {{ r.nombre }}</p>
+        <p><strong>Email:</strong> {{ r.email }}</p>
+        <div class="actions">
+          <button class="btn danger" (click)="eliminarRestaurante(r.id)">
+            <i class="fas fa-trash-alt"></i> Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN: MODIFICAR DATOS RESTAURANTES -->
+  <section class="accordion">
+    <button class="accordion-toggle" (click)="toggleSeccion('modificar')">
+      <i class="fas fa-pen-square"></i> Modificar datos de Restaurantes
+      <i class="fas" [ngClass]="{ 'fa-chevron-down': !seccionesAbiertas.modificar, 'fa-chevron-up': seccionesAbiertas.modificar }"></i>
+    </button>
+    <div class="accordion-content" [class.open]="seccionesAbiertas.modificar">
+      <p *ngIf="modificaciones.length === 0" class="empty-message">
+        <i class="fas fa-inbox"></i> No hay solicitudes de modificación.
+      </p>
+
+      <div *ngFor="let m of modificaciones" class="admin-card minimal">
+        <h3><i class="fas fa-edit"></i> Modificar restaurante</h3>
+        <p><strong>Restaurante:</strong> {{ m.restaurante.nombre }}</p>
+        <p><strong>Email:</strong> {{ m.restaurante.email }}</p>
+        <p><strong>Campo solicitado:</strong> {{ m.campo }}</p>
+        <p><strong>Nuevo valor:</strong> {{ m.nuevoValor }}</p>
+
+        <div class="modificacion-campo">
+          <label>Confirmar campo:</label>
+          <select [(ngModel)]="campoSeleccionado[m.restaurante.id]">
+            <option value="">-- Selecciona --</option>
+            <option *ngFor="let campo of camposEditables" [value]="campo.value">{{ campo.label }}</option>
+          </select>
+
+          <input
+            *ngIf="campoSeleccionado[m.restaurante.id]"
+            [(ngModel)]="nuevoValor[m.restaurante.id]"
+            type="text"
+            placeholder="Nuevo valor confirmado"
+          />
+
+          <button class="btn secondary" (click)="actualizarCampoRestaurante(m.restaurante.id)">
+            <i class="fas fa-edit"></i> Modificar
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN: BAJAS USUARIOS -->
+  <section class="accordion">
+    <button class="accordion-toggle" (click)="toggleSeccion('usuarios')">
+      <i class="fas fa-user-slash"></i> Bajas de Usuarios
+      <i class="fas" [ngClass]="{ 'fa-chevron-down': !seccionesAbiertas.usuarios, 'fa-chevron-up': seccionesAbiertas.usuarios }"></i>
+    </button>
+    <div class="accordion-content" [class.open]="seccionesAbiertas.usuarios">
+      <p *ngIf="bajasUsuarios.length === 0" class="empty-message">
+        <i class="fas fa-inbox"></i> No hay peticiones.
+      </p>
+
+      <div *ngFor="let u of bajasUsuarios" class="admin-card minimal">
+        <h3><i class="fas fa-user-clock"></i> Usuario en revisión</h3>
+        <p><strong>Nombre:</strong> {{ u.nombre }} {{ u.apellidos }}</p>
+        <p><strong>Email:</strong> {{ u.email }}</p>
+        <div class="actions">
+          <button class="btn danger" (click)="eliminarUsuario(u.id)">
+            <i class="fas fa-user-times"></i> Eliminar Usuario
+          </button>
+          <button class="btn secondary" (click)="rechazarBajaUsuario(u.id)">
+            <i class="fas fa-ban"></i> Rechazar
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

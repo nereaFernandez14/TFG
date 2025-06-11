@@ -26,4 +26,6 @@ export interface Restaurante {
   resenyas?: Resenya[];
   mediaPuntuacion?: number;
   descripcion?: string;
+  rutaMenu?: string; // Ruta al menú del restaurante
+  solicitaBaja?: boolean; // Indica si el restaurante ha solicitado la baja
 }

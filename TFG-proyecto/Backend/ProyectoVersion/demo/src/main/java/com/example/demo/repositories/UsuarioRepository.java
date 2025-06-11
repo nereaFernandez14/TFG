@@ -19,4 +19,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     List<Usuario> findByRol(RolNombre rol);
 
+    List<Usuario> findBySolicitaBajaTrue();
+
 }

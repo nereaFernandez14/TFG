@@ -29,9 +29,13 @@ export class RestauranteService {
   }
 
   obtenerRestaurantePorUsuario(idUsuario: number): Observable<Restaurante> {
-    const params = new HttpParams().set('idUsuario', idUsuario.toString());
-    return this.http.get<Restaurante>(`${this.apiUrl}/mio`, { params });
+    return this.http.get<Restaurante>(`/api/restaurantes/mio`, {
+      params: new HttpParams().set('idUsuario', idUsuario.toString()),
+      withCredentials: true 
+    });
   }
+
+
   obtenerRestaurantePorId(id: number): Observable<Restaurante> {
     return this.http.get<Restaurante>(`${this.apiUrl}/${id}`);
   }

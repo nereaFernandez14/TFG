@@ -3,6 +3,8 @@ package com.example.demo.entities;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -19,6 +21,8 @@ public class Resenya {
     private Long id;
 
     private String contenido;
+    @Column
+    private boolean denunciado = false;
 
     @NotNull(message = "La valoración es obligatoria.")
     @Min(value = 1, message = "La valoración mínima es 1.")
@@ -33,7 +37,8 @@ public class Resenya {
     @NotNull(message = "El restaurante es obligatorio.")
     private Restaurante restaurante;
 
-    @OneToMany(mappedBy = "resenya", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "resenya", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference
     private List<ImagenResenya> imagenes = new ArrayList<>();
 
     public Resenya(String contenido,

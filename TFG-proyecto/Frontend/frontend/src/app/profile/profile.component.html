@@ -1,8 +1,8 @@
 <div class="perfil-wrapper">
-
-  <!-- Contenido principal del perfil -->
   <section class="perfil-contenido">
     <div class="perfil-container">
+
+      <!-- 👤 Info del Usuario -->
       <div class="perfil-card">
         <div class="perfil-header">
           <i class="fas fa-user-circle perfil-icon"></i>
@@ -22,26 +22,87 @@
         </div>
       </div>
 
+      <!-- 🍽️ Info extendida del restaurante -->
+      <div *ngIf="usuario?.rol === 'RESTAURANTE' && restaurante" class="restaurante-info-section">
+        <h3><i class="fas fa-store"></i> Detalles de tu Restaurante</h3>
+        <div class="restaurante-grid">
+          <p><strong>Nombre:</strong> {{ restaurante.nombre }}</p>
+          <p><strong>Dirección:</strong> {{ restaurante.direccion }}</p>
+          <p><strong>Barrio:</strong> {{ restaurante.barrio }}</p>
+          <p><strong>Teléfono:</strong> {{ restaurante.telefono }}</p>
+          <p><strong>Email:</strong> {{ restaurante.email }}</p>
+          <p><strong>Tipo de Cocina:</strong>
+            {{ restaurante.tipoCocina === 'OTRO' ? restaurante.tipoCocinaPersonalizado : restaurante.tipoCocina }}
+          </p>
+          <p><strong>Rango de Precio:</strong> {{ restaurante.rangoPrecio }}</p>
+          <p *ngIf="restaurante.descripcion"><strong>Descripción:</strong> {{ restaurante.descripcion }}</p>
+          <p *ngIf="restaurante.restriccionesDieteticas?.length">
+            <strong>Restricciones dietéticas:</strong>
+            <span *ngFor="let restriccion of restaurante.restriccionesDieteticas; let last = last">
+              {{ restriccion }}<span *ngIf="!last">, </span>
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <!-- ✅ Subida de menú e imágenes para restaurantes -->
+    <div *ngIf="usuario?.rol === 'RESTAURANTE'" class="uploads-section">
+      <h3><i class="fas fa-upload"></i> Subir contenido del restaurante</h3>
+      <div class="uploads-grid">
+
+        <!-- 📄 Subir Menú -->
+        <form class="upload-card" (submit)="subirArchivo($event)">
+          <label><i class="fas fa-file-pdf"></i> Menú (PDF o Imagen)</label>
+          <input type="file" accept=".pdf,image/*" (change)="onFileSelected($event)" required />
+          <button type="submit">Subir menú</button>
+          <p *ngIf="nombreArchivo">📎 {{ nombreArchivo }}</p>
+        </form>
+
+        <!-- 🖼️ Subir Imágenes -->
+        <form class="upload-card" (submit)="subirImagenes($event)">
+          <label><i class="fas fa-images"></i> Imágenes del Restaurante</label>
+          <input type="file" accept="image/*" multiple (change)="onImagenesSeleccionadas($event)" />
+          <button type="submit">Subir imágenes</button>
+          <p *ngIf="nombresImagenes.length">📷 {{ nombresImagenes.join(', ') }}</p>
+        </form>
+
+      </div>
+    </div>
+
+
+<!-- ✅ Preferencias dietéticas para usuario (con checkbox y visual amigable) -->
+<div *ngIf="usuario?.rol === 'USUARIO'" class="extra-section">
+  <h3><i class="fas fa-carrot"></i> Preferencias dietéticas</h3>
+  <form>
+    <div *ngFor="let restriccion of restriccionesEnum" class="checkbox-linea">
+      <label>
+        <input
+          type="checkbox"
+          [value]="restriccion"
+          [checked]="restriccionesSeleccionadas.includes(restriccion)"
+          (change)="toggleRestriccion(restriccion)" />
+        {{ formatearRestriccion(restriccion) }}
+      </label>
+    </div>
+    <br />
+    <button type="button" (click)="guardarPreferencias()">Guardar preferencias</button>
+  </form>
+</div>
+
+
+
+
+      <!-- ✅ Botones de acción -->
       <div class="perfil-actions">
         <button type="button" (click)="irACambiarPassword()">Cambiar contraseña</button>
+        <button
+          *ngIf="usuario?.rol === 'USUARIO' || usuario?.rol === 'RESTAURANTE'"
+          class="baja-btn"
+          (click)="solicitarBaja()">
+          <i class="fas fa-user-slash"></i> Solicitar baja de {{ usuario?.rol?.toLowerCase() }}
+        </button>
       </div>
 
-      <!-- ✅ Sección para RESTAURANTE -->
-      <!--<div *ngIf="usuario?.rol === 'RESTAURANTE'" class="extra-section">
-        <p>¿Tienes un restaurante? ¡Añádelo ahora para empezar a recibir reseñas!</p>
-        <button type="button" (click)="irACrearRestaurante()">Añadir restaurante</button>
-      </div>-->
-
-      <!-- ✅ Sección para USUARIO -->
-      <div *ngIf="usuario?.rol === 'USUARIO'" class="extra-section">
-        <h3>Preferencias dietéticas</h3>
-        <form>
-          <label for="restricciones">Indica tus alergias o restricciones:</label>
-          <textarea id="restricciones" rows="4" cols="50" placeholder="Ej: Sin gluten, vegano..."></textarea>
-          <br />
-          <button type="button">Guardar preferencias</button>
-        </form>
-      </div>
     </div>
   </section>
 </div>

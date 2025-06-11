@@ -66,11 +66,18 @@ export class HeaderComponent implements OnInit {
   private comprobarEstadoRestaurante(idUsuario: number): void {
     this.restauranteService.obtenerRestaurantePorUsuario(idUsuario).subscribe({
       next: (restaurante) => {
-        this.puedeRegistrarRestaurante.set(!restaurante);
+        const registrado = restaurante && restaurante.id != null;
+        this.puedeRegistrarRestaurante.set(!registrado);
       },
-      error: () => {
+      error: (err) => {
+        if (err.status === 404) {
+          console.info("ℹ️ No hay restaurante, se puede registrar");
+        } else {
+          console.error("❌ Error inesperado consultando restaurante:", err);
+        }
         this.puedeRegistrarRestaurante.set(true);
       }
+
     });
   }
 

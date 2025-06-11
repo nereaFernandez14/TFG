@@ -94,6 +94,24 @@ export class UsuarioService {
       new Error(error.error?.message || 'Error inesperado en la petición.')
     );
   }
-}
 
+  
+  subirMenu(formData: FormData) {
+      return this.http.post(`${environment.apiUrl}/restaurantes/subir-menu`, formData, {
+      withCredentials: true
+    });
+  }
+  solicitarBaja(id: number) {
+    return this.http.post(`${this.apiUrl}/usuarios/${id}/solicitar-baja`, {}, {
+      withCredentials: true
+    });
+
+  }
+  subirImagenes(formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/usuarios/subir-imagenes`, formData, {
+      withCredentials: true
+    });
+  }
+
+}
 export { Usuario };

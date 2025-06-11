@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -25,6 +26,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
         @Bean
@@ -42,11 +44,24 @@ public class SecurityConfig {
                                                                 "/api/sesion",
                                                                 "/restaurantes/buscar",
                                                                 "/restaurantes/**",
-                                                                "/resenyas/**", // ✅ Añadido igual que restaurante
+                                                                "/resenyas/**",
                                                                 "/roles",
-                                                                "/change-password"))
+                                                                "/change-password",
+                                                                "/usuarios/*/solicitar-baja",
+                                                                "/api/usuarios/*/solicitar-baja",
+                                                                "/admin/**",
+                                                                "/api/usuarios/subir-imagenes",
+                                                                "/usuarios/subir-imagenes",
+                                                                "/api/restaurantes/*/solicitar-modificacion",
+                                                                "/api/notificaciones/**", // ✅ Ignorar CSRF para
+                                                                                          // notificaciones
+                                                                "/notificaciones/**" // ✅ Incluye también sin prefijo
+                                                                                     // /api
+                                                ))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                                                // 👇 Endpoints públicos
                                                 .requestMatchers(
                                                                 "/register",
                                                                 "/api/register",
@@ -60,14 +75,28 @@ public class SecurityConfig {
                                                                 "/change-password",
                                                                 "/error",
                                                                 "/restaurantes/filtrar-avanzado",
-                                                                "/restaurantes/**",
-                                                                "/resenyas/**" // ✅ Igual que restaurante
-                                                ).permitAll()
-                                                .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO") // ✅
-                                                                                                                  // Mantiene
-                                                                                                                  // lógica
-                                                                                                                  // de
-                                                                                                                  // seguridad
+                                                                "/restaurantes/menus/**",
+                                                                "/resenyas/**")
+                                                .permitAll()
+
+                                                // 👇 Roles específicos
+                                                .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO")
+                                                .requestMatchers(HttpMethod.POST, "/restaurantes/subir-menu")
+                                                .hasRole("RESTAURANTE")
+                                                .requestMatchers(HttpMethod.POST,
+                                                                "/api/restaurantes/*/solicitar-modificacion")
+                                                .hasRole("RESTAURANTE")
+
+                                                .requestMatchers("/admin/**").hasRole("ADMIN")
+
+                                                // ✅ Notificaciones (ADMIN y RESTAURANTE)
+                                                .requestMatchers(HttpMethod.GET, "/api/notificaciones")
+                                                .hasRole("RESTAURANTE")
+                                                .requestMatchers(HttpMethod.GET, "/api/notificaciones/admin")
+                                                .hasRole("ADMIN")
+                                                .requestMatchers(HttpMethod.PUT, "/api/notificaciones/*/marcar-vista")
+                                                .hasAnyRole("RESTAURANTE", "ADMIN")
+
                                                 .anyRequest().authenticated())
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))

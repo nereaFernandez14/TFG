@@ -1,59 +1,227 @@
-/* src/app/dashboard/dashboard.component.css */
-
 .dashboard-container {
   padding: 2rem;
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
-  color: #333;
+  color: #2c3e50;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 h2 {
   text-align: center;
   margin-bottom: 2rem;
-  font-size: 2rem;
-  color: #004d40;
+  font-size: 2.4rem;
+  color: #1a237e;
+  font-weight: 600;
 }
 
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+.cards-row {
+  display: flex;
+  flex-wrap: wrap;
   gap: 1.5rem;
+  justify-content: center;
+  margin-bottom: 2rem;
 }
 
+/* Base Card Compacto */
 .card {
-  background-color: #ffffff;
+  flex: 1 1 240px;
+  min-width: 220px;
+  max-width: 280px;
+  min-height: 130px;
+
+  background: #ffffff;
   border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  padding: 1.2rem;
+  text-align: center;
+
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+  border: 1px solid #e0e0e0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
 .card h3 {
-  margin-bottom: 0.8rem;
-  font-size: 1.2rem;
-  color: #00695c;
+  font-size: 1.1rem;
+  color: #1565c0;
+  margin-bottom: 0.4rem;
 }
 
 .card p {
-  font-size: 1.8rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #37474f;
+}
+
+/* Acciones */
+.link-card {
+  background-color: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.link-card:hover {
+  background-color: #bbdefb;
+}
+
+.info-card {
+  background-color: #fefefe;
+}
+
+/* Danger Card (dar de baja) */
+.danger-card {
+  background-color: #ffebee;
+  border-left: 4px solid #c62828;
+  color: #b71c1c;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 1.2rem 1.5rem;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  width: 100%;
+  max-width: 280px;
+  text-align: center;
+  border: 1px solid #ffcdd2;
+}
+
+.danger-card:hover {
+  background-color: #ffcdd2;
+  transform: scale(1.02);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .card {
+    min-width: 95%;
+    height: auto;
+  }
+}
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toast {
+  background-color: #323232;
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.toast button {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  margin-left: 12px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.toast button:hover {
+  color: #ff6b6b;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: #fefefe;
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h3 {
+  margin-bottom: 1rem;
+}
+
+.modal-content label {
+  display: block;
   font-weight: bold;
+  margin-top: 1rem;
+}
+
+.modal-content select,
+.modal-content input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 0.3rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.modal-content select:focus,
+.modal-content input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.modal-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.modal-actions .btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.modal-actions .btn.primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.modal-actions .btn.secondary {
+  background-color: #ccc;
   color: #333;
 }
 
-.card.actionable {
-  cursor: pointer;
-  background-color: #e0f2f1;
-}
 
-.card.actionable:hover {
-  background-color: #b2dfdb;
-}
 
-.card.highlight {
-  background-color: #fff8e1;
-}

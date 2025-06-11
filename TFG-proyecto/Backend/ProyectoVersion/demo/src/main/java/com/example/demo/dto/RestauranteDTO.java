@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 public class RestauranteDTO {
 
     private Long id;
+    private String email;
 
     @NotBlank(message = "El nombre es obligatorio.")
     private String nombre;
@@ -42,6 +43,8 @@ public class RestauranteDTO {
     private List<RestriccionDietetica> restricciones;
 
     private List<String> comentarios;
+    private String rutaMenu; 
+ 
 
     // ✅ NUEVOS CAMPOS PARA DASHBOARD
     private int visitas;
@@ -59,6 +62,7 @@ public class RestauranteDTO {
         this.id = restaurante.getId();
         this.nombre = restaurante.getNombre();
         this.direccion = restaurante.getDireccion();
+        this.email = restaurante.getEmail();
         this.tipoCocina = restaurante.getTipoCocina();
         this.barrio = restaurante.getBarrio();
         this.telefono = restaurante.getTelefono();
@@ -76,6 +80,8 @@ public class RestauranteDTO {
         // 👇 Datos nuevos del dashboard
         this.visitas = restaurante.getVisitas();
         this.cantidadComentarios = restaurante.getResenyas() != null ? restaurante.getResenyas().size() : 0;
+        this.rutaMenu = restaurante.getRutaMenu();
+
     }
 
     public RestauranteDTO() {

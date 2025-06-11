@@ -1,0 +1,21 @@
+<div class="menu-container">
+  <h2>📄 Modificar Menú</h2>
+
+  <!-- Mostrar enlace de descarga si hay menú -->
+  <div *ngIf="menuUrl" class="menu-actual">
+    <h3>Menú actual:</h3>
+    <a [href]="menuUrl" download target="_blank" rel="noopener noreferrer" class="menu-link">
+      Descargar menú actual
+    </a>
+  </div>
+
+  <div class="upload-section">
+    <label for="menu">Selecciona un nuevo menú:</label>
+    <input type="file" id="menu" (change)="onArchivoSeleccionado($event)" accept="application/pdf,image/*" />
+
+    <button (click)="subirMenu()">Subir Menú</button>
+
+    <p class="mensaje" *ngIf="mensaje">{{ mensaje }}</p>
+    <p class="error" *ngIf="error">{{ error }}</p>
+  </div>
+</div>

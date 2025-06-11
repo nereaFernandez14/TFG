@@ -6,4 +6,6 @@ export interface Usuario {
   apellidos: string;
   email: string;
   rol: RolNombre;
+  solicitaBaja?: boolean;
+
 }

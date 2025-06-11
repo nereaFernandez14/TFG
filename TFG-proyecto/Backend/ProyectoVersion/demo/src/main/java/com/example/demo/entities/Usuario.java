@@ -35,6 +35,9 @@ public class Usuario {
 
     @Column(name = "esta_registrado")
     private boolean estaRegistrado = false;
+    @Column(nullable = false)
+    private boolean solicitaBaja = false;
+
 
     public boolean isEstaRegistrado() {
         return estaRegistrado;

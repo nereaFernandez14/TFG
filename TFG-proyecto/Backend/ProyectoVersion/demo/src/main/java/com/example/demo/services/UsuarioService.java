@@ -71,5 +71,12 @@ public class UsuarioService {
         usuario.setPassword(passwordEncoder.encode(request.getNewPassword()));
         usuarioRepository.save(usuario);
     }
+    /*public void marcarSolicitudDeBaja(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        usuario.setSolicitaBaja(true);
+        usuarioRepository.save(usuario);
+    }*/
+
 
 }

@@ -4,13 +4,18 @@ import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { HeaderComponent } from './header/header.component';
-import { AdminComponent } from './Admin/admin.component';
+import { AdminPanelComponent } from './admin-panel/admin-panel-component';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { AuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
 import { RedirectIfAuthenticatedGuard } from './guards/redirect-if-authenticated.guard';
 import { SobreNosotrosComponent } from './sobre-nosotros/sobre-nosotros.component';
 import { RestauranteComponent } from './restaurante/restaurante.component';
+import { redirectRestauranteGuard } from './guards/redirect-restaurante.guard';
+import { MisResenyasComponent } from './mis-resenyas/mis-resenyas.component';
+import { AdminGuard } from './guards/admin.guard';
+import { redirectAdminGuard } from './guards/redirectAdminGuard';
+
 
 export const routes: Routes = [
   { path: 'header', component: HeaderComponent },
@@ -26,9 +31,11 @@ export const routes: Routes = [
   },
   {
     path: 'home',
-    component: HomeComponent
+    component: HomeComponent,
+    canActivate: [redirectRestauranteGuard, redirectAdminGuard]
   },
   {
+<<<<<<< HEAD
     path: 'sobre-nosotros',
     component: SobreNosotrosComponent
   },
@@ -37,6 +44,11 @@ export const routes: Routes = [
     component: AdminComponent,
     canActivate: [AuthGuard, RoleGuard],
     data: { rol: 'admin' }
+=======
+    path: 'admin-panel',
+    loadComponent: () => import('./admin-panel/admin-panel-component').then(m => m.AdminPanelComponent),
+    canActivate: [AdminGuard] 
+>>>>>>> origin/Rama_Alexandra
   },
   {
     path: 'profile',
@@ -78,6 +90,21 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     data: { rol: 'USUARIO' }
   },
+  {
+    path: 'comentarios',
+    loadComponent: () =>
+      import('./mis-resenyas/mis-resenyas.component').then(m => m.MisResenyasComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { rol: 'RESTAURANTE' }
+  },
+  {
+    path: 'menu/modificar',
+    loadComponent: () =>
+      import('./modificar-menu/modificar-menu.component').then(m => m.ModificarMenuComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { rol: 'RESTAURANTE' }
+  },
+
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' }

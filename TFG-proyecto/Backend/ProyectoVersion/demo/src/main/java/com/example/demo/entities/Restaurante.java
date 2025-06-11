@@ -20,6 +20,9 @@ public class Restaurante {
 
     @Column(unique = true, nullable = false)
     private String nombre;
+    @Column(name = "ruta_menu")
+    private String rutaMenu;
+
 
     private String direccion;
     private String telefono;
@@ -46,6 +49,14 @@ public class Restaurante {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RangoPrecio rangoPrecio;
+    @Column(nullable = false)
+    private boolean solicitaBaja = false;
+    @ElementCollection
+    @CollectionTable(name = "restaurante_imagenes", joinColumns = @JoinColumn(name = "restaurante_id"))
+    @Column(name = "nombre_imagen")
+    private List<String> imagenes = new ArrayList<>();
+
+
 
     @ElementCollection(targetClass = RestriccionDietetica.class)
     @Enumerated(EnumType.STRING)
@@ -60,13 +71,12 @@ public class Restaurante {
     public Restaurante() {
     }
 
-    public Restaurante(String nombre, String direccion, String telefono, String email, String password,
+    public Restaurante(String nombre, String direccion, String telefono, String email,
             TipoCocina tipoCocina, Barrio barrio, RangoPrecio rangoPrecio) {
         this.nombre = nombre;
         this.direccion = direccion;
         this.telefono = telefono;
         this.email = email;
-        this.password = password;
         this.tipoCocina = tipoCocina;
         this.barrio = barrio;
         this.rangoPrecio = rangoPrecio;

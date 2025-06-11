@@ -1,8 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router'; // 🧭
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-resenya',
@@ -11,7 +11,7 @@ import { Router } from '@angular/router'; // 🧭
   templateUrl: './resenya.component.html',
   styleUrls: ['./resenya.component.css']
 })
-export class ResenyaComponent {
+export class ResenyaComponent implements OnInit {
   @Input() restauranteId!: number;
   @Input() restauranteNombre: string = '';
   @Output() resenaEnviada = new EventEmitter<void>();
@@ -21,6 +21,8 @@ export class ResenyaComponent {
   puntuacionSeleccionada = 0;
   puntuacionHover = 0;
   mostrarExito = false;
+  mostrarError = false;
+  mensajeError = '';
   visible = true;
 
   imagenes: File[] = [];
@@ -28,30 +30,53 @@ export class ResenyaComponent {
   palabrasMalas = ['puta', 'mierda', 'gilipollas', 'estúpido'];
   comentarioValido = true;
 
+  yaTieneResena = false;
+  cargandoEstadoResena = true;
+
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
-    private router: Router // 🧭 Inyección de router
+    private router: Router
   ) {
     this.resenyaForm = this.fb.group({
       comentario: ['', [Validators.required, Validators.maxLength(300)]]
     });
   }
 
+  ngOnInit() {
+    this.http.get<{ yaExiste: boolean, puntuacion?: number }>(`/api/resenyas/usuario/${this.restauranteId}`, {
+      withCredentials: true
+    }).subscribe({
+      next: (res) => {
+        this.yaTieneResena = res.yaExiste;
+        this.puntuacionSeleccionada = res.puntuacion ?? 0;
+        this.cargandoEstadoResena = false;
+      },
+      error: (err) => {
+        console.error('❌ Error verificando existencia de reseña:', err);
+        this.cargandoEstadoResena = false;
+      }
+    });
+  }
+
   seleccionarPuntuacion(valor: number) {
+    if (this.yaTieneResena) return; // ❌ no permitir modificar la puntuación
     this.puntuacionSeleccionada = valor;
   }
 
   destacarPuntuacion(valor: number) {
+    if (this.yaTieneResena) return;
     this.puntuacionHover = valor;
   }
 
   resetearHover() {
+    if (this.yaTieneResena) return;
     this.puntuacionHover = 0;
   }
 
   enviarResena() {
     this.validarComentario();
+    this.resetMensajes();
     if (!this.comentarioValido) return;
 
     const formData = new FormData();
@@ -59,26 +84,60 @@ export class ResenyaComponent {
     formData.append('contenido', this.resenyaForm.value.comentario);
     formData.append('valoracion', this.puntuacionSeleccionada.toString());
 
-    this.imagenes.forEach(file => {
-      formData.append('imagenes', file);
-    });
+    this.imagenes.forEach(file => formData.append('imagenes', file));
 
-    this.http.post(`/api/resenyas`, formData, {
-      withCredentials: true
-    }).subscribe({
+    this.http.post(`/api/resenyas`, formData, { withCredentials: true }).subscribe({
       next: () => {
-        console.log('✅ Reseña enviada correctamente');
         this.mostrarExito = true;
         this.resenaEnviada.emit();
-
-        // Redirige y recarga la página para ver la reseña publicada
-        this.router.navigate([`/restaurantes/${this.restauranteId}`]).then(() => {
-          window.location.reload(); // 🔁 fuerza recarga para ver la reseña nueva
-        });
+        this.recargarPagina();
       },
-      error: (err) => {
-        console.error('❌ Error al enviar reseña:', err);
-      }
+      error: (err) => this.procesarError(err)
+    });
+  }
+
+  actualizarResena() {
+    this.validarComentario();
+    this.resetMensajes();
+    if (!this.comentarioValido) return;
+
+    const formData = new FormData();
+    formData.append('restauranteId', this.restauranteId.toString());
+    formData.append('contenido', this.resenyaForm.value.comentario);
+    this.imagenes.forEach(file => formData.append('imagenes', file));
+
+    this.http.put(`/api/resenyas`, formData, { withCredentials: true }).subscribe({
+      next: () => {
+        this.mostrarExito = true;
+        this.resenaEnviada.emit();
+        this.recargarPagina();
+      },
+      error: (err) => this.procesarError(err)
+    });
+  }
+
+  procesarError(err: any) {
+    this.mostrarError = true;
+    if (err.status === 400 && err.error?.error) {
+      this.mensajeError = `⚠️ ${err.error.error}`;
+    } else if (err.status === 409) {
+      this.mensajeError = '⚠️ Ya existe una reseña para este restaurante.';
+    } else if (err.status === 401) {
+      this.mensajeError = '⚠️ Necesitas estar autenticado para hacer una reseña.';
+    } else {
+      this.mensajeError = '❌ Ha ocurrido un error inesperado al procesar la reseña.';
+    }
+  }
+
+  resetMensajes() {
+    this.mostrarError = false;
+    this.mensajeError = '';
+    this.mostrarExito = false;
+  }
+
+  recargarPagina() {
+    this.router.navigate([`/restaurantes/${this.restauranteId}`]).then(() => {
+      window.location.reload();
     });
   }
 

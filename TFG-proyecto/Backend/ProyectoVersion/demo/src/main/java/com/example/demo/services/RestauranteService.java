@@ -1,6 +1,7 @@
 package com.example.demo.services;
 
 import com.example.demo.dto.RestauranteDTO;
+import com.example.demo.dto.RestauranteUpdateRequest;
 import com.example.demo.entities.Restaurante;
 import com.example.demo.entities.Usuario;
 import com.example.demo.enums.Barrio;
@@ -26,54 +27,52 @@ public class RestauranteService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    /**
-     * Crear restaurante y asignar usuario, con validación de tipo de cocina y
-     * filtro de palabras ofensivas.
-     */
-   public Restaurante crearRestaurante(Long idUsuario, Restaurante restaurante) {
+    public Restaurante crearDesdeDTO(Long idUsuario, RestauranteDTO dto) {
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         if (usuario.getRol() != RolNombre.RESTAURANTE) {
-            throw new RuntimeException("No puede agregar un restaurante porque no tiene el rol RESTAURANTE.");
+            throw new RuntimeException("No tiene permisos para crear restaurante.");
         }
 
+        Restaurante restaurante = new Restaurante();
         restaurante.setUsuario(usuario);
+        restaurante.setNombre(dto.getNombre());
+        restaurante.setDireccion(dto.getDireccion());
+        restaurante.setTelefono(dto.getTelefono());
+        restaurante.setEmail(dto.getEmail());
+        restaurante.setTipoCocina(dto.getTipoCocina());
+        restaurante.setBarrio(dto.getBarrio());
+        restaurante.setRangoPrecio(dto.getRangoPrecio());
+        restaurante.setTipoCocinaPersonalizado(dto.getTipoCocinaPersonalizado());
+        restaurante.setRestriccionesDieteticas(dto.getRestricciones());
 
-        // 🔒 Encriptar la contraseña si viene del frontend
-        if (restaurante.getPassword() != null && !restaurante.getPassword().isBlank()) {
-            String passwordHasheada = passwordEncoder.encode(restaurante.getPassword());
-            restaurante.setPassword(passwordHasheada);
+        if (dto.getTelefono() != null && !dto.getTelefono().isBlank()) {
+            restaurante.setPassword(passwordEncoder.encode(dto.getTelefono()));
         }
 
-        // ✅ Validación de tipo cocina personalizado
         if (restaurante.getTipoCocina() == TipoCocina.OTRO) {
             String personalizada = restaurante.getTipoCocinaPersonalizado();
-
             if (personalizada == null || personalizada.isBlank()) {
-                throw new RuntimeException("Si se selecciona 'OTRO' como tipo de cocina, se debe especificar un valor personalizado.");
+                throw new RuntimeException("Si el tipo de cocina es 'OTRO', debes especificar uno personalizado.");
             }
 
-            List<String> palabrasProhibidas = List.of("mierda", "puta", "gilipollas", "cabron", "joder", "idiota",
-                    "coño", "imbécil", "hijo de puta", "hijos de puta", "imbéciles");
-            String normalizado = personalizada.toLowerCase().replaceAll("[^a-záéíóúüñ]", "");
-
-            for (String prohibida : palabrasProhibidas) {
-                if (normalizado.contains(prohibida)) {
-                    throw new RuntimeException("El tipo de cocina contiene lenguaje inapropiado. Por favor, elige otro término.");
+            List<String> malasPalabras = List.of("mierda", "puta", "gilipollas", "cabron", "joder", "idiota",
+                    "imbécil");
+            String texto = personalizada.toLowerCase().replaceAll("[^a-z]", "");
+            for (String mala : malasPalabras) {
+                if (texto.contains(mala)) {
+                    throw new RuntimeException("El nombre personalizado contiene palabras ofensivas.");
                 }
             }
-
-        } else {
-            restaurante.setTipoCocinaPersonalizado(null);
         }
 
         return restauranteRepository.save(restaurante);
     }
-
 
     public List<Restaurante> obtenerTodosLosRestaurantes() {
         return restauranteRepository.findAll();
@@ -88,26 +87,16 @@ public class RestauranteService {
         return restauranteRepository.findByUsuarioId(idUsuario);
     }
 
-    /**
-     * Lógica completa para devolver un restaurante y aumentar contador de visitas.
-     */
     public Restaurante obtenerYIncrementarVisitas(Long id) {
         Restaurante restaurante = obtenerRestaurantePorId(id);
-        restaurante.setVisitas(restaurante.getVisitas() + 1);
+        restaurante.incrementarVisitas();
         return restauranteRepository.save(restaurante);
     }
 
-    /**
-     * Guardar restaurante desde fuera.
-     */
     public Restaurante guardar(Restaurante restaurante) {
         return restauranteRepository.save(restaurante);
     }
 
-    /**
-     * Filtrado avanzado por cocina, barrio, precio, puntuación mínima y
-     * restricciones dietéticas.
-     */
     public List<RestauranteDTO> filtrarRestaurantesAvanzado(
             TipoCocina tipoCocina,
             Barrio barrio,
@@ -124,10 +113,45 @@ public class RestauranteService {
                 .filter(r -> restricciones == null || restricciones.isEmpty()
                         || r.getRestriccionesDieteticas().containsAll(restricciones))
                 .filter(r -> nombre == null || r.getNombre() != null &&
-                        r.getNombre().toLowerCase().contains(nombre.toLowerCase())) 
+                        r.getNombre().toLowerCase().contains(nombre.toLowerCase()))
                 .sorted(Comparator.comparingDouble(Restaurante::getMediaPuntuacion).reversed())
                 .map(RestauranteDTO::new)
                 .collect(Collectors.toList());
     }
 
+    public Restaurante obtenerRestaurantePorEmailUsuario(String email) {
+        return restauranteRepository.findByUsuarioEmail(email).orElse(null);
+    }
+
+    public void actualizarDatosRestaurante(Long id, RestauranteUpdateRequest request) {
+        Restaurante restaurante = restauranteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Restaurante no encontrado"));
+
+        if (request.getNombre() != null)
+            restaurante.setNombre(request.getNombre());
+        if (request.getDireccion() != null)
+            restaurante.setDireccion(request.getDireccion());
+        if (request.getTelefono() != null)
+            restaurante.setTelefono(request.getTelefono());
+        if (request.getEmail() != null)
+            restaurante.setEmail(request.getEmail());
+        if (request.getTipoCocina() != null) {
+            restaurante.setTipoCocina(request.getTipoCocina());
+
+            // 🧼 Limpiar tipo personalizado si ya no es OTRO
+            if (request.getTipoCocina() != TipoCocina.OTRO) {
+                restaurante.setTipoCocinaPersonalizado(null);
+            }
+        }
+        if (request.getTipoCocinaPersonalizado() != null)
+            restaurante.setTipoCocinaPersonalizado(request.getTipoCocinaPersonalizado());
+        if (request.getBarrio() != null)
+            restaurante.setBarrio(request.getBarrio());
+        if (request.getRestriccionesDieteticas() != null)
+            restaurante.setRestriccionesDieteticas(request.getRestriccionesDieteticas());
+        if (request.getRangoPrecio() != null)
+            restaurante.setRangoPrecio(request.getRangoPrecio());
+
+        restauranteRepository.save(restaurante);
+    }
 }
