@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 @RestController
 @RequiredArgsConstructor
 public class ResenyaController {
@@ -49,8 +48,7 @@ public class ResenyaController {
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(Map.of(
                             "message", "Reseña guardada con éxito ✅",
-                            "id", nueva.getId()
-                    ));
+                            "id", nueva.getId()));
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -60,7 +58,6 @@ public class ResenyaController {
             return ResponseEntity.status(500).body(Map.of("error", "Error interno al guardar la reseña"));
         }
     }
-
 
     @PutMapping("/resenyas")
     @Transactional
@@ -117,6 +114,7 @@ public class ResenyaController {
             return ResponseEntity.notFound().build();
         }
     }
+
     @PreAuthorize("hasRole('RESTAURANTE')")
     @PostMapping("/resenyas/{id}/denunciar")
     public ResponseEntity<?> denunciarResenya(@PathVariable Long id) {
@@ -132,5 +130,73 @@ public class ResenyaController {
         return ResponseEntity.ok(Map.of("message", "La reseña ha sido denunciada correctamente"));
     }
 
+    @DeleteMapping("/resenyas/{id}")
+    @PreAuthorize("hasRole('USUARIO')")
+    public ResponseEntity<?> borrarResenya(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body(Map.of("error", "No autenticado"));
+        }
+
+        String email = auth.getName();
+
+        try {
+            resenyaService.borrarResenya(id, email);
+            return ResponseEntity.ok(Map.of("message", "Reseña eliminada correctamente"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(403).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Error al eliminar la reseña"));
+        }
+    }
+
+    @DeleteMapping("/imagenes/{id}")
+    @PreAuthorize("hasRole('USUARIO')")
+    public ResponseEntity<?> borrarImagen(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body(Map.of("error", "No autenticado"));
+        }
+
+        String email = auth.getName();
+
+        try {
+            resenyaService.borrarImagen(id, email);
+            return ResponseEntity.ok(Map.of("message", "Imagen eliminada correctamente"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(403).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Error al eliminar la imagen"));
+        }
+    }
+
+    @PatchMapping("/api/resenyas/{id}/contenido")
+    @PreAuthorize("hasRole('USUARIO')")
+    public ResponseEntity<?> borrarContenido(@PathVariable Long id) {
+        boolean borrado = resenyaService.borrarContenidoResenya(id);
+        if (!borrado) {
+            return ResponseEntity.status(404).body(Map.of("error", "Reseña no encontrada"));
+        }
+        return ResponseEntity.ok(Map.of("mensaje", "Contenido de la reseña eliminado"));
+    }
+
+    @PatchMapping("/resenyas/{id}/contenido")
+    @PreAuthorize("hasRole('USUARIO')")
+    public ResponseEntity<?> borrarContenidoDeResena(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body(Map.of("error", "No autenticado"));
+        }
+
+        try {
+            boolean actualizado = resenyaService.borrarContenidoResenya(id);
+            if (!actualizado) {
+                return ResponseEntity.status(404).body(Map.of("error", "Reseña no encontrada"));
+            }
+            return ResponseEntity.ok(Map.of("message", "Contenido eliminado"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Error al borrar contenido de reseña"));
+        }
+    }
 
 }

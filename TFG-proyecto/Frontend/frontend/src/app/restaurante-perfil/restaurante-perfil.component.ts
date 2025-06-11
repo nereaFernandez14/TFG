@@ -17,9 +17,10 @@ export class RestaurantePerfilComponent implements OnInit {
   restauranteId!: number;
   restaurante: any;
   resenas: any[] = [];
-  mostrarFormularioResena: boolean = false;
-  modalAbierto: boolean = false;
-  imagenActual: number = 0;
+  mostrarFormularioResena = false;
+  modalAbierto = false;
+  yaTieneResena: boolean = false;
+  imagenActual = 0;
   menuSanitizado: SafeResourceUrl | null = null;
 
   constructor(
@@ -31,52 +32,61 @@ export class RestaurantePerfilComponent implements OnInit {
 
   ngOnInit(): void {
     this.restauranteId = +this.route.snapshot.paramMap.get('id')!;
-
     this.http.get(`/api/restaurantes/${this.restauranteId}`).subscribe(data => {
       this.restaurante = data;
-
-      // Solo si hay menú, generamos URL segura
       if (this.restaurante?.rutaMenu) {
         const archivo = this.obtenerNombreArchivo(this.restaurante.rutaMenu);
         const url = `https://localhost:8443/restaurantes/menus/${archivo}`;
         this.menuSanitizado = this.sanitizer.bypassSecurityTrustResourceUrl(url);
       }
     });
-
     this.recargarResenas();
-
     this.mostrarFormularioResena = this.authService.isAuthenticated();
   }
 
-  abrirModalResena() {
-    this.modalAbierto = true;
-  }
-
-  cerrarModal() {
-    this.modalAbierto = false;
-  }
+  abrirModalResena() { this.modalAbierto = true; }
+  cerrarModal() { this.modalAbierto = false; }
+  obtenerNombreArchivo(ruta: string): string { return ruta.split(/[/\\]/).pop() || ''; }
 
   recargarResenas() {
     this.http.get<any[]>(`/api/restaurantes/${this.restauranteId}/resenas`).subscribe(data => {
       this.resenas = data;
-      console.log('🖼️ Reseñas recibidas con imágenes:', this.resenas);
     });
   }
 
-  obtenerNombreArchivo(ruta: string): string {
-    return ruta.split(/[/\\]/).pop() || '';
+  esAutorDeResena(emailAutor: string): boolean {
+  return this.authService.esAutorDeResena(emailAutor);
+}
+
+
+  borrarResena(id: number) {
+    this.http.delete(`/api/resenyas/${id}`, { withCredentials: true }).subscribe(() => {
+      this.recargarResenas();
+    });
   }
-  
+
+  borrarImagenResena(imagenId: number) {
+  this.http.delete(`/api/imagenes/${imagenId}`, { withCredentials: true }).subscribe({
+    next: () => this.recargarResenas(),
+    error: (err) => console.error('❌ Error al borrar imagen', err)
+  });
+}
+borrarContenidoResena(resenaId: number) {
+  this.http.patch(`/api/resenyas/${resenaId}/contenido`, { contenido: '' }, { withCredentials: true })
+    .subscribe({
+      next: () => this.recargarResenas(),
+      error: (err) => console.error('❌ Error al borrar comentario', err)
+    });
+}
+
   anteriorImagen() {
     if (this.restaurante?.imagenes?.length) {
       this.imagenActual = (this.imagenActual - 1 + this.restaurante.imagenes.length) % this.restaurante.imagenes.length;
     }
   }
-
   siguienteImagen() {
     if (this.restaurante?.imagenes?.length) {
       this.imagenActual = (this.imagenActual + 1) % this.restaurante.imagenes.length;
     }
   }
-
 }

@@ -177,9 +177,6 @@ export class AutenticacionService {
     return usuario?.rol ?? null;
   }
 
-  /**
-   * Convierte un string a RolNombre validado
-   */
   private mapearRol(rol: string | undefined | null): RolNombre {
     if (!rol || typeof rol !== 'string') {
       console.warn(`⚠️ Rol inválido recibido: ${rol}. Se asignará 'USUARIO' por defecto.`);
@@ -193,5 +190,13 @@ export class AutenticacionService {
       console.warn(`⚠️ Rol inválido recibido: ${rol}. Se asignará 'USUARIO' por defecto.`);
       return RolNombre.USUARIO;
     }
+  }
+
+  /**
+   * ✅ NUEVO MÉTODO: comprobar si el usuario actual es el autor de una reseña
+   */
+  esAutorDeResena(emailAutor: string): boolean {
+    const usuario = this.usuarioActual();
+    return usuario?.email === emailAutor;
   }
 }

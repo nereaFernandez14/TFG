@@ -6,13 +6,11 @@
     {{ restaurante.descripcion || 'Sin descripción disponible' }}
   </p>
 
-  <!-- 📍 Dirección y teléfono -->
   <div class="info-contacto">
     <p><i class="fas fa-map-marker-alt"></i> {{ restaurante.direccion }}</p>
     <p><i class="fas fa-phone-alt"></i> {{ restaurante.telefono }}</p>
   </div>
 
-  <!-- 🏷️ Etiquetas -->
   <div class="etiquetas">
     <span class="etiqueta"><i class="fas fa-utensils"></i> {{ restaurante.tipoCocina }}</span>
     <span class="etiqueta"><i class="fas fa-city"></i> {{ restaurante.barrio }}</span>
@@ -22,7 +20,6 @@
     </span>
   </div>
 
-  <!-- 🖼️ Carrusel de Imágenes -->
   <div *ngIf="restaurante.imagenes?.length" class="carrusel">
     <button class="nav-btn" (click)="anteriorImagen()">‹</button>
     <div class="carrusel-imagen">
@@ -36,7 +33,6 @@
     <button class="nav-btn" (click)="siguienteImagen()">›</button>
   </div>
 
-  <!-- 📋 Menú -->
   <div *ngIf="restaurante.rutaMenu" class="menu-restaurante">
     <h3><i class="fas fa-clipboard-list"></i> Menú del restaurante</h3>
     <a
@@ -48,14 +44,19 @@
     </a>
   </div>
 
-  <!-- ✍️ Añadir Reseña -->
-  <button class="btn-resena" *ngIf="mostrarFormularioResena" (click)="abrirModalResena()">
-    <i class="fas fa-pen"></i> Añadir reseña
-  </button>
+  <!-- ✅ Botón Añadir/Modificar Reseña -->
+  <ng-container *ngIf="mostrarFormularioResena; else mensajeLogin">
+    <button class="btn-resena" (click)="abrirModalResena()">
+      <i class="fas fa-pen"></i>
+      {{ yaTieneResena ? 'Modificar reseña' : 'Añadir reseña' }}
+    </button>
+  </ng-container>
 
-  <p *ngIf="!mostrarFormularioResena" class="aviso-login">
-    <i class="fas fa-lock"></i> Debes iniciar sesión para dejar una reseña.
-  </p>
+  <ng-template #mensajeLogin>
+    <p class="aviso-login">
+      <i class="fas fa-lock"></i> Debes iniciar sesión para dejar una reseña.
+    </p>
+  </ng-template>
 
   <!-- 💬 Modal -->
   <div class="modal-backdrop" *ngIf="modalAbierto" (click)="cerrarModal()">
@@ -65,7 +66,7 @@
         [restauranteId]="restaurante.id"
         (resenaEnviada)="recargarResenas(); cerrarModal()"
       ></app-resenya>
-      <button class="cerrar-modal">✖</button>
+      <button class="cerrar-modal" (click)="cerrarModal()">✖</button>
     </div>
   </div>
 
@@ -76,19 +77,44 @@
 
     <div *ngFor="let resena of resenas" class="resena-card">
       <div class="estrellas">
-        <ng-container *ngFor="let i of [1, 2, 3, 4, 5]">
+        <ng-container *ngFor="let i of [1,2,3,4,5]">
           <span [class.activa]="i <= resena.valoracion">★</span>
         </ng-container>
       </div>
+
       <p *ngIf="resena.contenido"><em>{{ resena.contenido }}</em></p>
 
+      <!-- 🧹 Botón eliminar contenido -->
+      <button
+        *ngIf="resena.contenido && esAutorDeResena(resena.autorEmail)"
+        class="btn btn-sm btn-outline-danger"
+        (click)="borrarContenidoResena(resena.id)">
+        🗑️ Borrar comentario
+      </button>
+
+      <!-- 🖼️ Imágenes -->
       <div *ngIf="resena.imagenes?.length > 0" class="imagenes-resena">
-        <img
-          *ngFor="let img of resena.imagenes"
-          [src]="'/api/imagenes/' + img.id"
-          [alt]="img.nombreArchivo"
-          class="img-resena"
-        />
+        <div class="img-wrapper" *ngFor="let img of resena.imagenes">
+          <img
+            [src]="'/api/imagenes/' + img.id"
+            [alt]="img.nombreArchivo"
+            class="img-resena"
+          />
+          <button
+            *ngIf="img?.id && esAutorDeResena(resena.autorEmail)"
+            class="btn-sm btn-danger btn-borrar-img"
+            (click)="borrarImagenResena(img.id)"
+            title="Eliminar imagen">
+            🗑️
+          </button>
+        </div>
+      </div>
+
+      <!-- 🧨 Acciones -->
+      <div class="acciones-resena" *ngIf="esAutorDeResena(resena.autorEmail)">
+        <button class="btn btn-danger" (click)="borrarResena(resena.id)">
+          🗑️ Eliminar reseña
+        </button>
       </div>
     </div>
   </div>

@@ -1,21 +1,20 @@
 <form [formGroup]="resenyaForm" (ngSubmit)="enviarResena()">
-  <!-- ESTRELLAS -->
   <div class="estrella-container">
-    <span *ngFor="let estrella of estrellas"
-          class="estrella"
-          [class.activa]="estrella <= (puntuacionHover || puntuacionSeleccionada)"
-          (click)="!yaTieneResena && seleccionarPuntuacion(estrella)"
-          (mouseover)="!yaTieneResena && destacarPuntuacion(estrella)"
-          (mouseleave)="!yaTieneResena && resetearHover()">
-      ★
-    </span>
-  </div>
+  <span *ngFor="let estrella of estrellas"
+        class="estrella"
+        [class.activa]="estrella <= (puntuacionHover || puntuacionSeleccionada)"
+        (click)="!yaTieneResena && seleccionarPuntuacion(estrella)"
+        (mouseover)="!yaTieneResena && destacarPuntuacion(estrella)"
+        (mouseleave)="!yaTieneResena && resetearHover()">
+    ★
+  </span>
+</div>
+
 
   <div *ngIf="yaTieneResena" class="info">
     La puntuación ya no se puede modificar.
   </div>
 
-  <!-- COMENTARIO -->
   <textarea formControlName="comentario"
             placeholder="Escriba aquí su opinión..."
             rows="4"
@@ -25,22 +24,18 @@
     ❌ El comentario contiene palabras inapropiadas
   </div>
 
-  <!-- INPUT DE IMAGEN -->
   <input type="file" accept="image/*" multiple (change)="handleFileInput($event)" />
 
-  <!-- VISTA PREVIA -->
   <div class="vista-previa" *ngIf="vistaPrevia.length > 0">
     <img *ngFor="let img of vistaPrevia" [src]="img" class="preview-img" />
   </div>
 
-  <!-- BOTONES -->
   <div class="botones" *ngIf="!cargandoEstadoResena">
     <button *ngIf="!yaTieneResena"
             type="submit"
             [disabled]="resenyaForm.invalid || puntuacionSeleccionada === 0 || !comentarioValido">
       Enviar Reseña
     </button>
-
     <button *ngIf="yaTieneResena"
             type="button"
             (click)="actualizarResena()"
@@ -49,10 +44,6 @@
     </button>
   </div>
 
-  <!-- MENSAJES -->
   <p *ngIf="mostrarExito" class="exito">✅ Reseña registrada correctamente</p>
-
-  <div *ngIf="mostrarError" class="error">
-    {{ mensajeError }}
-  </div>
+  <div *ngIf="mostrarError" class="error">{{ mensajeError }}</div>
 </form>

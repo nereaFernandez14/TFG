@@ -53,15 +53,17 @@ public class SecurityConfig {
                                                                 "/api/usuarios/subir-imagenes",
                                                                 "/usuarios/subir-imagenes",
                                                                 "/api/restaurantes/*/solicitar-modificacion",
-                                                                "/api/notificaciones/**", // ✅ Ignorar CSRF para
-                                                                                          // notificaciones
-                                                                "/notificaciones/**" // ✅ Incluye también sin prefijo
-                                                                                     // /api
+                                                                "/api/notificaciones/**",
+                                                                "/notificaciones/**",
+                                                                "/api/resenyas/**", // ✅ Ignorar CSRF en reseñas (PUT,
+                                                                                    // PATCH)
+                                                                "/api/imagenes/**" // ✅ Ignorar CSRF al eliminar
+                                                                                   // imágenes
                                                 ))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                                                // 👇 Endpoints públicos
+                                                // 🔓 Endpoints públicos
                                                 .requestMatchers(
                                                                 "/register",
                                                                 "/api/register",
@@ -76,20 +78,30 @@ public class SecurityConfig {
                                                                 "/error",
                                                                 "/restaurantes/filtrar-avanzado",
                                                                 "/restaurantes/menus/**",
+                                                                "/api/restaurantes/**", // ✅ Ver perfiles de restaurante
+                                                                "/api/imagenes/**", // ✅ Ver imágenes públicas
                                                                 "/resenyas/**")
                                                 .permitAll()
 
-                                                // 👇 Roles específicos
+                                                // 🔐 Acciones con reseñas (autenticado como USUARIO)
                                                 .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO")
+                                                .requestMatchers(HttpMethod.PUT, "/resenyas").hasRole("USUARIO")
+                                                .requestMatchers(HttpMethod.PATCH, "/api/resenyas/**")
+                                                .hasRole("USUARIO")
+                                                .requestMatchers(HttpMethod.DELETE, "/api/imagenes/**")
+                                                .hasRole("USUARIO")
+
+                                                // 🔐 Restaurante sube menú o pide cambios
                                                 .requestMatchers(HttpMethod.POST, "/restaurantes/subir-menu")
                                                 .hasRole("RESTAURANTE")
                                                 .requestMatchers(HttpMethod.POST,
                                                                 "/api/restaurantes/*/solicitar-modificacion")
                                                 .hasRole("RESTAURANTE")
 
+                                                // 🔐 Admin
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                                                // ✅ Notificaciones (ADMIN y RESTAURANTE)
+                                                // 🔐 Notificaciones
                                                 .requestMatchers(HttpMethod.GET, "/api/notificaciones")
                                                 .hasRole("RESTAURANTE")
                                                 .requestMatchers(HttpMethod.GET, "/api/notificaciones/admin")
@@ -121,7 +133,7 @@ public class SecurityConfig {
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration config = new CorsConfiguration();
                 config.setAllowedOrigins(List.of("https://localhost:4200"));
-                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
                 config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "X-XSRF-TOKEN"));
                 config.setExposedHeaders(List.of("Authorization", "X-XSRF-TOKEN", "Set-Cookie"));
                 config.setAllowCredentials(true);
