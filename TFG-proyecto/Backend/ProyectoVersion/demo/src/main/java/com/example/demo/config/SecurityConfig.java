@@ -57,7 +57,8 @@ public class SecurityConfig {
                     "/notificaciones/**",
                     "/api/resenyas/**",
                     "/api/imagenes/**",
-                    "/uploads/**"
+                    "/uploads/**",
+                    "/api/usuarios/*/preferencias-dieteticas"
                 ))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
