@@ -11,8 +11,7 @@ import { TipoCocina } from '../models/enums/tipo-cocina.enum';
 import { Barrio } from '../models/enums/barrio.enum';
 import { RangoPrecio } from '../models/enums/rango-precio.enum';
 import { RestriccionDietetica } from '../models/enums/restriccion-dietetica.enum';
-
-
+import { UsuarioService } from '../services/usuario.service';
 
 @Component({
   standalone: true,
@@ -28,15 +27,16 @@ export class HomeComponent implements OnInit {
   mensajeLogout: string | null = null;
   restriccionesAbierto: boolean = false;
   busquedaRealizada: boolean = false;
-  mostrarFormularioResena: boolean = false; // inicializa aquí
+  mostrarFormularioResena: boolean = false;
 
-  // Enums para filtros
+  // 🆕 Preferencias cargadas del usuario (solo para autofiltrado inicial)
+  preferenciasUsuario: string[] = [];
+
   tiposCocina = Object.values(TipoCocina);
   barrios = Object.values(Barrio);
   rangosPrecio = Object.values(RangoPrecio);
   restricciones = Object.values(RestriccionDietetica);
 
-  // 🆕 Filtros completos
   filtros = {
     tipoCocina: '',
     barrio: '',
@@ -57,13 +57,15 @@ export class HomeComponent implements OnInit {
 
   constructor(
     private autenticacionService: AutenticacionService,
-    private router: Router,
+    private usuarioService: UsuarioService,
     private restauranteService: RestauranteService,
+    private router: Router,
     private flashService: FlashMessageService
   ) {}
 
   ngOnInit(): void {
     this.mostrarFormularioResena = this.autenticacionService.isAuthenticated();
+
     this.flashService.mensaje$.subscribe((mensaje) => {
       if (mensaje) {
         this.mensajeLogout = mensaje;
@@ -74,13 +76,25 @@ export class HomeComponent implements OnInit {
     const usuario = this.autenticacionService.obtenerUsuario();
     if (!usuario) return;
 
-    switch (usuario.rol) {
-      case RolNombre.RESTAURANTE:
-        this.router.navigate(['/restaurante']);
-        break;
-      case RolNombre.USUARIO:
-        this.usuarioEmail = usuario.email || 'Desconocido';
-        break;
+    if (usuario.rol === RolNombre.RESTAURANTE) {
+      this.router.navigate(['/restaurante']);
+      return;
+    }
+
+    if (usuario.rol === RolNombre.USUARIO) {
+      this.usuarioEmail = usuario.email || 'Desconocido';
+      // 🆕 Cargar preferencias desde el perfil
+      this.usuarioService.obtenerPerfil().subscribe({
+        next: (data) => {
+          if (data.restriccionesDieteticas?.length) {
+            this.preferenciasUsuario = [...data.restriccionesDieteticas];
+            this.buscarConPreferencias();
+          }
+        },
+        error: (err) => {
+          console.error('❌ Error al obtener perfil del usuario', err);
+        }
+      });
     }
   }
 
@@ -89,11 +103,9 @@ export class HomeComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  // 🔍 Combina búsqueda por nombre y filtros
+  // 🔍 Búsqueda normal ignorando preferencias
   buscar() {
-    console.log('➡️ Filtros aplicados:', this.filtros);
-
-    this.busquedaRealizada = true; // ⬅️ Marcamos que el usuario hizo búsqueda
+    this.busquedaRealizada = true;
 
     this.restauranteService.filtrarRestaurantesAvanzado(
       this.filtros.tipoCocina || null,
@@ -105,7 +117,7 @@ export class HomeComponent implements OnInit {
     ).subscribe({
       next: (data) => {
         this.restaurantes = data;
-        console.log('✅ Resultados:', data);
+        console.log('✅ Resultados búsqueda manual:', data);
       },
       error: (err) => {
         console.error('❌ Error al buscar restaurantes:', err);
@@ -113,7 +125,29 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  // ✅ Checkbox handler para restricciones
+  // 🔍 Búsqueda automática con las preferencias del usuario
+  buscarConPreferencias() {
+    this.busquedaRealizada = true;
+
+    this.restauranteService.filtrarRestaurantesAvanzado(
+      null,
+      null,
+      null,
+      null,
+      this.preferenciasUsuario,
+      null
+    ).subscribe({
+      next: (data) => {
+        this.restaurantes = data;
+        console.log('🎯 Resultados según preferencias:', data);
+      },
+      error: (err) => {
+        console.error('❌ Error al buscar con preferencias del usuario', err);
+      }
+    });
+  }
+
+  // ✅ Checkbox de restricciones (manual)
   onCheckboxChange(event: any) {
     const value = event.target.value;
     if (event.target.checked) {
@@ -122,15 +156,14 @@ export class HomeComponent implements OnInit {
       this.filtros.restricciones = this.filtros.restricciones.filter(r => r !== value);
     }
 
-    this.buscar(); 
+    this.buscar(); // búsqueda normal
   }
 
   toggleRestricciones() {
     this.restriccionesAbierto = !this.restriccionesAbierto;
   }
+
   verPerfil(id: number): void {
-    console.log('➡️ Navegando al restaurante con ID:', id);
     this.router.navigate(['/restaurantes', id]);
   }
-
 }
