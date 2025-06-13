@@ -33,6 +33,9 @@
       <li (click)="irAlPerfil(); cerrarSidebar()">
         <i class="fas fa-id-badge"></i> Mi perfil
       </li>
+      <li *ngIf="user()?.rol === 'USUARIO'" (click)="irAFavoritos(); cerrarSidebar()">
+        <i class="fas fa-heart"></i> Mis favoritos
+      </li>
 
       <li *ngIf="puedeRegistrarRestaurante()" (click)="navegarACrearRestaurante(); cerrarSidebar()">
         <i class="fas fa-utensils"></i> Registrar Restaurante

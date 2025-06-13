@@ -176,3 +176,13 @@ nav ul li a:hover {
   background-color: rgba(0,0,0,0.3);
   z-index: 1000;
 }
+/* Mis favoritos: icono en rosa y con hover personalizado */
+.menu-list li i.fa-heart {
+  color: #e91e63; /* rosa fuerte para destacar */
+  transition: color 0.3s ease;
+}
+
+.menu-list li:hover i.fa-heart {
+  color: #ad1457; /* tono más oscuro al hacer hover */
+}
+
