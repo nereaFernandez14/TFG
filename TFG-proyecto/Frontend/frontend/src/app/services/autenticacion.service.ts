@@ -203,5 +203,6 @@ export class AutenticacionService {
     const sesion = JSON.parse(localStorage.getItem('usuario') || '{}');
     return sesion?.email || '';
   }
+  
 
 }
