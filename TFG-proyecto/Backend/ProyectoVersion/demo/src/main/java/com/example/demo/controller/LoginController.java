@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.entities.LoginRequest;
+import com.example.demo.dto.LoginRequest;
 import com.example.demo.enums.RolNombre;
 import com.example.demo.services.AuthService;
 import com.example.demo.services.UsuarioService;

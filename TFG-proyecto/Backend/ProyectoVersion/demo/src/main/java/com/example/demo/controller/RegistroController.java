@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.entities.RegistroRequest;
+import com.example.demo.dto.RegistroRequest;
 import com.example.demo.entities.Usuario;
 import com.example.demo.enums.RolNombre;
 import com.example.demo.repositories.UsuarioRepository;

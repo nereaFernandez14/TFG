@@ -72,11 +72,6 @@ export class UsuarioService {
     const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
     return match ? match[2] : null;
   }
-
-  /**
-   * Cierra la sesión del usuario autenticado.
-   * POST /api/logout
-   */
   logout(): Observable<any> {
     return this.http.post(`${this.apiUrl}/logout`, {}, {
       withCredentials: true
@@ -95,7 +90,7 @@ export class UsuarioService {
     );
   }
 
-  
+
   subirMenu(formData: FormData) {
       return this.http.post(`${environment.apiUrl}/restaurantes/subir-menu`, formData, {
       withCredentials: true

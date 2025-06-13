@@ -4,13 +4,13 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class RolService {
-  private apiUrl = '/api/roles'; // proxy debe redirigir a https://localhost:8443/api/roles
+  private apiUrl = '/api/roles';
 
   constructor(private http: HttpClient) {}
 
   obtenerRoles(): Observable<{ id: number, nombre: string }[]> {
     return this.http.get<{ id: number, nombre: string }[]>(this.apiUrl, {
-      withCredentials: true // ✅ necesario para sesión y CSRF
+      withCredentials: true
     });
   }
 }

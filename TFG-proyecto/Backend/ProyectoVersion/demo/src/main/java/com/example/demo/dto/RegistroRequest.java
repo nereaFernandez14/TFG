@@ -1,4 +1,4 @@
-package com.example.demo.entities;
+package com.example.demo.dto;
 
 import com.example.demo.enums.RolNombre;
 import jakarta.validation.constraints.Email;
