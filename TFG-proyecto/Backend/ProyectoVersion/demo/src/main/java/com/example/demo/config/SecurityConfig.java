@@ -59,8 +59,9 @@ public class SecurityConfig {
                                 "/api/imagenes/**",
                                 "/uploads/**",
                                 "/api/usuarios/*/preferencias-dieteticas",
-                                "/usuarios/*/favoritos/**"
-
+                                "/usuarios/*/favoritos/**",
+                                "/usuarios/*/solicitar-modificacion", // ✅ Añadido
+                                "/api/usuarios/*/solicitar-modificacion" // ✅ Añadido
                         ))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -84,10 +85,10 @@ public class SecurityConfig {
                                 "/imagenes/**",
                                 "/api/imagenes/**",
                                 "/resenyas/**",
-                                "/api/restaurantes/**", // ✅ perfiles de restaurante públicos
-                                "/api/resenyas/**", // ✅ reseñas públicas
-                                "/restaurantes/**" // ✅ compatibilidad si usas "/restaurantes" sin /api
-                        ).permitAll()
+                                "/api/restaurantes/**",
+                                "/api/resenyas/**",
+                                "/restaurantes/**")
+                        .permitAll()
 
                         // 🔐 Acciones protegidas
                         .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO")
@@ -102,8 +103,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/restaurantes/*/solicitar-modificacion")
                         .hasRole("RESTAURANTE")
 
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        // ✅ Añadidos para permitir la modificación de usuario
+                        .requestMatchers(HttpMethod.POST, "/usuarios/*/solicitar-modificacion").hasRole("USUARIO")
+                        .requestMatchers(HttpMethod.POST, "/api/usuarios/*/solicitar-modificacion").hasRole("USUARIO")
 
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/notificaciones").hasRole("RESTAURANTE")
                         .requestMatchers(HttpMethod.GET, "/api/notificaciones/admin").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/notificaciones/*/marcar-vista")

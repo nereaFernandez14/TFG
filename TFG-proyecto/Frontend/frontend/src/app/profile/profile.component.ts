@@ -1,235 +1,202 @@
 import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
-
-import { UsuarioService, Usuario } from '../services/usuario.service';
-import { RestauranteService } from '../services/restaurante.service';
-import { Restaurante } from '../models/restaurante.model';
-import { RestriccionDietetica } from '../models/enums/restriccion-dietetica.enum';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })
 export class ProfileComponent implements OnInit {
-  usuario: Usuario | null = null;
-  restaurante: Restaurante | null = null;
+  usuario: any;
+  restaurante: any;
+
+  restriccionesEnum: string[] = [
+    'VEGANO',
+    'VEGETARIANO',
+    'CELIACO',
+    'SIN_LACTOSA',
+    'DIABETICO',
+    'SIN_GLUTEN',
+    'HALAL',
+    'KOSHER'
+  ];
+
+  restriccionesSeleccionadas: string[] = [];
   notificaciones: any[] = [];
 
-  archivoSeleccionado: File | null = null;
-  nombreArchivo: string = '';
-  imagenesSeleccionadas: File[] = [];
-  nombresImagenes: string[] = [];
-
-  restriccionesEnum = Object.values(RestriccionDietetica);
-  restriccionesSeleccionadas: string[] = [];
-
-  mostrarVentanaModificacionUsuario: boolean = false;
   campoSeleccionadoUsuario: string = '';
   nuevoValorUsuario: string = '';
-  botonUsuarioDeshabilitado: boolean = false;
+  mostrarVentanaModificacionUsuario = false;
+  botonUsuarioDeshabilitado = false;
 
-  constructor(
-    private usuarioService: UsuarioService,
-    private restauranteService: RestauranteService,
-    private router: Router,
-    private http: HttpClient
-  ) {}
+  nombreArchivo: string = '';
+  archivoSeleccionado!: File;
+
+  nombresImagenes: string[] = [];
+  imagenesSeleccionadas: File[] = [];
+
+  constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
-    this.usuarioService.obtenerPerfil().subscribe({
+    this.obtenerPerfil();
+  }
+
+  obtenerPerfil() {
+    this.http.get<any>('/api/usuarios/perfil', { withCredentials: true }).subscribe({
       next: (data) => {
         this.usuario = data;
-
-        // ✅ Cargar restricciones seleccionadas desde backend
         this.restriccionesSeleccionadas = data.restriccionesDieteticas || [];
+        this.notificaciones = data.notificaciones || [];
 
-        if (this.usuario.rol === 'RESTAURANTE') {
-          this.restauranteService.obtenerRestaurantePorUsuario(this.usuario.id).subscribe({
-            next: (r) => (this.restaurante = r),
-            error: (err) => {
-              console.error('❌ Error al cargar restaurante', err);
-              this.restaurante = null;
-            }
-          });
+        if (data.rol === 'RESTAURANTE') {
+          this.obtenerRestaurante();
         }
       },
-      error: (err) => console.error('❌ Error al obtener perfil:', err)
-    });
-  }
-
-
-  toggleRestriccion(valor: string): void {
-    const idx = this.restriccionesSeleccionadas.indexOf(valor);
-    if (idx >= 0) this.restriccionesSeleccionadas.splice(idx, 1);
-    else this.restriccionesSeleccionadas.push(valor);
-  }
-
-  formatearRestriccion(valor: string): string {
-    return valor.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-  }
-
-  guardarPreferencias(): void {
-    if (!this.usuario) return;
-
-    this.usuarioService.actualizarPreferencias(this.usuario.id!, this.restriccionesSeleccionadas).subscribe({
-      next: () => {
-        alert('✅ Preferencias guardadas correctamente');
-      },
       error: (err) => {
-        console.error('❌ Error al guardar preferencias', err);
-        alert('❌ No se pudieron guardar las preferencias');
+        if (err.status === 401) {
+          this.router.navigate(['/login']);
+        }
       }
     });
   }
 
-
-  irACambiarPassword(): void {
-    this.router.navigate(['/change-password']);
-  }
-
-  irACrearRestaurante(): void {
-    this.router.navigate(['/restaurante/crear']);
-  }
-
-  logout(): void {
-    this.usuarioService.logout().subscribe({
-      next: () => {
-        localStorage.removeItem('usuario');
-        this.router.navigate(['/login']);
-      },
-      error: () => this.router.navigate(['/login'])
+  obtenerRestaurante() {
+    this.http.get<any>('/api/restaurantes/mis-datos', { withCredentials: true }).subscribe({
+      next: (restaurante) => {
+        this.restaurante = restaurante;
+      }
     });
   }
 
-  onFileSelected(event: Event): void {
-    const inp = event.target as HTMLInputElement;
-    if (inp.files?.length) {
-      this.archivoSeleccionado = inp.files[0];
-      this.nombreArchivo = this.archivoSeleccionado.name;
+  formatearRestriccion(restriccion: string): string {
+    const map: any = {
+      VEGANO: 'Vegano',
+      VEGETARIANO: 'Vegetariano',
+      CELIACO: 'Celíaco',
+      SIN_LACTOSA: 'Sin lactosa',
+      DIABETICO: 'Diabético',
+      SIN_GLUTEN: 'Sin gluten',
+      HALAL: 'Halal',
+      KOSHER: 'Kosher'
+    };
+    return map[restriccion] || restriccion;
+  }
+
+  toggleRestriccion(restriccion: string) {
+    if (this.restriccionesSeleccionadas.includes(restriccion)) {
+      this.restriccionesSeleccionadas = this.restriccionesSeleccionadas.filter(r => r !== restriccion);
+    } else {
+      this.restriccionesSeleccionadas.push(restriccion);
     }
   }
 
-  subirArchivo(event: Event): void {
-    event.preventDefault();
-    if (!this.archivoSeleccionado || !this.usuario) return;
+  guardarPreferencias() {
+    if (!this.usuario?.id) return;
 
-    const formData = new FormData();
-    formData.append('archivo', this.archivoSeleccionado);
-    formData.append('email', this.usuario.email);
-
-    this.usuarioService.subirMenu(formData).subscribe({
-      next: () => alert('✅ Menú subido correctamente'),
-      error: () => alert('❌ Error al subir el menú')
+    this.http.put(
+      `/api/usuarios/${this.usuario.id}/preferencias-dieteticas`,
+      this.restriccionesSeleccionadas,
+      { withCredentials: true }
+    ).subscribe({
+      next: () => console.log('✅ Preferencias guardadas'),
+      error: (err) => console.error('❌ Error al guardar preferencias:', err)
     });
   }
 
-  solicitarBaja(): void {
-    if (!this.usuario) return;
-    const confirmar = confirm(`¿Seguro que deseas solicitar la baja de tu cuenta (${this.usuario.rol.toLowerCase()})?`);
-    if (!confirmar) return;
-
-    this.usuarioService.solicitarBaja(this.usuario.id!).subscribe({
-      next: () => {
-        alert('✅ Solicitud enviada correctamente.');
-        this.usuario!.solicitaBaja = true;
-      },
-      error: () => alert('❌ Error al solicitar baja')
-    });
+  cerrarNotificacion(id: number) {
+    this.notificaciones = this.notificaciones.filter(n => n.id !== id);
+    this.http.put(`/api/notificaciones/${id}/marcar-vista`, {}, { withCredentials: true }).subscribe();
   }
 
-  onImagenesSeleccionadas(event: Event): void {
-    const inp = event.target as HTMLInputElement;
-    if (inp.files?.length) {
-      this.imagenesSeleccionadas = Array.from(inp.files);
-      this.nombresImagenes = this.imagenesSeleccionadas.map(f => f.name);
-    }
+  irACambiarPassword() {
+    this.router.navigate(['/cambiar-password']);
   }
 
-  subirImagenes(event: Event): void {
-    event.preventDefault();
-    if (!this.usuario || !this.imagenesSeleccionadas.length) return;
-
-    const formData = new FormData();
-    this.imagenesSeleccionadas.forEach(f => formData.append('imagenes', f));
-    formData.append('email', this.usuario.email);
-
-    this.usuarioService.subirImagenes(formData).subscribe({
-      next: () => {
-        alert('✅ Imágenes subidas correctamente');
-        this.nombresImagenes = [];
-        this.imagenesSeleccionadas = [];
-      },
-      error: () => alert('❌ Error al subir imágenes')
-    });
+  solicitarBaja() {
+    this.http.post(
+      `/api/${this.usuario.rol.toLowerCase()}s/${this.usuario.id}/solicitar-baja`,
+      {},
+      { withCredentials: true }
+    ).subscribe();
   }
 
-  abrirVentanaModificacionUsuario(): void {
+  abrirVentanaModificacionUsuario() {
     this.mostrarVentanaModificacionUsuario = true;
-    this.campoSeleccionadoUsuario = '';
-    this.nuevoValorUsuario = '';
-    this.botonUsuarioDeshabilitado = false;
   }
 
-  cerrarVentanaModificacionUsuario(): void {
+  cerrarVentanaModificacionUsuario() {
     this.mostrarVentanaModificacionUsuario = false;
     this.campoSeleccionadoUsuario = '';
     this.nuevoValorUsuario = '';
-    this.botonUsuarioDeshabilitado = false;
   }
 
-  enviarModificacionUsuario(): void {
-    const usuario = this.usuarioService.obtenerUsuario();
-    const usuarioId = usuario?.id;
-
-    if (!this.campoSeleccionadoUsuario || !usuarioId) {
-      alert('⚠️ Faltan datos para enviar la solicitud');
-      return;
-    }
-
-    const campo = this.campoSeleccionadoUsuario;
-    const nuevo = this.nuevoValorUsuario?.trim();
-    const actual = (this.usuario as any)[campo];
-
-    if (!campo || !nuevo) {
-      alert('⚠️ Selecciona un campo y un nuevo valor');
-      return;
-    }
-
-    if (actual?.toString().trim().toLowerCase() === nuevo.toLowerCase()) {
-      alert('⚠️ El nuevo valor no puede ser igual al actual');
-      return;
-    }
-
-    const malasPalabras = ['xxx', 'tonto', 'idiota'];
-    if (malasPalabras.some(p => nuevo.toLowerCase().includes(p))) {
-      alert('🚫 Valor no permitido');
-      return;
-    }
+  enviarModificacionUsuario() {
+    if (!this.usuario?.id || !this.campoSeleccionadoUsuario || !this.nuevoValorUsuario) return;
 
     this.botonUsuarioDeshabilitado = true;
 
-    const payload = { campo, nuevoValor: nuevo };
-    const endpoint = usuario?.rol === 'RESTAURANTE'
-      ? `/api/restaurantes/${usuarioId}/solicitar-modificacion`
-      : `/api/usuarios/${usuarioId}/solicitar-modificacion`;
+    const payload = {
+      campo: this.campoSeleccionadoUsuario,
+      nuevoValor: this.nuevoValorUsuario
+    };
 
-    this.http.post(endpoint, payload, { withCredentials: true }).subscribe({
+    this.http.post(
+      `/api/usuarios/${this.usuario.id}/solicitar-modificacion`,
+      payload,
+      { withCredentials: true }
+    ).subscribe({
       next: () => {
-        alert('✅ Solicitud enviada al administrador');
         this.cerrarVentanaModificacionUsuario();
+        this.botonUsuarioDeshabilitado = false;
       },
       error: (err) => {
-        console.error('❌ Error al enviar modificación', err);
-        alert('❌ Error al enviar la solicitud');
+        console.error('❌ Error al enviar modificación:', err);
         this.botonUsuarioDeshabilitado = false;
       }
     });
   }
 
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.archivoSeleccionado = file;
+      this.nombreArchivo = file.name;
+    }
+  }
+
+  subirArchivo(event: Event) {
+    event.preventDefault();
+    if (!this.archivoSeleccionado) return;
+
+    const formData = new FormData();
+    formData.append('archivo', this.archivoSeleccionado);
+
+    this.http.post(`/api/restaurantes/${this.usuario.id}/menu`, formData, { withCredentials: true }).subscribe(() => {
+      this.nombreArchivo = '';
+    });
+  }
+
+  onImagenesSeleccionadas(event: any) {
+    this.imagenesSeleccionadas = Array.from(event.target.files);
+    this.nombresImagenes = this.imagenesSeleccionadas.map(img => img.name);
+  }
+
+  subirImagenes(event: Event) {
+    event.preventDefault();
+    if (this.imagenesSeleccionadas.length === 0) return;
+
+    const formData = new FormData();
+    this.imagenesSeleccionadas.forEach(img => formData.append('imagenes', img));
+    formData.append('email', this.usuario.email);
+
+    this.http.post('/api/usuarios/subir-imagenes', formData, { withCredentials: true }).subscribe(() => {
+      this.nombresImagenes = [];
+      this.imagenesSeleccionadas = [];
+    });
+  }
 }

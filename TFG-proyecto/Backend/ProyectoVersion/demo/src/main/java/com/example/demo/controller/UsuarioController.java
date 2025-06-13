@@ -1,11 +1,14 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.RestauranteDTO;
 import com.example.demo.entities.Restaurante;
 import com.example.demo.entities.SolicitudModificacionUsuario;
 import com.example.demo.entities.Usuario;
+import com.example.demo.enums.RestriccionDietetica;
 import com.example.demo.repositories.RestauranteRepository;
 import com.example.demo.repositories.SolicitudModificacionUsuarioRepository;
 import com.example.demo.repositories.UsuarioRepository;
+import com.example.demo.services.NotificacionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,23 +21,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import com.example.demo.entities.Usuario;
-import com.example.demo.enums.RestriccionDietetica;
-import com.example.demo.dto.RestauranteDTO;
-import com.example.demo.entities.Restaurante;
-import com.example.demo.repositories.UsuarioRepository;
-import com.example.demo.repositories.RestauranteRepository;
-import com.example.demo.services.NotificacionService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -45,6 +33,9 @@ public class UsuarioController {
 
     @Autowired
     private RestauranteRepository restauranteRepository;
+
+    @Autowired
+    private SolicitudModificacionUsuarioRepository solicitudUsuarioRepository;
 
     @Autowired
     private NotificacionService notificacionService;
@@ -65,34 +56,32 @@ public class UsuarioController {
             return ResponseEntity.status(401).body("No autenticado");
         }
 
-        String email = authentication.getName();
+        String email = auth.getName();
         Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
         if (usuario == null)
             return ResponseEntity.status(404).body("Usuario no encontrado");
-    }
 
-    List<String> restricciones = usuario.getRestriccionesDieteticas()
+        List<String> restricciones = usuario.getRestriccionesDieteticas()
                 .stream()
                 .map(Enum::name)
                 .collect(Collectors.toList());
 
-    return ResponseEntity.ok(new UsuarioDTO(usuario.getId(),usuario.getNombre(),usuario.getApellidos(),usuario.getEmail(),usuario.getRol().name(),restricciones));
+        return ResponseEntity.ok(new UsuarioDTO(usuario.getId(), usuario.getNombre(), usuario.getApellidos(),
+                usuario.getEmail(), usuario.getRol().name(), restricciones));
     }
 
     @PreAuthorize("hasAnyRole('USUARIO', 'RESTAURANTE')")
-    @PostMapping("/usuarios/{id}/solicitar-baja")
-    public ResponseEntity<?> solicitarBajaUsuario(@PathVariable Long id, Authentication auth) {
-        String emailAutenticado = auth.getName();
+    @PostMapping("/{id}/solicitar-baja")
+    public ResponseEntity<?> solicitarBaja(@PathVariable Long id, Authentication auth) {
+        String email = auth.getName();
         Usuario usuario = usuarioRepository.findById(id).orElse(null);
-
-        if (usuario == null || !usuario.getEmail().equals(emailAutenticado)) {
-            return ResponseEntity.status(403).body("No autorizado para solicitar esta baja");
+        if (usuario == null || !usuario.getEmail().equals(email)) {
+            return ResponseEntity.status(403).body("No autorizado");
         }
 
         usuario.setSolicitaBaja(true);
         usuarioRepository.save(usuario);
 
-        // 🔔 Notificar al administrador
         Usuario admin = usuarioRepository.findByRol(com.example.demo.enums.RolNombre.ADMIN)
                 .stream()
                 .findFirst()
@@ -104,13 +93,67 @@ public class UsuarioController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/usuarios/subir-imagenes")
+    @PreAuthorize("hasRole('USUARIO')")
+    @PutMapping("/{id}/preferencias-dieteticas")
+    public ResponseEntity<?> actualizarPreferencias(
+            @PathVariable Long id,
+            @RequestBody List<String> restricciones,
+            Authentication auth) {
+
+        String emailAutenticado = auth.getName();
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        if (!usuario.getEmail().equals(emailAutenticado)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
+        }
+
+        Set<RestriccionDietetica> restriccionesConvertidas = restricciones.stream()
+                .map(String::toUpperCase)
+                .map(RestriccionDietetica::valueOf)
+                .collect(Collectors.toSet());
+
+        usuario.setRestriccionesDieteticas(restriccionesConvertidas);
+        usuarioRepository.save(usuario);
+
+        return ResponseEntity.ok(Map.of("mensaje", "Preferencias actualizadas correctamente"));
+    }
+
+    @PreAuthorize("hasRole('USUARIO')")
+    @PostMapping("/{id}/solicitar-modificacion")
+    public ResponseEntity<?> solicitarModificacionUsuario(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> payload,
+            Authentication auth) {
+
+        String emailAutenticado = auth.getName();
+        Usuario usuario = usuarioRepository.findById(id).orElse(null);
+
+        if (usuario == null || !usuario.getEmail().equals(emailAutenticado)) {
+            return ResponseEntity.status(403).body("No autorizado");
+        }
+
+        String campo = payload.get("campo");
+        String nuevoValor = payload.get("nuevoValor");
+
+        if (campo == null || nuevoValor == null || campo.isBlank() || nuevoValor.isBlank()) {
+            return ResponseEntity.badRequest().body("Campo y valor obligatorios");
+        }
+
+        SolicitudModificacionUsuario solicitud = new SolicitudModificacionUsuario();
+        solicitud.setCampo(campo);
+        solicitud.setNuevoValor(nuevoValor);
+        solicitud.setUsuario(usuario);
+        solicitudUsuarioRepository.save(solicitud);
+
+        return ResponseEntity.ok(Map.of("mensaje", "✅ Solicitud enviada"));
+    }
+
     @PreAuthorize("hasRole('RESTAURANTE')")
-    public ResponseEntity<?> subirImagenesRestaurante(
-            @RequestParam("imagenes") List<MultipartFile> imagenes,
+    @PostMapping("/subir-imagenes")
+    public ResponseEntity<?> subirImagenes(@RequestParam("imagenes") List<MultipartFile> imagenes,
             @RequestParam("email") String email) {
         Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         Restaurante restaurante = restauranteRepository.findByUsuarioId(usuario.getId());
@@ -144,31 +187,5 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     Map.of("error", "Error al guardar imágenes", "detalle", e.getMessage()));
         }
-    }
-
-    @PutMapping("/usuarios/{id}/preferencias-dieteticas")
-    @PreAuthorize("hasRole('USUARIO')")
-    public ResponseEntity<?> actualizarPreferencias(
-            @PathVariable Long id,
-            @RequestBody List<String> restricciones,
-            Authentication auth) {
-
-        String emailAutenticado = auth.getName();
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-
-        if (!usuario.getEmail().equals(emailAutenticado)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
-        }
-
-        Set<RestriccionDietetica> restriccionesConvertidas = restricciones.stream()
-                .map(String::toUpperCase)
-                .map(RestriccionDietetica::valueOf)
-                .collect(Collectors.toSet());
-
-        usuario.setRestriccionesDieteticas(restriccionesConvertidas);
-        usuarioRepository.save(usuario);
-
-        return ResponseEntity.ok(Map.of("mensaje", "Preferencias actualizadas correctamente"));
     }
 }

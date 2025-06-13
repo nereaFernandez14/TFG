@@ -39,6 +39,19 @@
         </div>
       </div>
 
+      <!-- 🔔 Notificaciones en listado -->
+      <div *ngIf="notificaciones && notificaciones.length > 0" class="notificaciones-section">
+        <h3><i class="fas fa-bell"></i> Notificaciones</h3>
+        <ul class="notificaciones-list">
+          <li *ngFor="let noti of notificaciones" class="notificacion-item">
+            {{ noti.mensaje }}
+            <button class="cerrar-btn" (click)="cerrarNotificacion(noti.id)">
+              <i class="fas fa-times"></i>
+            </button>
+          </li>
+        </ul>
+      </div>
+
       <!-- 🍽️ Info extendida del restaurante -->
       <div *ngIf="usuario?.rol === 'RESTAURANTE' && restaurante" class="restaurante-info-section">
         <h3><i class="fas fa-store"></i> Detalles de tu Restaurante</h3>
@@ -60,19 +73,6 @@
             </span>
           </p>
         </div>
-      </div>
-
-      <!-- 🔔 Notificaciones (opcional: duplicado visual del toast si quieres mantener) -->
-      <div *ngIf="notificaciones && notificaciones.length > 0" class="notificaciones-section">
-        <h3><i class="fas fa-bell"></i> Notificaciones</h3>
-        <ul class="notificaciones-list">
-          <li *ngFor="let noti of notificaciones" class="notificacion-item">
-            {{ noti.mensaje }}
-            <button class="cerrar-btn" (click)="cerrarNotificacion(noti.id)">
-              <i class="fas fa-times"></i>
-            </button>
-          </li>
-        </ul>
       </div>
 
       <!-- ✅ Subida de menú e imágenes para restaurantes -->
@@ -99,7 +99,7 @@
         </div>
       </div>
 
-      <!-- ✅ Preferencias dietéticas para usuario (con checkbox y visual amigable) -->
+      <!-- ✅ Preferencias dietéticas para usuario -->
       <div *ngIf="usuario?.rol === 'USUARIO'" class="extra-section">
         <h3><i class="fas fa-carrot"></i> Preferencias dietéticas</h3>
         <form>

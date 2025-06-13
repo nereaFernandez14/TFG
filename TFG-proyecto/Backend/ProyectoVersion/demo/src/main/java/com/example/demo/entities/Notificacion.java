@@ -17,19 +17,20 @@ public class Notificacion {
     private boolean vista;
     private boolean paraAdmin;
 
-    private boolean vista = false;
-
+    // 📬 Destinatario: Restaurante (opcional)
     @ManyToOne
     private Restaurante destinatarioRestaurante;
 
-    private boolean paraAdmin = false;
-
-    @ManyToOne
-    private Restaurante generadaPorRestaurante;
-
+    // 📬 Destinatario: Usuario (opcional)
     @ManyToOne
     private Usuario destinatarioUsuario;
 
+    // 📤 Generador: Restaurante (opcional)
+    @ManyToOne
+    private Restaurante generadaPorRestaurante;
+
+    // 📤 Generador: Usuario (opcional)
     @ManyToOne
     private Usuario generadaPorUsuario;
+
 }

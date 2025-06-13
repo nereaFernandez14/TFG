@@ -84,7 +84,6 @@ export class AdminPanelComponent implements OnInit {
   cargarModificaciones() {
     this.http.get<any[]>('/api/admin/modificaciones').subscribe(data => {
       this.modificaciones = data;
-
       for (let solicitud of data) {
         const id = solicitud.restaurante.id;
         this.campoSeleccionado[id] = solicitud.campo;
@@ -96,7 +95,6 @@ export class AdminPanelComponent implements OnInit {
   cargarModificacionesUsuarios() {
     this.http.get<any[]>('/api/admin/modificaciones-usuarios').subscribe(data => {
       this.modificacionesUsuario = data;
-
       for (let solicitud of data) {
         const id = solicitud.usuario.id;
         this.campoSeleccionadoUsuario[id] = solicitud.campo;
@@ -170,7 +168,7 @@ export class AdminPanelComponent implements OnInit {
     this.http.put(`/api/admin/restaurantes/${id}`, payload).subscribe({
       next: () => {
         alert('✅ Restaurante actualizado correctamente');
-        this.cargarModificaciones(); // ✅ recarga la lista desde backend
+        this.cargarModificaciones();
         this.campoSeleccionado[id] = '';
         this.nuevoValor[id] = '';
       },
@@ -198,7 +196,7 @@ export class AdminPanelComponent implements OnInit {
     this.http.put(`/api/admin/usuarios/${id}/modificar`, payload).subscribe({
       next: () => {
         alert('✅ Usuario actualizado correctamente');
-        this.cargarModificacionesUsuarios(); // ✅ recarga la lista desde backend
+        this.cargarModificacionesUsuarios();
         this.campoSeleccionadoUsuario[id] = '';
         this.nuevoValorUsuario[id] = '';
       },

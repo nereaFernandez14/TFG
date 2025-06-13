@@ -146,6 +146,7 @@ h1 {
 }
 
 .accordion-toggle i {
+  margin-left: 0.5rem;
   transition: transform 0.3s ease;
 }
 
@@ -160,6 +161,11 @@ h1 {
 .accordion-content.open {
   max-height: 1500px;
   padding: 1rem;
+}
+
+.accordion-content p,
+.accordion-content .admin-card {
+  margin-bottom: 1rem;
 }
 
 .notificaciones-admin {
@@ -204,7 +210,9 @@ h1 {
   transform: scale(1.1);
 }
 
-i.fas, i.far, i.fab {
+i.fas,
+i.far,
+i.fab {
   margin-right: 0.4rem;
 }
 
