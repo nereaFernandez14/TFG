@@ -25,7 +25,6 @@ public class Restaurante {
     @Column(name = "ruta_menu")
     private String rutaMenu;
 
-
     private String direccion;
     private String telefono;
     private String email;
@@ -37,7 +36,7 @@ public class Restaurante {
     @OneToOne
     private Usuario usuario;
 
-    @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "restaurante", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JsonManagedReference("restaurante-resenyas")
     private List<Resenya> resenyas = new ArrayList<>();
 
@@ -59,15 +58,12 @@ public class Restaurante {
     @Column(name = "nombre_imagen")
     private List<String> imagenes = new ArrayList<>();
 
-
-
     @ElementCollection(targetClass = RestriccionDietetica.class)
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "restaurante_restricciones", joinColumns = @JoinColumn(name = "restaurante_id"))
     @Column(name = "restriccion")
     private List<RestriccionDietetica> restriccionesDieteticas = new ArrayList<>();
 
-    // ✅ NUEVO: visitas
     @Column(nullable = false)
     private int visitas = 0;
 

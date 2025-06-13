@@ -3,6 +3,7 @@ package com.example.demo.services;
 import com.example.demo.entities.Notificacion;
 import com.example.demo.entities.Restaurante;
 import com.example.demo.entities.SolicitudModificacion;
+import com.example.demo.entities.Usuario;
 import com.example.demo.repositories.NotificacionRepository;
 import com.example.demo.repositories.RestauranteRepository;
 import com.example.demo.repositories.SolicitudModificacionRepository;
@@ -90,5 +91,14 @@ public class NotificacionService {
     // Alias: por compatibilidad o conveniencia
     public void crear(Restaurante restaurante, String mensaje) {
         crearParaRestaurante(restaurante, mensaje);
+    }
+
+    public void crearParaAdmin(String mensaje, Usuario generadoPor) {
+        Notificacion noti = new Notificacion();
+        noti.setMensaje(mensaje);
+        noti.setParaAdmin(true);
+        noti.setGeneradaPorUsuario(generadoPor);
+        noti.setVista(false);
+        notificacionRepository.save(noti);
     }
 }

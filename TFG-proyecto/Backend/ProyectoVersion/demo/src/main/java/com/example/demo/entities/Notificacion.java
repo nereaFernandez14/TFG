@@ -15,14 +15,17 @@ public class Notificacion {
 
     private boolean vista = false;
 
-    // ✅ Si es para un restaurante concreto
     @ManyToOne
     private Restaurante destinatarioRestaurante;
 
-    // ✅ Si es para el administrador
     private boolean paraAdmin = false;
 
-    // ✅ (Opcional) Quién generó la notificación, solo si te interesa trazar origen
     @ManyToOne
     private Restaurante generadaPorRestaurante;
+
+    @ManyToOne
+    private Usuario destinatarioUsuario;
+
+    @ManyToOne
+    private Usuario generadaPorUsuario;
 }
