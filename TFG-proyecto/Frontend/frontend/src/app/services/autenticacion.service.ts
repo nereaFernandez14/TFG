@@ -199,4 +199,10 @@ export class AutenticacionService {
     const usuario = this.usuarioActual();
     return usuario?.email === emailAutor;
   }
+  getEmailUsuario(): string {
+    const sesion = JSON.parse(localStorage.getItem('usuario') || '{}');
+    return sesion?.email || '';
+  }
+  
+
 }

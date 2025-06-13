@@ -30,13 +30,13 @@ export class RegisterComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // ✅ Solicitamos el token CSRF (también fuerza la creación de sesión)
+    // ✅ Token CSRF inicial
     this.authService.obtenerCsrfToken().subscribe({
       next: () => console.log('✅ Token CSRF obtenido correctamente'),
       error: (err) => console.warn('⚠️ No se pudo obtener el token CSRF:', err)
     });
 
-    // 🧾 Inicializa el formulario
+    // 🧾 Formulario reactivo
     this.registerForm = this.fb.group({
       nombre: ['', Validators.required],
       apellidos: ['', Validators.required],
@@ -57,12 +57,22 @@ export class RegisterComponent implements OnInit {
 
     this.isSubmitting = true;
     const formData = this.registerForm.value;
-    console.log('📤 Enviando datos de registro (enum):', formData);
 
     this.usuarioService.registrar(formData).subscribe({
       next: () => {
-        this.formSubmitted = true;
-        this.router.navigate(['/home']);
+        console.log('✅ Registro exitoso. Iniciando sesión automáticamente...');
+
+        // 🔐 Login automático tras registro
+        this.authService.login(formData.email, formData.password).subscribe({
+          next: () => {
+            console.log('✅ Login automático completado');
+            this.router.navigate(['/home']);
+          },
+          error: (loginErr) => {
+            console.error('❌ Error al iniciar sesión automáticamente:', loginErr);
+            this.router.navigate(['/login']);
+          }
+        });
       },
       error: (err) => {
         console.error('❌ Error en el registro:', err);

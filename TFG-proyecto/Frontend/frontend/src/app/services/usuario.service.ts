@@ -107,6 +107,12 @@ export class UsuarioService {
       withCredentials: true
     });
   }
+  actualizarPreferencias(id: number, preferencias: string[]): Observable<any> {
+    return this.http.put(`${this.apiUrl}/usuarios/${id}/preferencias-dieteticas`, preferencias, {
+      withCredentials: true
+    });
+  }
+
 
 }
 export { Usuario };

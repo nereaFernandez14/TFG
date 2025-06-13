@@ -35,8 +35,8 @@ export class ProfileComponent implements OnInit {
       next: (data) => {
         this.usuario = data;
 
-        // Si decides añadir el atributo restricciones al usuario, aquí puedes cargarlo
-        // this.restriccionesSeleccionadas = data.restricciones || [];
+        // ✅ Cargar restricciones seleccionadas desde backend
+        this.restriccionesSeleccionadas = data.restriccionesDieteticas || [];
 
         if (this.usuario.rol === 'RESTAURANTE') {
           this.restauranteService.obtenerRestaurantePorUsuario(this.usuario.id).subscribe({
@@ -53,6 +53,7 @@ export class ProfileComponent implements OnInit {
       error: (err) => console.error('❌ Error al obtener perfil:', err)
     });
   }
+
 
   toggleRestriccion(valor: string): void {
     const index = this.restriccionesSeleccionadas.indexOf(valor);
@@ -71,9 +72,19 @@ export class ProfileComponent implements OnInit {
   }
 
   guardarPreferencias(): void {
-    alert('✅ Preferencias guardadas: ' + this.restriccionesSeleccionadas.join(', '));
-    // Aquí puedes añadir un POST al backend si decides persistir los datos
+    if (!this.usuario) return;
+
+    this.usuarioService.actualizarPreferencias(this.usuario.id!, this.restriccionesSeleccionadas).subscribe({
+      next: () => {
+        alert('✅ Preferencias guardadas correctamente');
+      },
+      error: (err) => {
+        console.error('❌ Error al guardar preferencias', err);
+        alert('❌ No se pudieron guardar las preferencias');
+      }
+    });
   }
+
 
   irACambiarPassword(): void {
     this.router.navigate(['/change-password']);
@@ -174,4 +185,5 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
+  
 }

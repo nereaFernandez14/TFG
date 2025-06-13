@@ -15,6 +15,7 @@ export class ResenyaComponent implements OnInit {
   @Input() restauranteId!: number;
   @Input() restauranteNombre: string = '';
   @Output() resenaEnviada = new EventEmitter<void>();
+  @Input() resenaExistente: any; 
 
   resenyaForm: FormGroup;
   estrellas: number[] = [1, 2, 3, 4, 5];
@@ -42,20 +43,31 @@ export class ResenyaComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.http.get<{ yaExiste: boolean, puntuacion?: number }>(`/api/resenyas/usuario/${this.restauranteId}`, {
-      withCredentials: true
-    }).subscribe({
-      next: (res) => {
-        this.yaTieneResena = res.yaExiste;
-        this.puntuacionSeleccionada = res.puntuacion ?? 0;
-        this.cargandoEstadoResena = false;
-      },
-      error: (err) => {
-        console.error('❌ Error verificando existencia de reseña:', err);
-        this.cargandoEstadoResena = false;
-      }
-    });
+    if (this.resenaExistente) {
+      this.yaTieneResena = true;
+      this.puntuacionSeleccionada = this.resenaExistente.valoracion ?? 0;
+      this.resenyaForm.patchValue({ comentario: this.resenaExistente.contenido || '' });
+      this.cargandoEstadoResena = false;
+    } else {
+      this.http.get<{ yaExiste: boolean, puntuacion?: number, contenido?: string }>(
+        `/api/resenyas/usuario/${this.restauranteId}`,
+        { withCredentials: true }
+      ).subscribe({
+        next: (res) => {
+          this.yaTieneResena = res.yaExiste;
+          this.puntuacionSeleccionada = res.puntuacion ?? 0;
+          this.resenyaForm.patchValue({ comentario: res.contenido || '' });
+          this.cargandoEstadoResena = false;
+        },
+        error: (err) => {
+          console.error('❌ Error verificando existencia de reseña:', err);
+          this.cargandoEstadoResena = false;
+        }
+      });
+    }
   }
+
+
 
   seleccionarPuntuacion(valor: number) {
     if (this.yaTieneResena) return;

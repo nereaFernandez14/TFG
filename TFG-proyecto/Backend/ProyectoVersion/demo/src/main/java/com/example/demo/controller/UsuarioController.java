@@ -13,8 +13,12 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.example.demo.entities.Usuario;
+import com.example.demo.enums.RestriccionDietetica;
+import com.example.demo.dto.RestauranteDTO;
 import com.example.demo.entities.Restaurante;
 import com.example.demo.repositories.UsuarioRepository;
 import com.example.demo.repositories.RestauranteRepository;
@@ -37,8 +41,15 @@ public class UsuarioController {
     private RestauranteRepository restauranteRepository;
 
     // ✅ DTO interno para limitar la información enviada
-    public record UsuarioDTO(Long id, String nombre, String apellidos, String email, String rol) {
-    }
+    public record UsuarioDTO(
+        Long id,
+        String nombre,
+        String apellidos,
+        String email,
+        String rol,
+        List<String> restriccionesDieteticas // ✅ Agregado
+    ) {}
+
 
     // ✅ Endpoint para obtener el perfil del usuario autenticado
     @GetMapping("/perfil")
@@ -49,20 +60,25 @@ public class UsuarioController {
             return ResponseEntity.status(401).body("Usuario no autenticado");
         }
 
-        String email = authentication.getName(); // 👈 Asumiendo que el username es el email
+        String email = authentication.getName();
         Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
 
         if (usuario == null) {
             return ResponseEntity.status(404).body("Usuario no encontrado");
         }
 
-        // ✅ Devolvemos solo los datos necesarios para el perfil
+        List<String> restricciones = usuario.getRestriccionesDieteticas()
+            .stream()
+            .map(Enum::name)
+            .collect(Collectors.toList());
+
         return ResponseEntity.ok(new UsuarioDTO(
-                usuario.getId(),
-                usuario.getNombre(),
-                usuario.getApellidos(),
-                usuario.getEmail(),
-                usuario.getRol().name() // 🔄 Convertimos enum a String
+            usuario.getId(),
+            usuario.getNombre(),
+            usuario.getApellidos(),
+            usuario.getEmail(),
+            usuario.getRol().name(),
+            restricciones // ✅ aquí las incluimos
         ));
     }
 
@@ -126,4 +142,30 @@ public class UsuarioController {
         }
 
     }
+    @PutMapping("/usuarios/{id}/preferencias-dieteticas")
+    @PreAuthorize("hasRole('USUARIO')")
+    public ResponseEntity<?> actualizarPreferencias(
+            @PathVariable Long id,
+            @RequestBody List<String> restricciones,
+            Authentication auth) {
+
+        String emailAutenticado = auth.getName();
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        if (!usuario.getEmail().equals(emailAutenticado)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
+        }
+
+        Set<RestriccionDietetica> restriccionesConvertidas = restricciones.stream()
+                .map(String::toUpperCase)
+                .map(RestriccionDietetica::valueOf)
+                .collect(Collectors.toSet());
+
+        usuario.setRestriccionesDieteticas(restriccionesConvertidas);
+        usuarioRepository.save(usuario);
+
+        return ResponseEntity.ok(Map.of("mensaje", "Preferencias actualizadas correctamente"));
+    }
+
 }

@@ -1,21 +1,33 @@
 <div class="menu-container">
-  <h2>📄 Modificar Menú</h2>
+  <h2><i class="fas fa-utensils"></i> Modificar Menú</h2>
 
   <!-- Mostrar enlace de descarga si hay menú -->
   <div *ngIf="menuUrl" class="menu-actual">
-    <h3>Menú actual:</h3>
-    <a [href]="menuUrl" download target="_blank" rel="noopener noreferrer" class="menu-link">
-      Descargar menú actual
+    <h3><i class="fas fa-file-alt"></i> Menú actual:</h3>
+    <a
+      [href]="menuUrl"
+      download
+      target="_blank"
+      rel="noopener noreferrer"
+      class="menu-link"
+    >
+      <i class="fas fa-download"></i> Descargar menú actual
     </a>
   </div>
 
   <div class="upload-section">
-    <label for="menu">Selecciona un nuevo menú:</label>
+    <label for="menu"><i class="fas fa-upload"></i> Selecciona un nuevo menú:</label>
     <input type="file" id="menu" (change)="onArchivoSeleccionado($event)" accept="application/pdf,image/*" />
 
-    <button (click)="subirMenu()">Subir Menú</button>
+    <button (click)="subirMenu()">
+      <i class="fas fa-cloud-upload-alt"></i> Subir Menú
+    </button>
 
-    <p class="mensaje" *ngIf="mensaje">{{ mensaje }}</p>
-    <p class="error" *ngIf="error">{{ error }}</p>
+    <p class="mensaje" *ngIf="mensaje">
+      <i class="fas fa-check-circle"></i> {{ mensaje }}
+    </p>
+    <p class="error" *ngIf="error">
+      <i class="fas fa-exclamation-circle"></i> {{ error }}
+    </p>
   </div>
 </div>

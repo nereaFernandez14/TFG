@@ -1,9 +1,14 @@
 package com.example.demo.entities;
 
+import com.example.demo.enums.RestriccionDietetica;
 import com.example.demo.enums.RolNombre;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Entity
 @Data
@@ -37,6 +42,24 @@ public class Usuario {
     private boolean estaRegistrado = false;
     @Column(nullable = false)
     private boolean solicitaBaja = false;
+    
+    @ElementCollection(targetClass = RestriccionDietetica.class)
+    @CollectionTable(
+        name = "usuario_restricciones",
+        joinColumns = @JoinColumn(name = "usuario_id")
+    )
+    @Enumerated(EnumType.STRING)
+    @Column(name = "restriccion")
+    private Set<RestriccionDietetica> restriccionesDieteticas = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+        name = "favoritos",
+        joinColumns = @JoinColumn(name = "usuario_id"),
+        inverseJoinColumns = @JoinColumn(name = "restaurante_id")
+    )
+    private Set<Restaurante> favoritos = new HashSet<>();
+
 
 
     public boolean isEstaRegistrado() {

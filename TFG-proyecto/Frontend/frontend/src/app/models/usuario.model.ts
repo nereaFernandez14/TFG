@@ -7,5 +7,6 @@ export interface Usuario {
   email: string;
   rol: RolNombre;
   solicitaBaja?: boolean;
+  restriccionesDieteticas?: string[];
 
 }

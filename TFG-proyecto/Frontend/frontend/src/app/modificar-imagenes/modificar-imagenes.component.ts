@@ -16,6 +16,8 @@ export class ModificarImagenesComponent implements OnInit {
   nuevasImagenes: File[] = [];
   nombresNuevasImagenes: string[] = [];
   restauranteId!: number;
+  imagenesUrl: string[] = [];
+
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -30,10 +32,16 @@ export class ModificarImagenesComponent implements OnInit {
 
   cargarImagenes(): void {
     this.http.get<string[]>(`/api/restaurantes/${this.restauranteId}/imagenes`).subscribe({
-      next: (data) => this.imagenesActuales = data,
+      next: (nombres) => {
+        this.imagenesActuales = nombres;
+        this.imagenesUrl = nombres.map(n =>
+          `https://localhost:8443/restaurantes/uploads/${this.restauranteId}/${n}`
+        );
+      },
       error: (err) => console.error('❌ Error al cargar imágenes actuales', err)
     });
   }
+
 
   eliminarImagen(nombre: string): void {
     const confirmar = confirm(`¿Eliminar imagen "${nombre}"?`);

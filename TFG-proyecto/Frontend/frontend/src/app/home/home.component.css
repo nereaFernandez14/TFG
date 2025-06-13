@@ -209,3 +209,31 @@
 .restaurante-card.clickable:hover {
   background-color: #f4f4f4;
 }
+.resultados-container h2 {
+  margin-top: 20px;
+  color: #2e7d32;
+  font-weight: bold;
+}
+
+.restaurante-card.recomendado {
+  border-left: 4px solid #66bb6a;
+  background-color: #f1f8e9;
+}
+
+.etiqueta.restriccion {
+  background-color: #c8e6c9;
+  color: #2e7d32;
+}
+.sin-resultados {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #fff3e0;
+  border-left: 4px solid #ff9800;
+  border-radius: 4px;
+}
+
+.restaurante-card.destacado {
+  border-left: 4px solid #ffa000;
+  background-color: #fffde7;
+}
+

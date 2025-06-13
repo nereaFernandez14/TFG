@@ -19,6 +19,14 @@
               usuario?.rol
             }}
           </p>
+
+          <!-- ✅ Mostrar restricciones dietéticas como chips -->
+          <p *ngIf="restriccionesSeleccionadas.length">
+            <strong>Restricciones dietéticas:</strong>
+            <span class="chip" *ngFor="let restriccion of restriccionesSeleccionadas">
+              {{ formatearRestriccion(restriccion) }}
+            </span>
+          </p>
         </div>
       </div>
 
@@ -46,51 +54,47 @@
       </div>
 
       <!-- ✅ Subida de menú e imágenes para restaurantes -->
-    <div *ngIf="usuario?.rol === 'RESTAURANTE'" class="uploads-section">
-      <h3><i class="fas fa-upload"></i> Subir contenido del restaurante</h3>
-      <div class="uploads-grid">
+      <div *ngIf="usuario?.rol === 'RESTAURANTE'" class="uploads-section">
+        <h3><i class="fas fa-upload"></i> Subir contenido del restaurante</h3>
+        <div class="uploads-grid">
 
-        <!-- 📄 Subir Menú -->
-        <form class="upload-card" (submit)="subirArchivo($event)">
-          <label><i class="fas fa-file-pdf"></i> Menú (PDF o Imagen)</label>
-          <input type="file" accept=".pdf,image/*" (change)="onFileSelected($event)" required />
-          <button type="submit">Subir menú</button>
-          <p *ngIf="nombreArchivo">📎 {{ nombreArchivo }}</p>
-        </form>
+          <!-- 📄 Subir Menú -->
+          <form class="upload-card" (submit)="subirArchivo($event)">
+            <label><i class="fas fa-file-pdf"></i> Menú (PDF o Imagen)</label>
+            <input type="file" accept=".pdf,image/*" (change)="onFileSelected($event)" required />
+            <button type="submit">Subir menú</button>
+            <p *ngIf="nombreArchivo">📎 {{ nombreArchivo }}</p>
+          </form>
 
-        <!-- 🖼️ Subir Imágenes -->
-        <form class="upload-card" (submit)="subirImagenes($event)">
-          <label><i class="fas fa-images"></i> Imágenes del Restaurante</label>
-          <input type="file" accept="image/*" multiple (change)="onImagenesSeleccionadas($event)" />
-          <button type="submit">Subir imágenes</button>
-          <p *ngIf="nombresImagenes.length">📷 {{ nombresImagenes.join(', ') }}</p>
-        </form>
+          <!-- 🖼️ Subir Imágenes -->
+          <form class="upload-card" (submit)="subirImagenes($event)">
+            <label><i class="fas fa-images"></i> Imágenes del Restaurante</label>
+            <input type="file" accept="image/*" multiple (change)="onImagenesSeleccionadas($event)" />
+            <button type="submit">Subir imágenes</button>
+            <p *ngIf="nombresImagenes.length">📷 {{ nombresImagenes.join(', ') }}</p>
+          </form>
 
+        </div>
       </div>
-    </div>
 
-
-<!-- ✅ Preferencias dietéticas para usuario (con checkbox y visual amigable) -->
-<div *ngIf="usuario?.rol === 'USUARIO'" class="extra-section">
-  <h3><i class="fas fa-carrot"></i> Preferencias dietéticas</h3>
-  <form>
-    <div *ngFor="let restriccion of restriccionesEnum" class="checkbox-linea">
-      <label>
-        <input
-          type="checkbox"
-          [value]="restriccion"
-          [checked]="restriccionesSeleccionadas.includes(restriccion)"
-          (change)="toggleRestriccion(restriccion)" />
-        {{ formatearRestriccion(restriccion) }}
-      </label>
-    </div>
-    <br />
-    <button type="button" (click)="guardarPreferencias()">Guardar preferencias</button>
-  </form>
-</div>
-
-
-
+      <!-- ✅ Preferencias dietéticas para usuario (con checkbox y visual amigable) -->
+      <div *ngIf="usuario?.rol === 'USUARIO'" class="extra-section">
+        <h3><i class="fas fa-carrot"></i> Preferencias dietéticas</h3>
+        <form>
+          <div *ngFor="let restriccion of restriccionesEnum" class="checkbox-linea">
+            <label>
+              <input
+                type="checkbox"
+                [value]="restriccion"
+                [checked]="restriccionesSeleccionadas.includes(restriccion)"
+                (change)="toggleRestriccion(restriccion)" />
+              {{ formatearRestriccion(restriccion) }}
+            </label>
+          </div>
+          <br />
+          <button type="button" (click)="guardarPreferencias()">Guardar preferencias</button>
+        </form>
+      </div>
 
       <!-- ✅ Botones de acción -->
       <div class="perfil-actions">

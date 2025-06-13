@@ -107,6 +107,12 @@ export const routes: Routes = [
     canActivate: [AuthGuard, RoleGuard],
     data: { rol: 'RESTAURANTE' }
   },
+  {
+    path: 'favoritos',
+    loadComponent: () => import('./favoritos/favoritos.component').then(m => m.FavoritosComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { rol: 'USUARIO' }
+  },
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' }

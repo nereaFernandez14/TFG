@@ -1,16 +1,30 @@
 <div *ngIf="restaurante" class="perfil-restaurante">
-  <h2 class="nombre-restaurante"><i class="fas fa-store"></i> {{ restaurante.nombre }}</h2>
+  <!-- 🏪 Cabecera -->
+  <div class="header-restaurante">
+    <h2 class="nombre-restaurante">
+      <i class="fas fa-store"></i> {{ restaurante.nombre }}
+    </h2>
 
+    <!-- ❤️ Botón de favorito -->
+    <button *ngIf="esUsuario" (click)="toggleFavorito()" class="btn-favorito">
+      <i class="fas" [class.fa-heart]="esFavorito" [class.fa-heart-broken]="!esFavorito"></i>
+      <span>{{ esFavorito ? 'Quitar de favoritos' : 'Añadir a favoritos' }}</span>
+    </button>
+  </div>
+
+  <!-- 📝 Descripción -->
   <p class="descripcion-restaurante">
     <i class="fas fa-info-circle"></i>
     {{ restaurante.descripcion || 'Sin descripción disponible' }}
   </p>
 
+  <!-- ☎️ Contacto -->
   <div class="info-contacto">
     <p><i class="fas fa-map-marker-alt"></i> {{ restaurante.direccion }}</p>
     <p><i class="fas fa-phone-alt"></i> {{ restaurante.telefono }}</p>
   </div>
 
+  <!-- 🏷️ Etiquetas -->
   <div class="etiquetas">
     <span class="etiqueta"><i class="fas fa-utensils"></i> {{ restaurante.tipoCocina }}</span>
     <span class="etiqueta"><i class="fas fa-city"></i> {{ restaurante.barrio }}</span>
@@ -20,8 +34,12 @@
     </span>
   </div>
 
+  <!-- 🎞️ Carrusel -->
   <div *ngIf="restaurante.imagenes?.length" class="carrusel">
-    <button class="nav-btn" (click)="anteriorImagen()">‹</button>
+    <button class="nav-btn" (click)="anteriorImagen()" title="Anterior">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+
     <div class="carrusel-imagen">
       <img
         *ngIf="restaurante.imagenes?.length"
@@ -30,21 +48,26 @@
         class="img-carrusel fade-in"
       />
     </div>
-    <button class="nav-btn" (click)="siguienteImagen()">›</button>
+
+    <button class="nav-btn" (click)="siguienteImagen()" title="Siguiente">
+      <i class="fas fa-chevron-right"></i>
+    </button>
   </div>
 
+  <!-- 📋 Menú -->
   <div *ngIf="restaurante.rutaMenu" class="menu-restaurante">
     <h3><i class="fas fa-clipboard-list"></i> Menú del restaurante</h3>
     <a
       [href]="'https://localhost:8443/restaurantes/menus/' + obtenerNombreArchivo(restaurante.rutaMenu)"
       target="_blank"
       class="boton-descargar"
-      download>
-      <i class="fas fa-download"></i> Descargar menú
+      download
+    >
+      <i class="fas fa-file-download"></i> Descargar menú
     </a>
   </div>
 
-  <!-- ✅ Botón Añadir/Modificar Reseña -->
+  <!-- ✍️ Añadir/Modificar reseña -->
   <ng-container *ngIf="mostrarFormularioResena; else mensajeLogin">
     <button class="btn-resena" (click)="abrirModalResena()">
       <i class="fas fa-pen"></i>
@@ -52,70 +75,61 @@
     </button>
   </ng-container>
 
+  <!-- 🔒 Requiere login -->
   <ng-template #mensajeLogin>
     <p class="aviso-login">
       <i class="fas fa-lock"></i> Debes iniciar sesión para dejar una reseña.
     </p>
   </ng-template>
 
-  <!-- 💬 Modal -->
+  <!-- 💬 Modal de Reseña -->
   <div class="modal-backdrop" *ngIf="modalAbierto" (click)="cerrarModal()">
     <div class="modal" (click)="$event.stopPropagation()">
       <app-resenya
         [restauranteNombre]="restaurante.nombre"
         [restauranteId]="restaurante.id"
+        [resenaExistente]="resenaDelUsuario"
         (resenaEnviada)="recargarResenas(); cerrarModal()"
       ></app-resenya>
-      <button class="cerrar-modal" (click)="cerrarModal()">✖</button>
+
+      <button class="cerrar-modal" (click)="cerrarModal()"><i class="fas fa-times"></i></button>
     </div>
   </div>
 
   <!-- 🌟 Reseñas -->
   <div class="resenas">
     <h3><i class="fas fa-comments"></i> Reseñas</h3>
-    <div *ngIf="resenas.length === 0" class="sin-reseñas">No hay reseñas aún.</div>
+
+    <div *ngIf="resenas.length === 0" class="sin-reseñas">
+      <i class="fas fa-comment-slash"></i> No hay reseñas aún.
+    </div>
 
     <div *ngFor="let resena of resenas" class="resena-card">
       <div class="estrellas">
         <ng-container *ngFor="let i of [1,2,3,4,5]">
-          <span [class.activa]="i <= resena.valoracion">★</span>
+          <span [class.activa]="i <= resena.valoracion"><i class="fas fa-star"></i></span>
         </ng-container>
       </div>
 
-      <p *ngIf="resena.contenido"><em>{{ resena.contenido }}</em></p>
+      <p *ngIf="resena.contenido"><em><i class="fas fa-quote-left"></i> {{ resena.contenido }}</em></p>
 
-      <!-- 🧹 Botón eliminar contenido -->
-      <button
-        *ngIf="resena.contenido && esAutorDeResena(resena.autorEmail)"
-        class="btn btn-sm btn-outline-danger"
-        (click)="borrarContenidoResena(resena.id)">
-        🗑️ Borrar comentario
-      </button>
-
-      <!-- 🖼️ Imágenes -->
       <div *ngIf="resena.imagenes?.length > 0" class="imagenes-resena">
         <div class="img-wrapper" *ngFor="let img of resena.imagenes">
-          <img
-            [src]="'/api/imagenes/' + img.id"
-            [alt]="img.nombreArchivo"
-            class="img-resena"
-          />
-          <button
-            *ngIf="img?.id && esAutorDeResena(resena.autorEmail)"
-            class="btn-sm btn-danger btn-borrar-img"
-            (click)="borrarImagenResena(img.id)"
-            title="Eliminar imagen">
-            🗑️
-          </button>
+          <img [src]="'/api/imagenes/' + img.id" [alt]="img.nombreArchivo" class="img-resena" />
         </div>
       </div>
 
-      <!-- 🧨 Acciones -->
       <div class="acciones-resena" *ngIf="esAutorDeResena(resena.autorEmail)">
         <button class="btn btn-danger" (click)="borrarResena(resena.id)">
-          🗑️ Eliminar reseña
+          <i class="fas fa-trash-alt"></i> Eliminar reseña
         </button>
       </div>
     </div>
   </div>
+  <!-- ✅ Toast de mensaje de favoritos -->
+  <div class="toast-favorito" *ngIf="mensajeFavorito">
+    <i class="fas fa-check-circle"></i>
+    {{ mensajeFavorito }}
+  </div>
+
 </div>
