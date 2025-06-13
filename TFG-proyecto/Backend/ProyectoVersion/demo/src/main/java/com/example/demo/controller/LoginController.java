@@ -15,10 +15,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Collections;
 import java.util.Map;
@@ -64,7 +66,9 @@ public class LoginController {
             session.setAttribute("rol", rol);
 
             // ✅ El rol se establece correctamente con ROLE_ prefijo
-            GrantedAuthority authority = (GrantedAuthority) () -> "ROLE_" + rol.name();
+            // ✅ Línea corregida
+            GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + rol.name());
+
 
             User userDetails = new User(
                     loginRequest.getUsername(),

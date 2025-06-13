@@ -52,6 +52,15 @@ public class Usuario {
     @Column(name = "restriccion")
     private Set<RestriccionDietetica> restriccionesDieteticas = new HashSet<>();
 
+    @ManyToMany
+    @JoinTable(
+        name = "favoritos",
+        joinColumns = @JoinColumn(name = "usuario_id"),
+        inverseJoinColumns = @JoinColumn(name = "restaurante_id")
+    )
+    private Set<Restaurante> favoritos = new HashSet<>();
+
+
 
     public boolean isEstaRegistrado() {
         return estaRegistrado;

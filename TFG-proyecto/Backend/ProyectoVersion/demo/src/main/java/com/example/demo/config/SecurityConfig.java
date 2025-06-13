@@ -26,7 +26,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity(prePostEnabled = true, jsr250Enabled = true)
 public class SecurityConfig {
 
     @Bean
@@ -58,7 +58,9 @@ public class SecurityConfig {
                     "/api/resenyas/**",
                     "/api/imagenes/**",
                     "/uploads/**",
-                    "/api/usuarios/*/preferencias-dieteticas"
+                    "/api/usuarios/*/preferencias-dieteticas",
+                     "/usuarios/*/favoritos/**"
+
                 ))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -92,6 +94,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/resenyas").hasRole("USUARIO")
                 .requestMatchers(HttpMethod.PATCH, "/api/resenyas/**").hasRole("USUARIO")
                 .requestMatchers(HttpMethod.DELETE, "/api/imagenes/**").hasRole("USUARIO")
+                .requestMatchers(HttpMethod.GET, "/usuarios/*/favoritos").hasRole("USUARIO")
+                .requestMatchers(HttpMethod.POST, "/usuarios/*/favoritos/*").hasRole("USUARIO")
+                .requestMatchers(HttpMethod.DELETE, "/usuarios/*/favoritos/*").hasRole("USUARIO")
+
+
 
                 .requestMatchers(HttpMethod.POST, "/restaurantes/subir-menu").hasRole("RESTAURANTE")
                 .requestMatchers(HttpMethod.POST, "/api/restaurantes/*/solicitar-modificacion").hasRole("RESTAURANTE")

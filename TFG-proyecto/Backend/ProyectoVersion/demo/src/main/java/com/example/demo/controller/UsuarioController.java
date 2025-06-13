@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import com.example.demo.entities.Usuario;
 import com.example.demo.enums.RestriccionDietetica;
+import com.example.demo.dto.RestauranteDTO;
 import com.example.demo.entities.Restaurante;
 import com.example.demo.repositories.UsuarioRepository;
 import com.example.demo.repositories.RestauranteRepository;
