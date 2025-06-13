@@ -1,34 +1,51 @@
+:root {
+  --primary-color: #2196f3;
+  --primary-hover: #1976d2;
+  --danger-color: #e53935;
+  --danger-hover: #c62828;
+  --secondary-bg: #e0e0e0;
+  --secondary-hover: #bdbdbd;
+  --accent-green: #2e7d32;
+  --accent-green-light: #d9f0e2;
+  --accordion-bg: #f1f1f1;
+  --section-title: #00695c;
+  --font-main: 'Segoe UI', sans-serif;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: #fafafa;
+}
+
 .admin-container {
   max-width: 960px;
   margin: auto;
   padding: 2rem;
-  font-family: 'Segoe UI', sans-serif;
   background-color: #fefefe;
 }
 
 h1 {
   text-align: center;
-  color: #00695c;
+  color: var(--section-title);
   font-size: 2.2rem;
   margin-bottom: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .admin-section {
   margin-bottom: 3rem;
 }
 
-.admin-section h2 {
-  color: #333;
-  font-size: 1.4rem;
-  margin-bottom: 1.2rem;
-  border-left: 4px solid #00796b;
-  padding-left: 0.6rem;
-}
-
 .empty-message {
   font-style: italic;
   color: #666;
   margin-left: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .admin-card.minimal {
@@ -50,6 +67,9 @@ h1 {
   color: #333;
   font-size: 1.2rem;
   margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .actions {
@@ -65,39 +85,40 @@ h1 {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
   font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .btn.primary {
-  background-color: #2196f3;
+  background-color: var(--primary-color);
   color: white;
 }
 
 .btn.primary:hover {
-  background-color: #1976d2;
+  background-color: var(--primary-hover);
 }
 
 .btn.secondary {
-  background-color: #e0e0e0;
+  background-color: var(--secondary-bg);
   color: #333;
 }
 
 .btn.secondary:hover {
-  background-color: #bdbdbd;
+  background-color: var(--secondary-hover);
 }
 
 .btn.danger {
-  background-color: #e53935;
+  background-color: var(--danger-color);
   color: white;
 }
 
 .btn.danger:hover {
-  background-color: #c62828;
+  background-color: var(--danger-hover);
 }
-i {
-  margin-right: 0.4rem;
-}
+
 .accordion {
   margin-bottom: 2rem;
   border-radius: 8px;
@@ -107,9 +128,8 @@ i {
 
 .accordion-toggle {
   width: 100%;
-  background: #f1f1f1;
+  background: var(--accordion-bg);
   border: none;
-  outline: none;
   padding: 1rem;
   font-size: 1.1rem;
   font-weight: bold;
@@ -118,29 +138,30 @@ i {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+.accordion-toggle:hover {
+  background-color: #e0e0e0;
 }
 
 .accordion-toggle i {
-  margin-left: 0.5rem;
+  transition: transform 0.3s ease;
 }
 
 .accordion-content {
-  max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease;
+  transition: max-height 0.4s ease, padding 0.3s ease;
+  max-height: 0;
   padding: 0 1rem;
-  background: #ffffff;
+  background: #fff;
 }
 
 .accordion-content.open {
+  max-height: 1500px;
   padding: 1rem;
-  max-height: 1500px; /* suficientemente grande para todo el contenido */
 }
 
-.accordion-content p,
-.accordion-content .admin-card {
-  margin-bottom: 1rem;
-}
 .notificaciones-admin {
   margin: 1rem 0;
   padding: 0.5rem;
@@ -148,8 +169,8 @@ i {
 
 .notificaciones-admin .alert {
   background: #e6f4ea;
-  border-left: 5px solid #2e7d32;
-  color: #2e7d32;
+  border-left: 5px solid var(--accent-green);
+  color: var(--accent-green);
   padding: 1rem 1.25rem;
   border-radius: 8px;
   font-weight: 500;
@@ -157,11 +178,13 @@ i {
   margin-bottom: 10px;
   position: relative;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .notificaciones-admin .alert:hover {
-  background: #d9f0e2;
+  background: var(--accent-green-light);
   transform: translateY(-1px);
   box-shadow: 0 5px 10px rgba(46, 125, 50, 0.15);
 }
@@ -169,11 +192,11 @@ i {
 .notificaciones-admin .btn {
   background-color: transparent;
   border: none;
-  color: #2e7d32;
+  color: var(--accent-green);
   font-size: 1.25rem;
   padding: 0;
   cursor: pointer;
-  transition: color 0.3s ease;
+  transition: color 0.3s ease, transform 0.2s ease;
 }
 
 .notificaciones-admin .btn:hover {
@@ -181,3 +204,38 @@ i {
   transform: scale(1.1);
 }
 
+i.fas, i.far, i.fab {
+  margin-right: 0.4rem;
+}
+
+/* 🌐 Responsive design */
+@media screen and (max-width: 768px) {
+  .admin-container {
+    padding: 1rem;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .accordion-toggle {
+    font-size: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  h1 {
+    font-size: 1.7rem;
+  }
+
+  .admin-card h3 {
+    font-size: 1rem;
+  }
+}

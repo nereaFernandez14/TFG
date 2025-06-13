@@ -328,9 +328,26 @@ public class RestauranteController {
                     .body(Map.of("error", "❌ Error al eliminar la imagen: " + e.getMessage()));
         }
     }
+    @GetMapping("/uploads/{id}/{nombre:.+}")
+    public ResponseEntity<Resource> obtenerImagenRestaurante(
+        @PathVariable Long id,
+        @PathVariable String nombre) throws IOException {
 
+        Path ruta = Paths.get(System.getProperty("user.dir"), "uploads", "restaurantes", String.valueOf(id), nombre);
 
+        if (!Files.exists(ruta)) {
+            return ResponseEntity.notFound().build();
+        }
 
+        Resource recurso = new UrlResource(ruta.toUri());
 
+        String mimeType = Files.probeContentType(ruta);
+        if (mimeType == null) mimeType = "application/octet-stream";
+
+        return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(mimeType))
+            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + nombre + "\"")
+            .body(recurso);
+    }
 
 }

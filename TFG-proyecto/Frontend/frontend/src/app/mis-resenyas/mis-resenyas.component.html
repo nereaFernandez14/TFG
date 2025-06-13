@@ -1,16 +1,16 @@
 <div class="mis-resenyas-container">
-  <h2>📝 Reseñas de tus clientes</h2>
+  <h2><i class="fas fa-comment-dots"></i> Reseñas de tus clientes</h2>
 
   <!-- Mensaje si no hay reseñas -->
   <div *ngIf="!cargando && resenyas.length === 0" class="mensaje-vacio">
-    <p>Este restaurante aún no tiene reseñas registradas.</p>
+    <p><i class="fas fa-info-circle"></i> Este restaurante aún no tiene reseñas registradas.</p>
   </div>
 
   <!-- Lista de reseñas -->
   <div *ngIf="!cargando" class="resenya-lista">
     <div class="resenya-card" *ngFor="let res of resenyas">
-      <h3>⭐ Valoración: {{ res.valoracion }}</h3>
-      <p><strong>Comentario:</strong> {{ res.contenido }}</p>
+      <h3><i class="fas fa-star"></i> Valoración: {{ res.valoracion }}</h3>
+      <p><i class="fas fa-quote-left"></i> <strong>Comentario:</strong> {{ res.contenido }}</p>
 
       <!-- Imágenes -->
       <div class="imagenes" *ngIf="res.id && imagenesMap[res.id]?.length">
@@ -24,13 +24,13 @@
 
       <!-- Botón de denuncia -->
       <button (click)="denunciarResenya(res.id!)" class="denunciar-btn">
-        🚨 Denunciar comentario
+        <i class="fas fa-flag"></i> Denunciar comentario
       </button>
     </div>
   </div>
 
   <!-- Cargando -->
   <div *ngIf="cargando" class="cargando">
-    <p>🔄 Cargando reseñas...</p>
+    <p><i class="fas fa-spinner fa-spin"></i> Cargando reseñas...</p>
   </div>
 </div>
