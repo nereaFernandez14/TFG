@@ -1,4 +1,13 @@
 <div class="perfil-wrapper">
+
+  <!-- 🔔 TOASTS DE NOTIFICACIONES -->
+  <div class="toast-container" *ngIf="notificaciones?.length">
+    <div class="toast" *ngFor="let n of notificaciones">
+      <span>{{ n.mensaje }}</span>
+      <button (click)="cerrarNotificacion(n.id)">✖</button>
+    </div>
+  </div>
+
   <section class="perfil-contenido">
     <div class="perfil-container">
 
@@ -53,6 +62,19 @@
         </div>
       </div>
 
+      <!-- 🔔 Notificaciones (opcional: duplicado visual del toast si quieres mantener) -->
+      <div *ngIf="notificaciones && notificaciones.length > 0" class="notificaciones-section">
+        <h3><i class="fas fa-bell"></i> Notificaciones</h3>
+        <ul class="notificaciones-list">
+          <li *ngFor="let noti of notificaciones" class="notificacion-item">
+            {{ noti.mensaje }}
+            <button class="cerrar-btn" (click)="cerrarNotificacion(noti.id)">
+              <i class="fas fa-times"></i>
+            </button>
+          </li>
+        </ul>
+      </div>
+
       <!-- ✅ Subida de menú e imágenes para restaurantes -->
       <div *ngIf="usuario?.rol === 'RESTAURANTE'" class="uploads-section">
         <h3><i class="fas fa-upload"></i> Subir contenido del restaurante</h3>
@@ -105,6 +127,43 @@
           (click)="solicitarBaja()">
           <i class="fas fa-user-slash"></i> Solicitar baja de {{ usuario?.rol?.toLowerCase() }}
         </button>
+        <button
+          *ngIf="usuario?.rol === 'USUARIO' || usuario?.rol === 'RESTAURANTE'"
+          class="modificar-btn"
+          (click)="abrirVentanaModificacionUsuario()">
+          <i class="fas fa-edit"></i> Solicitar modificación de mis datos
+        </button>
+      </div>
+
+      <!-- 🌐 Modal de modificación de usuario -->
+      <div class="modal" *ngIf="mostrarVentanaModificacionUsuario">
+        <div class="modal-content">
+          <h3><i class="fas fa-user-edit"></i> Solicitar modificación de usuario</h3>
+
+          <div class="form-group">
+            <label>Campo a modificar:</label>
+            <select [(ngModel)]="campoSeleccionadoUsuario">
+              <option value="" disabled selected>-- Selecciona un campo --</option>
+              <option value="nombre">Nombre</option>
+              <option value="apellidos">Apellidos</option>
+              <option value="email">Email</option>
+            </select>
+          </div>
+
+          <div class="form-group" *ngIf="campoSeleccionadoUsuario">
+            <label>Nuevo valor:</label>
+            <input type="text" [(ngModel)]="nuevoValorUsuario" placeholder="Introduce el nuevo valor" />
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn primary" [disabled]="botonUsuarioDeshabilitado" (click)="enviarModificacionUsuario()">
+              <i class="fas fa-paper-plane"></i> Enviar
+            </button>
+            <button class="btn secondary" (click)="cerrarVentanaModificacionUsuario()">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
+          </div>
+        </div>
       </div>
 
     </div>

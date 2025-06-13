@@ -1,10 +1,12 @@
 package com.example.demo.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Data
+@Getter
+@Setter
 public class Notificacion {
 
     @Id
@@ -12,6 +14,8 @@ public class Notificacion {
     private Long id;
 
     private String mensaje;
+    private boolean vista;
+    private boolean paraAdmin;
 
     private boolean vista = false;
 

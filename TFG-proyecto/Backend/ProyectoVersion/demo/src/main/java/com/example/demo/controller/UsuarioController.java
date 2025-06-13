@@ -1,16 +1,23 @@
 package com.example.demo.controller;
 
+import com.example.demo.entities.Restaurante;
+import com.example.demo.entities.SolicitudModificacionUsuario;
+import com.example.demo.entities.Usuario;
+import com.example.demo.repositories.RestauranteRepository;
+import com.example.demo.repositories.SolicitudModificacionUsuarioRepository;
+import com.example.demo.repositories.UsuarioRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,7 +37,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/usuarios")
 public class UsuarioController {
 
     @Autowired
@@ -53,31 +60,23 @@ public class UsuarioController {
 
     @GetMapping("/perfil")
     public ResponseEntity<?> obtenerPerfil() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(401).body("Usuario no autenticado");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body("No autenticado");
         }
 
         String email = authentication.getName();
         Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
-
-        if (usuario == null) {
+        if (usuario == null)
             return ResponseEntity.status(404).body("Usuario no encontrado");
-        }
+    }
 
-        List<String> restricciones = usuario.getRestriccionesDieteticas()
+    List<String> restricciones = usuario.getRestriccionesDieteticas()
                 .stream()
                 .map(Enum::name)
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(new UsuarioDTO(
-                usuario.getId(),
-                usuario.getNombre(),
-                usuario.getApellidos(),
-                usuario.getEmail(),
-                usuario.getRol().name(),
-                restricciones));
+    return ResponseEntity.ok(new UsuarioDTO(usuario.getId(),usuario.getNombre(),usuario.getApellidos(),usuario.getEmail(),usuario.getRol().name(),restricciones));
     }
 
     @PreAuthorize("hasAnyRole('USUARIO', 'RESTAURANTE')")
@@ -111,6 +110,7 @@ public class UsuarioController {
             @RequestParam("imagenes") List<MultipartFile> imagenes,
             @RequestParam("email") String email) {
         Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         Restaurante restaurante = restauranteRepository.findByUsuarioId(usuario.getId());

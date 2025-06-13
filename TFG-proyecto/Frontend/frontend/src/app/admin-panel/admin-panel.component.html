@@ -94,8 +94,7 @@
             *ngIf="campoSeleccionado[m.restaurante.id]"
             [(ngModel)]="nuevoValor[m.restaurante.id]"
             type="text"
-            placeholder="Nuevo valor confirmado"
-          />
+            placeholder="Nuevo valor confirmado" />
 
           <button class="btn secondary" (click)="actualizarCampoRestaurante(m.restaurante.id)">
             <i class="fas fa-edit"></i> Modificar

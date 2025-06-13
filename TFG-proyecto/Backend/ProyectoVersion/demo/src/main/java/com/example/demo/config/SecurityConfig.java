@@ -32,102 +32,99 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .ignoringRequestMatchers(
-                    "/register",
-                    "/api/register",
-                    "/api/login",
-                    "/api/logout",
-                    "/api/rol",
-                    "/api/sesion",
-                    "/restaurantes/buscar",
-                    "/restaurantes/**",
-                    "/resenyas/**",
-                    "/roles",
-                    "/change-password",
-                    "/usuarios/*/solicitar-baja",
-                    "/api/usuarios/*/solicitar-baja",
-                    "/admin/**",
-                    "/api/usuarios/subir-imagenes",
-                    "/usuarios/subir-imagenes",
-                    "/api/restaurantes/*/solicitar-modificacion",
-                    "/api/notificaciones/**",
-                    "/notificaciones/**",
-                    "/api/resenyas/**",
-                    "/api/imagenes/**",
-                    "/uploads/**",
-                    "/api/usuarios/*/preferencias-dieteticas",
-                     "/usuarios/*/favoritos/**"
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .ignoringRequestMatchers(
+                                "/register",
+                                "/api/register",
+                                "/api/login",
+                                "/api/logout",
+                                "/api/rol",
+                                "/api/sesion",
+                                "/restaurantes/buscar",
+                                "/restaurantes/**",
+                                "/resenyas/**",
+                                "/roles",
+                                "/change-password",
+                                "/usuarios/*/solicitar-baja",
+                                "/api/usuarios/*/solicitar-baja",
+                                "/admin/**",
+                                "/api/usuarios/subir-imagenes",
+                                "/usuarios/subir-imagenes",
+                                "/api/restaurantes/*/solicitar-modificacion",
+                                "/api/notificaciones/**",
+                                "/notificaciones/**",
+                                "/api/resenyas/**",
+                                "/api/imagenes/**",
+                                "/uploads/**",
+                                "/api/usuarios/*/preferencias-dieteticas",
+                                "/usuarios/*/favoritos/**"
 
-                ))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        ))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // 🔓 Endpoints públicos
-                .requestMatchers(
-                    "/register",
-                    "/api/register",
-                    "/api/csrf",
-                    "/api/login",
-                    "/api/logout",
-                    "/api/rol",
-                    "/api/sesion",
-                    "/restaurantes/buscar",
-                    "/roles",
-                    "/change-password",
-                    "/error",
-                    "/restaurantes/filtrar-avanzado",
-                    "/restaurantes/menus/**",
-                    "/uploads/**",
-                    "/imagenes/**",
-                    "/api/imagenes/**",
-                    "/resenyas/**",
-                    "/api/restaurantes/**", // ✅ perfiles de restaurante públicos
-                    "/api/resenyas/**",      // ✅ reseñas públicas
-                    "/restaurantes/**"       // ✅ compatibilidad si usas "/restaurantes" sin /api
-                ).permitAll()
+                        // 🔓 Endpoints públicos
+                        .requestMatchers(
+                                "/register",
+                                "/api/register",
+                                "/api/csrf",
+                                "/api/login",
+                                "/api/logout",
+                                "/api/rol",
+                                "/api/sesion",
+                                "/restaurantes/buscar",
+                                "/roles",
+                                "/change-password",
+                                "/error",
+                                "/restaurantes/filtrar-avanzado",
+                                "/restaurantes/menus/**",
+                                "/uploads/**",
+                                "/imagenes/**",
+                                "/api/imagenes/**",
+                                "/resenyas/**",
+                                "/api/restaurantes/**", // ✅ perfiles de restaurante públicos
+                                "/api/resenyas/**", // ✅ reseñas públicas
+                                "/restaurantes/**" // ✅ compatibilidad si usas "/restaurantes" sin /api
+                        ).permitAll()
 
-                // 🔐 Acciones protegidas
-                .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO")
-                .requestMatchers(HttpMethod.PUT, "/resenyas").hasRole("USUARIO")
-                .requestMatchers(HttpMethod.PATCH, "/api/resenyas/**").hasRole("USUARIO")
-                .requestMatchers(HttpMethod.DELETE, "/api/imagenes/**").hasRole("USUARIO")
-                .requestMatchers(HttpMethod.GET, "/usuarios/*/favoritos").hasRole("USUARIO")
-                .requestMatchers(HttpMethod.POST, "/usuarios/*/favoritos/*").hasRole("USUARIO")
-                .requestMatchers(HttpMethod.DELETE, "/usuarios/*/favoritos/*").hasRole("USUARIO")
+                        // 🔐 Acciones protegidas
+                        .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO")
+                        .requestMatchers(HttpMethod.PUT, "/resenyas").hasRole("USUARIO")
+                        .requestMatchers(HttpMethod.PATCH, "/api/resenyas/**").hasRole("USUARIO")
+                        .requestMatchers(HttpMethod.DELETE, "/api/imagenes/**").hasRole("USUARIO")
+                        .requestMatchers(HttpMethod.GET, "/usuarios/*/favoritos").hasRole("USUARIO")
+                        .requestMatchers(HttpMethod.POST, "/usuarios/*/favoritos/*").hasRole("USUARIO")
+                        .requestMatchers(HttpMethod.DELETE, "/usuarios/*/favoritos/*").hasRole("USUARIO")
 
+                        .requestMatchers(HttpMethod.POST, "/restaurantes/subir-menu").hasRole("RESTAURANTE")
+                        .requestMatchers(HttpMethod.POST, "/api/restaurantes/*/solicitar-modificacion")
+                        .hasRole("RESTAURANTE")
 
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                .requestMatchers(HttpMethod.POST, "/restaurantes/subir-menu").hasRole("RESTAURANTE")
-                .requestMatchers(HttpMethod.POST, "/api/restaurantes/*/solicitar-modificacion").hasRole("RESTAURANTE")
+                        .requestMatchers(HttpMethod.GET, "/api/notificaciones").hasRole("RESTAURANTE")
+                        .requestMatchers(HttpMethod.GET, "/api/notificaciones/admin").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/notificaciones/*/marcar-vista")
+                        .hasAnyRole("RESTAURANTE", "ADMIN")
 
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-
-                .requestMatchers(HttpMethod.GET, "/api/notificaciones").hasRole("RESTAURANTE")
-                .requestMatchers(HttpMethod.GET, "/api/notificaciones/admin").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/notificaciones/*/marcar-vista")
-                    .hasAnyRole("RESTAURANTE", "ADMIN")
-
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
-            .formLogin(form -> form.disable())
-            .httpBasic(httpBasic -> httpBasic.disable())
-            .logout(logout -> logout
-                .logoutUrl("/api/logout")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID", "XSRF-TOKEN")
-                .logoutSuccessHandler((request, response, authentication) -> {
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    response.setContentType("application/json");
-                    PrintWriter writer = response.getWriter();
-                    writer.write("{\"message\": \"Logout exitoso\"}");
-                    writer.flush();
-                })
-            );
+                        .anyRequest().authenticated())
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                .formLogin(form -> form.disable())
+                .httpBasic(httpBasic -> httpBasic.disable())
+                .logout(logout -> logout
+                        .logoutUrl("/api/logout")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID", "XSRF-TOKEN")
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                            response.setContentType("application/json");
+                            PrintWriter writer = response.getWriter();
+                            writer.write("{\"message\": \"Logout exitoso\"}");
+                            writer.flush();
+                        }));
 
         return http.build();
     }

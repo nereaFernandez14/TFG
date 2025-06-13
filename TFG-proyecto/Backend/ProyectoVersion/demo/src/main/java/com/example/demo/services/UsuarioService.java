@@ -5,6 +5,8 @@ import com.example.demo.entities.Usuario;
 import com.example.demo.exception.DangerException;
 import com.example.demo.repositories.UsuarioRepository;
 import com.example.helper.PRG;
+
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -71,12 +73,28 @@ public class UsuarioService {
         usuario.setPassword(passwordEncoder.encode(request.getNewPassword()));
         usuarioRepository.save(usuario);
     }
-    /*public void marcarSolicitudDeBaja(Long id) {
-        Usuario usuario = usuarioRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        usuario.setSolicitaBaja(true);
-        usuarioRepository.save(usuario);
-    }*/
 
+    public Usuario getUsuarioById(Long id) {
+        return usuarioRepository.findById(id).orElse(null);
+    }
+
+    public Usuario findByEmail(String email) {
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
+    }
+
+    public Usuario obtenerPorId(Long id) {
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+    }
+
+    /*
+     * public void marcarSolicitudDeBaja(Long id) {
+     * Usuario usuario = usuarioRepository.findById(id)
+     * .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+     * usuario.setSolicitaBaja(true);
+     * usuarioRepository.save(usuario);
+     * }
+     */
 
 }

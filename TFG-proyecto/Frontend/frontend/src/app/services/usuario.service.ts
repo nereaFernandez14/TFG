@@ -11,35 +11,34 @@ export interface UsuarioRegistro {
   apellidos: string;
   email: string;
   password: string;
-  rol: string; // El front envía string
+  rol: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsuarioService {
-  private readonly apiUrl = `${environment.apiUrl}/api`;
+
+  private readonly apiUrl = `${environment.apiUrl}`;
 
   constructor(private http: HttpClient) {}
 
   /**
-   * Registra un nuevo usuario.
+   * 🔐 Registra un nuevo usuario
    * POST /api/register
    */
   registrar(usuario: UsuarioRegistro): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, usuario, {
+    return this.http.post(`${this.apiUrl}/api/register`, usuario, {
       withCredentials: true
-    }).pipe(
-      catchError(this.handleError)
-    );
+    }).pipe(catchError(this.handleError));
   }
 
   /**
-   * Obtiene los datos del usuario autenticado.
-   * GET /api/perfil
+   * 👤 Obtiene los datos del usuario autenticado desde el backend
+   * GET /usuarios/perfil ✅ RUTA ACTUALIZADA
    */
   obtenerPerfil(): Observable<Usuario> {
-    return this.http.get<Usuario>(`${this.apiUrl}/perfil`, {
+    return this.http.get<Usuario>(`${this.apiUrl}/usuarios/perfil`, {
       withCredentials: true
     }).pipe(
       map((usuario: any) => ({
@@ -51,33 +50,34 @@ export class UsuarioService {
   }
 
   /**
-   * Cambia la contraseña del usuario autenticado.
+   * 📦 Obtiene el usuario actual desde localStorage
+   */
+  obtenerUsuario(): Usuario | null {
+    const data = localStorage.getItem('usuario');
+    return data ? JSON.parse(data) as Usuario : null;
+  }
+
+  /**
+   * 🔒 Cambia la contraseña del usuario autenticado
    * POST /change-password
    */
   cambiarPassword(passwordActual: string, nuevaPassword: string): Observable<any> {
-  return this.http.post(
-    `${environment.apiUrl}/change-password`,
-    {
-      currentPassword: passwordActual,
-      newPassword: nuevaPassword
-    },
-    {
-      withCredentials: true,
-      responseType: 'json'
-    }
-  );
-}
-
-  private getCookie(name: string): string | null {
-    const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
-    return match ? match[2] : null;
+    return this.http.post(
+      `${this.apiUrl}/change-password`,
+      {
+        currentPassword: passwordActual,
+        newPassword: nuevaPassword
+      },
+      {
+        withCredentials: true,
+        responseType: 'json'
+      }
+    );
   }
   logout(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/logout`, {}, {
+    return this.http.post(`${this.apiUrl}/api/logout`, {}, {
       withCredentials: true
-    }).pipe(
-      catchError(this.handleError)
-    );
+    }).pipe(catchError(this.handleError));
   }
 
   /**
@@ -96,12 +96,19 @@ export class UsuarioService {
       withCredentials: true
     });
   }
-  solicitarBaja(id: number) {
+
+  /**
+   * ❌ Solicita la baja del usuario
+   */
+  solicitarBaja(id: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/usuarios/${id}/solicitar-baja`, {}, {
       withCredentials: true
     });
-
   }
+
+  /**
+   * 🖼️ Subida de imágenes para restaurante
+   */
   subirImagenes(formData: FormData): Observable<any> {
     return this.http.post(`${this.apiUrl}/usuarios/subir-imagenes`, formData, {
       withCredentials: true
