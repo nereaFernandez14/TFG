@@ -34,6 +34,7 @@ public class Restaurante {
     private String tipoCocinaPersonalizado;
 
     @OneToOne
+    @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
     @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -70,10 +71,10 @@ public class Restaurante {
     @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SolicitudModificacion> solicitudesModificacion = new ArrayList<>();
 
-    @OneToMany(mappedBy = "destinatarioUsuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "destinatarioRestaurante", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notificacion> notificacionesRecibidas = new ArrayList<>();
 
-    @OneToMany(mappedBy = "generadaPorUsuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "generadaPorRestaurante", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notificacion> notificacionesGeneradas = new ArrayList<>();
 
     public Restaurante() {

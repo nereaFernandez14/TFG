@@ -58,6 +58,9 @@ public class Usuario {
     @JoinTable(name = "favoritos", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "restaurante_id"))
     private Set<Restaurante> favoritos = new HashSet<>();
 
+    @OneToOne(mappedBy = "usuario")
+    private Restaurante restaurante;
+
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<SolicitudModificacionUsuario> solicitudesModificacion = new HashSet<>();
 

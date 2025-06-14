@@ -22,6 +22,7 @@ public class SolicitudModificacionUsuario {
     private String campo;
     private String nuevoValor;
 
+    @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 

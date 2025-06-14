@@ -33,10 +33,11 @@ public class Notificacion {
     private Usuario destinatarioUsuario;
 
     @ManyToOne
-    @JoinColumn(name = "generada_por_restaurante_id")
-    private Restaurante generadaPorRestaurante;
+    @JoinColumn(name = "usuario_id")
+    private Usuario generadaPorUsuario;
 
     @ManyToOne
-    @JoinColumn(name = "generada_por_usuario_id")
-    private Usuario generadaPorUsuario;
+    @JoinColumn(name = "restaurante_id")
+    private Restaurante generadaPorRestaurante;
+
 }
