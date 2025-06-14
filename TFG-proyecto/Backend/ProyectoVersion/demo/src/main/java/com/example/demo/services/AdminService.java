@@ -27,7 +27,7 @@ public class AdminService {
     private final RestauranteService restauranteService;
     private final NotificacionService notificacionService;
     private final SolicitudModificacionRepository solicitudModificacionRepository;
-    private final SolicitudModificacionUsuarioRepository solicitudModificacionUsuarioRepository;
+    private final SolicitudModificacionUsuarioRepository solicitudUsuarioRepository;
 
     public List<Resenya> obtenerResenyasDenunciadas() {
         return resenyaRepository.findByDenunciadoTrue();
@@ -86,15 +86,67 @@ public class AdminService {
 
         restauranteService.actualizarDatosRestaurante(id, request);
 
-        // 🔁 Marcar solicitudes como gestionadas
-        List<SolicitudModificacion> solicitudes = solicitudModificacionRepository.findByRestauranteId(id);
-        for (SolicitudModificacion solicitud : solicitudes) {
-            solicitud.setGestionada(true);
-        }
-        solicitudModificacionRepository.saveAll(solicitudes);
-
         notificacionService.crearParaRestaurante(
                 restaurante, "📌 El administrador ha aplicado los cambios solicitados en tus datos.");
+    }
+
+    public List<SolicitudModificacion> obtenerSolicitudesModificacion() {
+        return solicitudModificacionRepository.findAll();
+    }
+
+    public List<SolicitudModificacionUsuario> obtenerSolicitudesModificacionUsuario() {
+        return solicitudUsuarioRepository.findAll();
+    }
+
+    public SolicitudModificacion obtenerSolicitudRestaurantePorId(Long id) {
+        return solicitudModificacionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+    }
+
+    public SolicitudModificacionUsuario obtenerSolicitudUsuarioPorId(Long id) {
+        return solicitudUsuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+    }
+
+    // ✔️ Resolución para restaurante
+    public void resolverModificacionRestaurante(Long id, boolean aceptada) {
+        SolicitudModificacion solicitud = obtenerSolicitudRestaurantePorId(id);
+
+        solicitud.setGestionada(true);
+        solicitud.setAceptada(aceptada);
+        solicitudModificacionRepository.save(solicitud);
+
+        String msg = aceptada
+                ? "✅ Tu solicitud de modificación del campo '" + solicitud.getCampo() + "' fue aceptada."
+                : "❌ Tu solicitud de modificación del campo '" + solicitud.getCampo() + "' fue rechazada.";
+
+        notificacionService.crear(solicitud.getRestaurante(), msg);
+    }
+
+    public void resolverModificacionUsuario(Long id, boolean aceptada) {
+        SolicitudModificacionUsuario solicitud = obtenerSolicitudUsuarioPorId(id);
+
+        Usuario usuario = solicitud.getUsuario();
+
+        if (aceptada) {
+            switch (solicitud.getCampo().toLowerCase()) {
+                case "nombre" -> usuario.setNombre(solicitud.getNuevoValor());
+                case "apellidos" -> usuario.setApellidos(solicitud.getNuevoValor());
+                case "email" -> usuario.setEmail(solicitud.getNuevoValor());
+                default -> throw new IllegalArgumentException("Campo inválido: " + solicitud.getCampo());
+            }
+            usuarioRepository.save(usuario);
+        }
+
+        solicitud.setGestionada(true);
+        solicitud.setAceptada(aceptada);
+        solicitudUsuarioRepository.save(solicitud);
+
+        String msg = aceptada
+                ? "✅ Tu solicitud de modificación del campo '" + solicitud.getCampo() + "' fue aceptada."
+                : "❌ Tu solicitud de modificación del campo '" + solicitud.getCampo() + "' fue rechazada.";
+
+        notificacionService.crear(usuario, msg);
     }
 
     public void actualizarDatosUsuario(Long id, Usuario datosActualizados) {
@@ -109,47 +161,13 @@ public class AdminService {
         usuarioRepository.save(usuario);
 
         // 🔁 Marcar solicitudes como gestionadas
-        List<SolicitudModificacionUsuario> solicitudes = solicitudModificacionUsuarioRepository.findByUsuarioId(id);
+        List<SolicitudModificacionUsuario> solicitudes = solicitudUsuarioRepository.findByUsuarioId(id);
         for (SolicitudModificacionUsuario solicitud : solicitudes) {
             solicitud.setGestionada(true);
         }
-        solicitudModificacionUsuarioRepository.saveAll(solicitudes);
+        solicitudUsuarioRepository.saveAll(solicitudes);
 
         notificacionService.crearParaUsuario(usuario, "📌 El administrador ha aplicado los cambios solicitados.");
     }
 
-    public List<SolicitudModificacion> obtenerSolicitudesModificacion() {
-        return solicitudModificacionRepository.findAll().stream()
-                .filter(solicitud -> !solicitud.isGestionada())
-                .toList();
-    }
-
-    public void eliminarSolicitudModificacionRestaurante(Long restauranteId) {
-        solicitudModificacionRepository.deleteByRestauranteId(restauranteId);
-    }
-
-    public void eliminarSolicitudModificacionUsuario(Long usuarioId) {
-        solicitudModificacionUsuarioRepository.deleteByUsuarioId(usuarioId);
-    }
-
-    public void eliminarSolicitudUsuario(Long usuarioId, String campo) {
-        solicitudModificacionUsuarioRepository.deleteAll(
-                solicitudModificacionUsuarioRepository.findAll().stream()
-                        .filter(s -> s.getUsuario().getId().equals(usuarioId) && s.getCampo().equalsIgnoreCase(campo))
-                        .toList());
-    }
-
-    public List<SolicitudModificacionUsuario> obtenerSolicitudesModificacionUsuario() {
-        return solicitudModificacionUsuarioRepository.findAll().stream()
-                .filter(solicitud -> !solicitud.isGestionada())
-                .toList();
-    }
-
-    public void eliminarSolicitudModificacionRestauranteCampo(Long restauranteId, String campo) {
-        solicitudModificacionRepository.deleteAll(
-                solicitudModificacionRepository.findAll().stream()
-                        .filter(s -> s.getRestaurante().getId().equals(restauranteId)
-                                && s.getCampo().equalsIgnoreCase(campo))
-                        .toList());
-    }
 }

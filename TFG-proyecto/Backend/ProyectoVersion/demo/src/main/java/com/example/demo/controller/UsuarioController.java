@@ -1,31 +1,37 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.RestauranteDTO;
-import com.example.demo.entities.Restaurante;
-import com.example.demo.entities.SolicitudModificacionUsuario;
-import com.example.demo.entities.Usuario;
-import com.example.demo.enums.RestriccionDietetica;
-import com.example.demo.repositories.RestauranteRepository;
-import com.example.demo.repositories.SolicitudModificacionUsuarioRepository;
-import com.example.demo.repositories.UsuarioRepository;
-import com.example.demo.services.NotificacionService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.nio.file.*;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.example.demo.entities.Usuario;
+import com.example.demo.enums.RestriccionDietetica;
+import com.example.demo.dto.RestauranteDTO;
+import com.example.demo.entities.Restaurante;
+import com.example.demo.entities.SolicitudModificacionUsuario;
+import com.example.demo.repositories.UsuarioRepository;
+import com.example.demo.repositories.RestauranteRepository;
+import com.example.demo.repositories.SolicitudModificacionUsuarioRepository;
+import com.example.demo.services.NotificacionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 @RestController
-@RequestMapping("/usuarios")
+@RequestMapping("/api")
 public class UsuarioController {
 
     @Autowired
@@ -51,107 +57,52 @@ public class UsuarioController {
 
     @GetMapping("/perfil")
     public ResponseEntity<?> obtenerPerfil() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) {
-            return ResponseEntity.status(401).body("No autenticado");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).body("Usuario no autenticado");
         }
 
-        String email = auth.getName();
+        String email = authentication.getName();
         Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
-        if (usuario == null)
+
+        if (usuario == null) {
             return ResponseEntity.status(404).body("Usuario no encontrado");
+        }
 
         List<String> restricciones = usuario.getRestriccionesDieteticas()
                 .stream()
                 .map(Enum::name)
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(new UsuarioDTO(usuario.getId(), usuario.getNombre(), usuario.getApellidos(),
-                usuario.getEmail(), usuario.getRol().name(), restricciones));
+        return ResponseEntity.ok(new UsuarioDTO(
+                usuario.getId(),
+                usuario.getNombre(),
+                usuario.getApellidos(),
+                usuario.getEmail(),
+                usuario.getRol().name(),
+                restricciones));
     }
 
     @PreAuthorize("hasAnyRole('USUARIO', 'RESTAURANTE')")
-    @PostMapping("/{id}/solicitar-baja")
-    public ResponseEntity<?> solicitarBaja(@PathVariable Long id, Authentication auth) {
-        String email = auth.getName();
-        Usuario usuario = usuarioRepository.findById(id).orElse(null);
-        if (usuario == null || !usuario.getEmail().equals(email)) {
-            return ResponseEntity.status(403).body("No autorizado");
-        }
-
-        usuario.setSolicitaBaja(true);
-        usuarioRepository.save(usuario);
-
-        Usuario admin = usuarioRepository.findByRol(com.example.demo.enums.RolNombre.ADMIN)
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Administrador no encontrado"));
-
-        String mensaje = "El usuario " + usuario.getNombre() + " " + usuario.getApellidos() + " ha solicitado su baja.";
-        notificacionService.crearParaAdmin(mensaje, usuario);
-
-        return ResponseEntity.ok().build();
-    }
-
-    @PreAuthorize("hasRole('USUARIO')")
-    @PutMapping("/{id}/preferencias-dieteticas")
-    public ResponseEntity<?> actualizarPreferencias(
-            @PathVariable Long id,
-            @RequestBody List<String> restricciones,
-            Authentication auth) {
-
-        String emailAutenticado = auth.getName();
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-
-        if (!usuario.getEmail().equals(emailAutenticado)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
-        }
-
-        Set<RestriccionDietetica> restriccionesConvertidas = restricciones.stream()
-                .map(String::toUpperCase)
-                .map(RestriccionDietetica::valueOf)
-                .collect(Collectors.toSet());
-
-        usuario.setRestriccionesDieteticas(restriccionesConvertidas);
-        usuarioRepository.save(usuario);
-
-        return ResponseEntity.ok(Map.of("mensaje", "Preferencias actualizadas correctamente"));
-    }
-
-    @PreAuthorize("hasRole('USUARIO')")
-    @PostMapping("/{id}/solicitar-modificacion")
-    public ResponseEntity<?> solicitarModificacionUsuario(
-            @PathVariable Long id,
-            @RequestBody Map<String, String> payload,
-            Authentication auth) {
-
+    @PostMapping("/usuarios/{id}/solicitar-baja")
+    public ResponseEntity<?> solicitarBajaUsuario(@PathVariable Long id, Authentication auth) {
         String emailAutenticado = auth.getName();
         Usuario usuario = usuarioRepository.findById(id).orElse(null);
 
         if (usuario == null || !usuario.getEmail().equals(emailAutenticado)) {
-            return ResponseEntity.status(403).body("No autorizado");
+            return ResponseEntity.status(403).body("No autorizado para solicitar esta baja");
         }
 
-        String campo = payload.get("campo");
-        String nuevoValor = payload.get("nuevoValor");
-
-        if (campo == null || nuevoValor == null || campo.isBlank() || nuevoValor.isBlank()) {
-            return ResponseEntity.badRequest().body("Campo y valor obligatorios");
-        }
-
-        SolicitudModificacionUsuario solicitud = new SolicitudModificacionUsuario();
-        solicitud.setCampo(campo);
-        solicitud.setNuevoValor(nuevoValor);
-        solicitud.setUsuario(usuario);
-        solicitudUsuarioRepository.save(solicitud);
-
-        return ResponseEntity.ok(Map.of("mensaje", "✅ Solicitud enviada"));
+        usuario.setSolicitaBaja(true);
+        usuarioRepository.save(usuario);
+        return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/usuarios/subir-imagenes")
     @PreAuthorize("hasRole('RESTAURANTE')")
-    @PostMapping("/subir-imagenes")
-    public ResponseEntity<?> subirImagenes(@RequestParam("imagenes") List<MultipartFile> imagenes,
+    public ResponseEntity<?> subirImagenesRestaurante(
+            @RequestParam("imagenes") List<MultipartFile> imagenes,
             @RequestParam("email") String email) {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
@@ -188,4 +139,126 @@ public class UsuarioController {
                     Map.of("error", "Error al guardar imágenes", "detalle", e.getMessage()));
         }
     }
+
+    @PutMapping("/usuarios/{id}/preferencias-dieteticas")
+    @PreAuthorize("hasRole('USUARIO')")
+    public ResponseEntity<?> actualizarPreferencias(
+            @PathVariable Long id,
+            @RequestBody List<String> restricciones,
+            Authentication auth) {
+
+        String emailAutenticado = auth.getName();
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        if (!usuario.getEmail().equals(emailAutenticado)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
+        }
+
+        Set<RestriccionDietetica> restriccionesConvertidas = restricciones.stream()
+                .map(String::toUpperCase)
+                .map(RestriccionDietetica::valueOf)
+                .collect(Collectors.toSet());
+
+        usuario.setRestriccionesDieteticas(restriccionesConvertidas);
+        usuarioRepository.save(usuario);
+
+        return ResponseEntity.ok(Map.of("mensaje", "Preferencias actualizadas correctamente"));
+    }
+
+    private boolean contienePalabrasMalSonantes(String texto) {
+        // Lista configurable de palabras prohibidas
+        List<String> palabrasProhibidas = List.of(
+                "puta", "mierda", "gilipollas", "cabron", "imbecil", "coño", "zorra", "maldito", "joder");
+
+        // Normalizamos el texto: lo pasamos a minúsculas y eliminamos símbolos
+        String textoNormalizado = texto.toLowerCase().replaceAll("[^a-záéíóúñ]", " ");
+
+        // Verifica si contiene alguna de las palabras mal sonantes
+        for (String palabra : palabrasProhibidas) {
+            if (textoNormalizado.contains(palabra)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @PreAuthorize("hasRole('USUARIO')")
+    @PostMapping("/usuarios/{id}/solicitar-modificacion")
+    public ResponseEntity<?> solicitarModificacionUsuario(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> payload,
+            Authentication auth) {
+
+        try {
+            String emailAutenticado = auth.getName();
+            Usuario usuario = usuarioRepository.findById(id).orElse(null);
+
+            if (usuario == null || !usuario.getEmail().equals(emailAutenticado)) {
+                System.out.println("🚫 Usuario no encontrado o no coincide con autenticado");
+                return ResponseEntity.status(403).body("No autorizado");
+            }
+
+            String campo = payload.get("campo");
+            String nuevoValor = payload.get("nuevoValor");
+
+            System.out.println("🧪 Campo recibido: " + campo);
+            System.out.println("🧪 Valor recibido: " + nuevoValor);
+
+            if (campo == null || nuevoValor == null || campo.isBlank() || nuevoValor.isBlank()) {
+                return ResponseEntity.badRequest().body("Campo y valor obligatorios");
+            }
+
+            if (nuevoValor.length() < 2 || nuevoValor.length() > 70) {
+                return ResponseEntity.badRequest().body("El valor debe tener entre 2 y 70 caracteres");
+            }
+
+            if (contienePalabrasMalSonantes(nuevoValor)) {
+                return ResponseEntity.badRequest().body("El valor contiene palabras inapropiadas");
+            }
+
+            switch (campo.toLowerCase()) {
+                case "nombre":
+                case "apellidos":
+                    if (!nuevoValor.matches("^([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)(\\s[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)*$")) {
+                        return ResponseEntity.badRequest()
+                                .body("Formato inválido. Use mayúscula inicial por palabra");
+                    }
+                    break;
+
+                case "email":
+                    if (!nuevoValor.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")) {
+                        return ResponseEntity.badRequest().body("Formato de email inválido");
+                    }
+                    break;
+
+                default:
+                    return ResponseEntity.badRequest().body("Campo no válido");
+            }
+
+            // 🔄 Crear y guardar la solicitud
+            SolicitudModificacionUsuario solicitud = new SolicitudModificacionUsuario();
+            solicitud.setCampo(campo);
+            solicitud.setNuevoValor(nuevoValor);
+            solicitud.setUsuario(usuario);
+
+            solicitudUsuarioRepository.save(solicitud);
+
+            // 📬 Notificación al admin
+            notificacionService.crearParaAdmin(
+                    "✏️ El usuario '" + usuario.getNombre()
+                            + "' solicita modificar el campo \"" + campo
+                            + "\" con valor: '" + nuevoValor + "'",
+                    usuario);
+
+            return ResponseEntity.ok(Map.of("mensaje", "✅ Solicitud enviada"));
+        } catch (Exception e) {
+            System.err.println("❌ Error interno en solicitud de modificación:");
+            e.printStackTrace(); // 🔥 Asegura trazabilidad
+            return ResponseEntity.internalServerError()
+                    .body("Error inesperado al procesar la solicitud: " + e.getMessage());
+        }
+    }
+
 }

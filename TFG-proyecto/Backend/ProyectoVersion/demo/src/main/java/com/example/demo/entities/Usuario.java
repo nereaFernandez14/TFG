@@ -43,12 +43,6 @@ public class Usuario {
     @NotNull(message = "El rol es obligatorio para el usuario")
     private RolNombre rol;
 
-    @OneToMany(mappedBy = "destinatarioUsuario", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Notificacion> notificacionesRecibidas = new ArrayList<>();
-
-    @OneToMany(mappedBy = "generadaPorUsuario", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Notificacion> notificacionesGeneradas = new ArrayList<>();
-
     @Column(name = "esta_registrado")
     private boolean estaRegistrado = false;
     @Column(nullable = false)
@@ -59,13 +53,23 @@ public class Usuario {
     @Enumerated(EnumType.STRING)
     @Column(name = "restriccion")
     private Set<RestriccionDietetica> restriccionesDieteticas = new HashSet<>();
-    @OneToMany(mappedBy = "autor", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    @JsonManagedReference(value = "autor-resenyas")
-    private Set<Resenya> resenyas = new HashSet<>();
 
     @ManyToMany
     @JoinTable(name = "favoritos", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "restaurante_id"))
     private Set<Restaurante> favoritos = new HashSet<>();
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<SolicitudModificacionUsuario> solicitudesModificacion = new HashSet<>();
+
+    @OneToMany(mappedBy = "destinatarioUsuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notificacion> notificacionesRecibidas = new ArrayList<>();
+
+    @OneToMany(mappedBy = "generadaPorUsuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notificacion> notificacionesGeneradas = new ArrayList<>();
+
+    @OneToMany(mappedBy = "autor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "autor-resenyas")
+    private List<Resenya> resenyas = new ArrayList<>();
 
     public boolean isEstaRegistrado() {
         return estaRegistrado;

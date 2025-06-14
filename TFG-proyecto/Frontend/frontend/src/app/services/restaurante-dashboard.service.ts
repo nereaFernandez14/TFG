@@ -4,11 +4,11 @@ import { Observable } from 'rxjs';
 import { Resenya } from '../models/resenya.model';
 
 export interface RestauranteDashboardDatos {
+  id: number;
   visitas: number;
   comentarios: number;
   valoracionPromedio: number;
 
-  // 🆕 Añadimos los campos usados en el dashboard
   nombre?: string;
   direccion?: string;
   telefono?: string;

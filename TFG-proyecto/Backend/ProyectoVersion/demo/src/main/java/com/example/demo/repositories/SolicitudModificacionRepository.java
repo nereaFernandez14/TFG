@@ -12,11 +12,4 @@ public interface SolicitudModificacionRepository extends JpaRepository<Solicitud
     List<SolicitudModificacion> findByRestaurante(Restaurante restaurante);
 
     boolean existsByRestauranteAndCampoAndNuevoValor(Restaurante restaurante, String campo, String nuevoValor);
-
-    void deleteByRestauranteId(Long restauranteId);
-
-    List<SolicitudModificacion> findByRestauranteId(Long restauranteId);
-
-    List<SolicitudModificacion> findByGestionadaFalse(); // 👈 útil para filtrar las pendientes
-
 }

@@ -3,6 +3,7 @@ package com.example.demo.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -14,23 +15,28 @@ public class Notificacion {
     private Long id;
 
     private String mensaje;
+
     private boolean vista;
+
     private boolean paraAdmin;
 
-    // 📬 Destinatario: Restaurante (opcional)
+    private boolean gestionada;
+
+    private LocalDateTime fechaCreacion = LocalDateTime.now();
+
     @ManyToOne
+    @JoinColumn(name = "destinatario_restaurante_id")
     private Restaurante destinatarioRestaurante;
 
-    // 📬 Destinatario: Usuario (opcional)
     @ManyToOne
+    @JoinColumn(name = "destinatario_usuario_id")
     private Usuario destinatarioUsuario;
 
-    // 📤 Generador: Restaurante (opcional)
     @ManyToOne
+    @JoinColumn(name = "generada_por_restaurante_id")
     private Restaurante generadaPorRestaurante;
 
-    // 📤 Generador: Usuario (opcional)
     @ManyToOne
+    @JoinColumn(name = "generada_por_usuario_id")
     private Usuario generadaPorUsuario;
-
 }

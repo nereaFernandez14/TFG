@@ -75,13 +75,15 @@ export class DashboardComponent implements OnInit {
   }
 
   pedirBajaRestaurante() {
+    if (!this.datos?.id) {
+      alert('❌ No se ha cargado el ID del restaurante');
+      return;
+    }
+
     const confirmado = confirm('¿Estás seguro de que deseas solicitar la baja del restaurante?');
     if (!confirmado) return;
 
-    const usuario = this.authService.obtenerUsuario();
-    if (!usuario?.id) return;
-
-    this.dashboardService.solicitarBaja(usuario.id).subscribe({
+    this.dashboardService.solicitarBaja(this.datos.id).subscribe({
       next: () => alert('Solicitud de baja enviada al administrador ✅'),
       error: (err) => {
         console.error('❌ Error solicitando baja', err);
@@ -106,7 +108,7 @@ export class DashboardComponent implements OnInit {
 
   onCampoSeleccionadoChange() {
     if (this.campoSeleccionado !== 'tipoCocina') {
-      this.valorPersonalizado = '';  // ✅ Limpiar campo personalizado si ya no es relevante
+      this.valorPersonalizado = '';
     }
     this.nuevoValor = '';
     this.nuevoValorMultiple = [];
@@ -114,15 +116,12 @@ export class DashboardComponent implements OnInit {
 
   onNuevoValorChange() {
     if (this.campoSeleccionado === 'tipoCocina' && this.nuevoValor !== 'OTRO') {
-      this.valorPersonalizado = ''; // ✅ Limpiar también si elige algo diferente a OTRO
+      this.valorPersonalizado = '';
     }
   }
 
   enviarPeticionModificacion() {
-    const usuario = this.authService.obtenerUsuario();
-    const restauranteId = usuario?.id;
-
-    if (!this.campoSeleccionado || !restauranteId) {
+    if (!this.campoSeleccionado || !this.datos?.id) {
       alert('⚠️ Faltan datos para enviar la solicitud');
       return;
     }
@@ -178,7 +177,7 @@ export class DashboardComponent implements OnInit {
 
     this.botonDeshabilitado = true;
 
-    this.http.post(`/api/restaurantes/${restauranteId}/solicitar-modificacion`, {
+    this.http.post(`/api/restaurantes/${this.datos.id}/solicitar-modificacion`, {
       campo,
       nuevoValor
     }).subscribe({

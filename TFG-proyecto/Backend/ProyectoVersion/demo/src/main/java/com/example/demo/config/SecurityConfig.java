@@ -26,7 +26,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true, jsr250Enabled = true)
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     @Bean
@@ -49,24 +49,18 @@ public class SecurityConfig {
                                 "/change-password",
                                 "/usuarios/*/solicitar-baja",
                                 "/api/usuarios/*/solicitar-baja",
+                                "/usuarios/*/solicitar-modificacion", // ✅ NUEVO
+                                "/api/usuarios/*/solicitar-modificacion", // ✅ NUEVO
+                                "/api/restaurantes/*/solicitar-modificacion",
+                                "/restaurantes/*/solicitar-modificacion",
                                 "/admin/**",
                                 "/api/usuarios/subir-imagenes",
                                 "/usuarios/subir-imagenes",
-                                "/api/restaurantes/*/solicitar-modificacion",
                                 "/api/notificaciones/**",
-                                "/notificaciones/**",
-                                "/api/resenyas/**",
-                                "/api/imagenes/**",
-                                "/uploads/**",
-                                "/api/usuarios/*/preferencias-dieteticas",
-                                "/usuarios/*/favoritos/**",
-                                "/usuarios/*/solicitar-modificacion", // ✅ Añadido
-                                "/api/usuarios/*/solicitar-modificacion" // ✅ Añadido
-                        ))
+                                "/notificaciones/**"))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // 🔓 Endpoints públicos
                         .requestMatchers(
                                 "/register",
                                 "/api/register",
@@ -81,41 +75,30 @@ public class SecurityConfig {
                                 "/error",
                                 "/restaurantes/filtrar-avanzado",
                                 "/restaurantes/menus/**",
-                                "/uploads/**",
-                                "/imagenes/**",
-                                "/api/imagenes/**",
-                                "/resenyas/**",
-                                "/api/restaurantes/**",
-                                "/api/resenyas/**",
-                                "/restaurantes/**")
+                                "/resenyas/**")
                         .permitAll()
 
-                        // 🔐 Acciones protegidas
                         .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO")
-                        .requestMatchers(HttpMethod.PUT, "/resenyas").hasRole("USUARIO")
-                        .requestMatchers(HttpMethod.PATCH, "/api/resenyas/**").hasRole("USUARIO")
-                        .requestMatchers(HttpMethod.DELETE, "/api/imagenes/**").hasRole("USUARIO")
-                        .requestMatchers(HttpMethod.GET, "/usuarios/*/favoritos").hasRole("USUARIO")
-                        .requestMatchers(HttpMethod.POST, "/usuarios/*/favoritos/*").hasRole("USUARIO")
-                        .requestMatchers(HttpMethod.DELETE, "/usuarios/*/favoritos/*").hasRole("USUARIO")
-
                         .requestMatchers(HttpMethod.POST, "/restaurantes/subir-menu").hasRole("RESTAURANTE")
                         .requestMatchers(HttpMethod.POST, "/api/restaurantes/*/solicitar-modificacion")
                         .hasRole("RESTAURANTE")
+                        .requestMatchers(HttpMethod.POST, "/restaurantes/*/solicitar-modificacion")
+                        .hasRole("RESTAURANTE")
 
-                        // ✅ Añadidos para permitir la modificación de usuario
-                        .requestMatchers(HttpMethod.POST, "/usuarios/*/solicitar-modificacion").hasRole("USUARIO")
+                        // ✅ NUEVO: Solicitudes de modificación de usuario
                         .requestMatchers(HttpMethod.POST, "/api/usuarios/*/solicitar-modificacion").hasRole("USUARIO")
+                        .requestMatchers(HttpMethod.POST, "/usuarios/*/solicitar-modificacion").hasRole("USUARIO")
 
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+
                         .requestMatchers(HttpMethod.GET, "/api/notificaciones").hasRole("RESTAURANTE")
                         .requestMatchers(HttpMethod.GET, "/api/notificaciones/admin").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/notificaciones/*/marcar-vista")
-                        .hasAnyRole("RESTAURANTE", "ADMIN")
+                        .hasAnyRole("RESTAURANTE", "ADMIN", "USUARIO")
 
                         .anyRequest().authenticated())
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                .sessionManagement(
+                        session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .formLogin(form -> form.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .logout(logout -> logout
@@ -137,7 +120,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of("https://localhost:4200"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "X-XSRF-TOKEN"));
         config.setExposedHeaders(List.of("Authorization", "X-XSRF-TOKEN", "Set-Cookie"));
         config.setAllowCredentials(true);

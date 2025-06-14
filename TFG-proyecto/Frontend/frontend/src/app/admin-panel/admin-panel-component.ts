@@ -84,6 +84,7 @@ export class AdminPanelComponent implements OnInit {
   cargarModificaciones() {
     this.http.get<any[]>('/api/admin/modificaciones').subscribe(data => {
       this.modificaciones = data;
+
       for (let solicitud of data) {
         const id = solicitud.restaurante.id;
         this.campoSeleccionado[id] = solicitud.campo;
@@ -95,8 +96,9 @@ export class AdminPanelComponent implements OnInit {
   cargarModificacionesUsuarios() {
     this.http.get<any[]>('/api/admin/modificaciones-usuarios').subscribe(data => {
       this.modificacionesUsuario = data;
+
       for (let solicitud of data) {
-        const id = solicitud.usuario.id;
+        const id = solicitud.id;
         this.campoSeleccionadoUsuario[id] = solicitud.campo;
         this.nuevoValorUsuario[id] = solicitud.nuevoValor;
       }
@@ -112,19 +114,19 @@ export class AdminPanelComponent implements OnInit {
 
   marcarComoVista(id: number) {
     this.http.put(`/api/notificaciones/${id}/marcar-vista`, {}).subscribe(() => {
-      this.notificaciones = this.eliminarItemPorId(this.notificaciones, id);
+      this.notificaciones = this.notificaciones.filter(n => n.id !== id);
     });
   }
 
   aceptarDenuncia(id: number) {
     this.http.post(`/api/admin/denuncias/${id}/aceptar`, {}).subscribe(() => {
-      this.denuncias = this.eliminarItemPorId(this.denuncias, id);
+      this.denuncias = this.denuncias.filter(d => d.id !== id);
     });
   }
 
   rechazarDenuncia(id: number) {
     this.http.post(`/api/admin/denuncias/${id}/rechazar`, {}).subscribe(() => {
-      this.denuncias = this.eliminarItemPorId(this.denuncias, id);
+      this.denuncias = this.denuncias.filter(d => d.id !== id);
     });
   }
 
@@ -168,7 +170,7 @@ export class AdminPanelComponent implements OnInit {
     this.http.put(`/api/admin/restaurantes/${id}`, payload).subscribe({
       next: () => {
         alert('✅ Restaurante actualizado correctamente');
-        this.cargarModificaciones();
+        this.modificaciones = this.eliminarItemPorId(this.modificaciones, id);
         this.campoSeleccionado[id] = '';
         this.nuevoValor[id] = '';
       },
@@ -179,30 +181,25 @@ export class AdminPanelComponent implements OnInit {
     });
   }
 
-  actualizarCampoUsuario(id: number) {
-    const campo = this.campoSeleccionadoUsuario[id];
-    const valor = this.nuevoValorUsuario[id];
-
-    if (!campo || valor === undefined || valor === '') {
-      alert('⚠️ Debes seleccionar un campo y escribir un valor válido.');
+  modificarUsuario(solicitudId: number, usuarioId: number, campo: string, nuevoValor: string) {
+    if (!campo || !nuevoValor) {
+      alert('⚠️ Campo o valor inválido');
       return;
     }
 
     const payload = {
       campo: campo,
-      nuevoValor: valor
+      nuevoValor: nuevoValor
     };
 
-    this.http.put(`/api/admin/usuarios/${id}/modificar`, payload).subscribe({
+    this.http.put(`/api/admin/usuarios/${usuarioId}/modificar`, payload).subscribe({
       next: () => {
         alert('✅ Usuario actualizado correctamente');
-        this.cargarModificacionesUsuarios();
-        this.campoSeleccionadoUsuario[id] = '';
-        this.nuevoValorUsuario[id] = '';
+        this.modificacionesUsuario = this.eliminarItemPorId(this.modificacionesUsuario, solicitudId);
       },
       error: (err) => {
         console.error('❌ Error al actualizar usuario', err);
-        alert('⚠️ Error al actualizar el usuario');
+        alert('⚠️ Error al actualizar usuario');
       }
     });
   }

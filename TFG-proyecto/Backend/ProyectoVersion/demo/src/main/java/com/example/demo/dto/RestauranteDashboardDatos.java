@@ -10,6 +10,8 @@ import java.util.List;
 
 @Data
 public class RestauranteDashboardDatos {
+
+    private Long id;
     private int visitas;
     private int comentarios;
     private double valoracionPromedio;

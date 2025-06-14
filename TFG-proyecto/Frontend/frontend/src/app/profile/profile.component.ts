@@ -1,202 +1,227 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { UsuarioService, Usuario } from '../services/usuario.service';
+import { Router } from '@angular/router';
+import { Restaurante } from '../models/restaurante.model';
+import { RestauranteService } from '../services/restaurante.service';
+import { RestriccionDietetica } from '../models/enums/restriccion-dietetica.enum';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })
 export class ProfileComponent implements OnInit {
-  usuario: any;
-  restaurante: any;
-
-  restriccionesEnum: string[] = [
-    'VEGANO',
-    'VEGETARIANO',
-    'CELIACO',
-    'SIN_LACTOSA',
-    'DIABETICO',
-    'SIN_GLUTEN',
-    'HALAL',
-    'KOSHER'
-  ];
-
-  restriccionesSeleccionadas: string[] = [];
-  notificaciones: any[] = [];
-
-  campoSeleccionadoUsuario: string = '';
-  nuevoValorUsuario: string = '';
-  mostrarVentanaModificacionUsuario = false;
-  botonUsuarioDeshabilitado = false;
-
+  usuario: Usuario | null = null;
+  restaurante: Restaurante | null = null;
+  archivoSeleccionado: File | null = null;
   nombreArchivo: string = '';
-  archivoSeleccionado!: File;
-
-  nombresImagenes: string[] = [];
   imagenesSeleccionadas: File[] = [];
+  nombresImagenes: string[] = [];
 
-  constructor(private http: HttpClient, private router: Router) {}
+  restriccionesEnum = Object.values(RestriccionDietetica);
+  restriccionesSeleccionadas: string[] = [];
+
+  // 🔧 NUEVO para el modal de modificación
+  modalModificacionAbierto: boolean = false;
+  campoSeleccionado: string = 'nombre';
+  nuevoValor: string = '';
+
+  constructor(
+    private usuarioService: UsuarioService,
+    private restauranteService: RestauranteService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
-    this.obtenerPerfil();
-  }
-
-  obtenerPerfil() {
-    this.http.get<any>('/api/usuarios/perfil', { withCredentials: true }).subscribe({
+    this.usuarioService.obtenerPerfil().subscribe({
       next: (data) => {
         this.usuario = data;
         this.restriccionesSeleccionadas = data.restriccionesDieteticas || [];
-        this.notificaciones = data.notificaciones || [];
 
-        if (data.rol === 'RESTAURANTE') {
-          this.obtenerRestaurante();
+        if (this.usuario.rol === 'RESTAURANTE') {
+          this.restauranteService.obtenerRestaurantePorUsuario(this.usuario.id).subscribe({
+            next: (restaurante) => {
+              this.restaurante = restaurante;
+            },
+            error: (err) => {
+              console.error('❌ Error al cargar restaurante', err);
+              this.restaurante = null;
+            }
+          });
         }
       },
-      error: (err) => {
-        if (err.status === 401) {
-          this.router.navigate(['/login']);
-        }
-      }
+      error: (err) => console.error('❌ Error al obtener perfil:', err)
     });
   }
 
-  obtenerRestaurante() {
-    this.http.get<any>('/api/restaurantes/mis-datos', { withCredentials: true }).subscribe({
-      next: (restaurante) => {
-        this.restaurante = restaurante;
-      }
-    });
-  }
-
-  formatearRestriccion(restriccion: string): string {
-    const map: any = {
-      VEGANO: 'Vegano',
-      VEGETARIANO: 'Vegetariano',
-      CELIACO: 'Celíaco',
-      SIN_LACTOSA: 'Sin lactosa',
-      DIABETICO: 'Diabético',
-      SIN_GLUTEN: 'Sin gluten',
-      HALAL: 'Halal',
-      KOSHER: 'Kosher'
-    };
-    return map[restriccion] || restriccion;
-  }
-
-  toggleRestriccion(restriccion: string) {
-    if (this.restriccionesSeleccionadas.includes(restriccion)) {
-      this.restriccionesSeleccionadas = this.restriccionesSeleccionadas.filter(r => r !== restriccion);
+  toggleRestriccion(valor: string): void {
+    const index = this.restriccionesSeleccionadas.indexOf(valor);
+    if (index >= 0) {
+      this.restriccionesSeleccionadas.splice(index, 1);
     } else {
-      this.restriccionesSeleccionadas.push(restriccion);
+      this.restriccionesSeleccionadas.push(valor);
     }
   }
 
-  guardarPreferencias() {
-    if (!this.usuario?.id) return;
-
-    this.http.put(
-      `/api/usuarios/${this.usuario.id}/preferencias-dieteticas`,
-      this.restriccionesSeleccionadas,
-      { withCredentials: true }
-    ).subscribe({
-      next: () => console.log('✅ Preferencias guardadas'),
-      error: (err) => console.error('❌ Error al guardar preferencias:', err)
-    });
+  formatearRestriccion(valor: string): string {
+    return valor
+      .toLowerCase()
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (l) => l.toUpperCase());
   }
 
-  cerrarNotificacion(id: number) {
-    this.notificaciones = this.notificaciones.filter(n => n.id !== id);
-    this.http.put(`/api/notificaciones/${id}/marcar-vista`, {}, { withCredentials: true }).subscribe();
-  }
+  guardarPreferencias(): void {
+    if (!this.usuario) return;
 
-  irACambiarPassword() {
-    this.router.navigate(['/cambiar-password']);
-  }
-
-  solicitarBaja() {
-    this.http.post(
-      `/api/${this.usuario.rol.toLowerCase()}s/${this.usuario.id}/solicitar-baja`,
-      {},
-      { withCredentials: true }
-    ).subscribe();
-  }
-
-  abrirVentanaModificacionUsuario() {
-    this.mostrarVentanaModificacionUsuario = true;
-  }
-
-  cerrarVentanaModificacionUsuario() {
-    this.mostrarVentanaModificacionUsuario = false;
-    this.campoSeleccionadoUsuario = '';
-    this.nuevoValorUsuario = '';
-  }
-
-  enviarModificacionUsuario() {
-    if (!this.usuario?.id || !this.campoSeleccionadoUsuario || !this.nuevoValorUsuario) return;
-
-    this.botonUsuarioDeshabilitado = true;
-
-    const payload = {
-      campo: this.campoSeleccionadoUsuario,
-      nuevoValor: this.nuevoValorUsuario
-    };
-
-    this.http.post(
-      `/api/usuarios/${this.usuario.id}/solicitar-modificacion`,
-      payload,
-      { withCredentials: true }
-    ).subscribe({
+    this.usuarioService.actualizarPreferencias(this.usuario.id!, this.restriccionesSeleccionadas).subscribe({
       next: () => {
-        this.cerrarVentanaModificacionUsuario();
-        this.botonUsuarioDeshabilitado = false;
+        alert('✅ Preferencias guardadas correctamente');
       },
       error: (err) => {
-        console.error('❌ Error al enviar modificación:', err);
-        this.botonUsuarioDeshabilitado = false;
+        console.error('❌ Error al guardar preferencias', err);
+        alert('❌ No se pudieron guardar las preferencias');
       }
     });
   }
 
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      this.archivoSeleccionado = file;
-      this.nombreArchivo = file.name;
+  irACambiarPassword(): void {
+    this.router.navigate(['/change-password']);
+  }
+
+  irACrearRestaurante(): void {
+    this.router.navigate(['/restaurante/crear']);
+  }
+
+  logout(): void {
+    this.usuarioService.logout().subscribe({
+      next: () => {
+        console.log('🔒 Sesión cerrada desde perfil');
+        localStorage.removeItem('usuario');
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        console.error('❌ Error al cerrar sesión desde perfil', err);
+        this.router.navigate(['/login']);
+      }
+    });
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.archivoSeleccionado = input.files[0];
+      this.nombreArchivo = this.archivoSeleccionado.name;
     }
   }
 
-  subirArchivo(event: Event) {
+  subirArchivo(event: Event): void {
     event.preventDefault();
-    if (!this.archivoSeleccionado) return;
+    if (!this.archivoSeleccionado || !this.usuario) return;
 
     const formData = new FormData();
     formData.append('archivo', this.archivoSeleccionado);
-
-    this.http.post(`/api/restaurantes/${this.usuario.id}/menu`, formData, { withCredentials: true }).subscribe(() => {
-      this.nombreArchivo = '';
-    });
-  }
-
-  onImagenesSeleccionadas(event: any) {
-    this.imagenesSeleccionadas = Array.from(event.target.files);
-    this.nombresImagenes = this.imagenesSeleccionadas.map(img => img.name);
-  }
-
-  subirImagenes(event: Event) {
-    event.preventDefault();
-    if (this.imagenesSeleccionadas.length === 0) return;
-
-    const formData = new FormData();
-    this.imagenesSeleccionadas.forEach(img => formData.append('imagenes', img));
     formData.append('email', this.usuario.email);
 
-    this.http.post('/api/usuarios/subir-imagenes', formData, { withCredentials: true }).subscribe(() => {
-      this.nombresImagenes = [];
-      this.imagenesSeleccionadas = [];
+    this.usuarioService.subirMenu(formData).subscribe({
+      next: (resp) => {
+        console.log('📤 Archivo subido correctamente', resp);
+        alert('Menú subido correctamente ✅');
+      },
+      error: (err) => {
+        console.error('❌ Error al subir archivo', err);
+        alert('Error al subir el menú ❌');
+      }
     });
   }
+
+  solicitarBaja(): void {
+    if (!this.usuario) return;
+
+    const rol = this.usuario.rol?.toLowerCase();
+    const confirmar = confirm(`¿Seguro que deseas solicitar la baja de tu cuenta (${rol})? Será revisado por un administrador.`);
+    if (!confirmar) return;
+
+    this.usuarioService.solicitarBaja(this.usuario.id!).subscribe({
+      next: () => {
+        alert(`✅ Solicitud de baja como ${rol} enviada correctamente.`);
+        this.usuario!.solicitaBaja = true;
+      },
+      error: (err) => {
+        console.error('❌ Error al solicitar baja', err);
+        alert('Ocurrió un error al enviar la solicitud ❌');
+      }
+    });
+  }
+
+  onImagenesSeleccionadas(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.imagenesSeleccionadas = Array.from(input.files);
+      this.nombresImagenes = this.imagenesSeleccionadas.map(file => file.name);
+    }
+  }
+
+  subirImagenes(event: Event): void {
+    event.preventDefault();
+    if (!this.usuario || this.imagenesSeleccionadas.length === 0) return;
+
+    const formData = new FormData();
+    this.imagenesSeleccionadas.forEach(file => {
+      formData.append('imagenes', file);
+    });
+    formData.append('email', this.usuario.email);
+
+    this.usuarioService.subirImagenes(formData).subscribe({
+      next: () => {
+        alert('✅ Imágenes subidas correctamente');
+        this.nombresImagenes = [];
+        this.imagenesSeleccionadas = [];
+      },
+      error: (err) => {
+        console.error('❌ Error al subir imágenes', err);
+        alert('Ocurrió un error al subir las imágenes');
+      }
+    });
+  }
+
+  // ✅ MODAL: Abrir/Cerrar/Enviar solicitud
+  abrirModalModificacion(): void {
+    this.modalModificacionAbierto = true;
+    this.campoSeleccionado = '';
+    this.nuevoValor = '';
+  }
+
+  cerrarModalModificacion(): void {
+    this.modalModificacionAbierto = false;
+  }
+
+  enviarSolicitudModificacion(): void {
+    if (!this.usuario) return;
+
+    const payload = {
+      campo: this.campoSeleccionado,
+      nuevoValor: this.nuevoValor
+    };
+
+    this.usuarioService.solicitarModificacion(this.usuario.id!, payload).subscribe({
+      next: () => {
+        alert('✅ Solicitud enviada correctamente');
+        this.modalModificacionAbierto = false;
+      },
+      error: (err) => {
+        console.error('❌ Error al enviar solicitud de modificación', err);
+        alert('❌ Ocurrió un error al enviar la solicitud');
+      }
+    });
+  }
+  cerrarModal(): void {
+  this.modalModificacionAbierto = false;
+  this.campoSeleccionado = '';
+  this.nuevoValor = '';
+}
+
 }

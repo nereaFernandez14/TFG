@@ -41,25 +41,21 @@ public class RestauranteController {
     @Autowired
     private NotificacionService notificacionService;
 
-    // ✅ Crear restaurante
     @PostMapping
     public Restaurante crearRestaurante(@RequestParam Long idUsuario, @RequestBody @Valid RestauranteDTO dto) {
         return restauranteService.crearDesdeDTO(idUsuario, dto);
     }
 
-    // ✅ Obtener todos
     @GetMapping
     public List<Restaurante> getAllRestaurantes() {
         return restauranteService.obtenerTodosLosRestaurantes();
     }
 
-    // ✅ Obtener uno por ID (e incrementa visitas)
     @GetMapping("/{id}")
     public Restaurante getRestauranteById(@PathVariable Long id) {
         return restauranteService.obtenerYIncrementarVisitas(id);
     }
 
-    // ✅ Obtener restaurante del usuario
     @GetMapping("/mio")
     public ResponseEntity<Restaurante> getRestauranteByUsuario(@RequestParam Long idUsuario) {
         Restaurante restaurante = restauranteService.obtenerRestaurantePorUsuario(idUsuario);
@@ -69,7 +65,6 @@ public class RestauranteController {
         return ResponseEntity.ok(restaurante);
     }
 
-    // ✅ Restaurantes destacados
     @GetMapping("/destacados")
     public List<Restaurante> getRestaurantesDestacados() {
         return restauranteService.obtenerTodosLosRestaurantes()
@@ -79,7 +74,6 @@ public class RestauranteController {
                 .toList();
     }
 
-    // ✅ Buscar por nombre
     @GetMapping("/buscar")
     public ResponseEntity<?> buscarRestaurantes(@RequestParam String nombre) {
         List<Restaurante> resultados = restauranteService.obtenerTodosLosRestaurantes()
@@ -89,7 +83,6 @@ public class RestauranteController {
         return ResponseEntity.ok(resultados);
     }
 
-    // ✅ Filtro avanzado
     @GetMapping("/filtrar-avanzado")
     public List<RestauranteDTO> filtrarRestaurantesAvanzado(
             @RequestParam(required = false) TipoCocina tipoCocina,
@@ -103,7 +96,6 @@ public class RestauranteController {
                 tipoCocina, barrio, rangoPrecio, minPuntuacion, restricciones, nombre);
     }
 
-    // ✅ Dashboard para restaurante
     @GetMapping("/dashboard")
     public ResponseEntity<RestauranteDTO> obtenerDashboard(@RequestParam Long idUsuario) {
         Restaurante restaurante = restauranteService.obtenerRestaurantePorUsuario(idUsuario);
@@ -114,7 +106,6 @@ public class RestauranteController {
         return ResponseEntity.ok(dto);
     }
 
-    // RestauranteController.java
     @PreAuthorize("hasRole('RESTAURANTE')")
     @GetMapping("/resumen/{idUsuario}")
     public ResponseEntity<RestauranteDashboardDatos> obtenerResumen(@PathVariable Long idUsuario) {
@@ -127,6 +118,7 @@ public class RestauranteController {
         }
 
         RestauranteDashboardDatos datos = new RestauranteDashboardDatos();
+        datos.setId(restaurante.getId());
         datos.setVisitas(restaurante.getVisitas());
         datos.setComentarios(restaurante.getResenyas().size());
         datos.setValoracionPromedio(restaurante.getMediaPuntuacion());
@@ -143,7 +135,6 @@ public class RestauranteController {
         return ResponseEntity.ok(datos);
     }
 
-    // ✅ Subir menú (PDF o imagen)
     @PostMapping("/subir-menu")
     public ResponseEntity<?> subirMenu(
             @RequestParam("archivo") MultipartFile archivo,
@@ -155,19 +146,14 @@ public class RestauranteController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Restaurante no encontrado");
             }
 
-            // Sanitizar y construir nombre
             String nombreArchivoSanitizado = restaurante.getNombre()
                     .replaceAll("[^a-zA-Z0-9\\-_]", "_") + "_" + archivo.getOriginalFilename();
 
-            // Ruta segura
             String basePath = System.getProperty("user.dir") + "/uploads/menus";
             Path rutaDestino = Paths.get(basePath, nombreArchivoSanitizado);
             Files.createDirectories(rutaDestino.getParent());
-
-            // Guardar archivo
             Files.copy(archivo.getInputStream(), rutaDestino, StandardCopyOption.REPLACE_EXISTING);
 
-            // Guardar solo el nombre en BD
             restaurante.setRutaMenu(nombreArchivoSanitizado);
             restauranteService.guardar(restaurante);
 
@@ -180,7 +166,6 @@ public class RestauranteController {
         }
     }
 
-    // ✅ Descargar menú
     @GetMapping("/menus/{nombreArchivo:.+}")
     public ResponseEntity<Resource> descargarMenu(@PathVariable String nombreArchivo) throws IOException {
         Path ruta = Paths.get(System.getProperty("user.dir") + "/uploads/menus").resolve(nombreArchivo).normalize();
@@ -225,14 +210,20 @@ public class RestauranteController {
         return ResponseEntity.ok().build();
     }
 
+    // 🔧 LÓGICA CORREGIDA DE SOLICITAR MODIFICACIÓN
     @PreAuthorize("hasRole('RESTAURANTE')")
     @PostMapping("/{id}/solicitar-modificacion")
     public ResponseEntity<?> solicitarModificacion(
             @PathVariable Long id,
             @RequestBody Map<String, String> payload) {
 
+        System.out.println("🛰️ Recibida solicitud de modificación");
+        System.out.println("🧩 ID recibido: " + id);
+        System.out.println("📦 Payload recibido: " + payload);
+
         Restaurante restaurante = restauranteService.obtenerRestaurantePorId(id);
         if (restaurante == null) {
+            System.out.println("❌ Restaurante no encontrado con ID: " + id);
             return ResponseEntity.status(404).body("Restaurante no encontrado");
         }
 
@@ -240,18 +231,27 @@ public class RestauranteController {
         String nuevoValor = payload.get("nuevoValor");
 
         if (campo == null || nuevoValor == null) {
+            System.out.println("⚠️ Campo o valor nulo. Campo: " + campo + " | Valor: " + nuevoValor);
             return ResponseEntity.badRequest().body("Campo o valor inválido");
         }
 
-        notificacionService.crearSolicitudConNotificacion(restaurante, campo, nuevoValor);
+        System.out.println("📝 Campo: " + campo + " | Nuevo valor: " + nuevoValor);
+
+        try {
+            notificacionService.crearSolicitudConNotificacion(restaurante, campo, nuevoValor);
+        } catch (Exception e) {
+            e.printStackTrace(); // 👈 Esto te va a decir la causa del 500
+            return ResponseEntity.status(500).body("Error interno al procesar la solicitud");
+        }
         return ResponseEntity.ok(Map.of("mensaje", "Modificación enviada y en espera de revisión"));
     }
+
     @GetMapping("/{id}/imagenes")
     public ResponseEntity<List<String>> obtenerImagenes(@PathVariable Long id) {
         Path dir = Paths.get(System.getProperty("user.dir"), "uploads", "restaurantes", String.valueOf(id));
 
         if (!Files.exists(dir)) {
-            return ResponseEntity.ok(List.of()); // No hay imágenes aún
+            return ResponseEntity.ok(List.of());
         }
 
         try (Stream<Path> paths = Files.list(dir)) {
@@ -265,8 +265,10 @@ public class RestauranteController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
     @PostMapping("/{id}/imagenes")
-    public ResponseEntity<?> subirImagenes(@PathVariable Long id, @RequestParam("imagenes") List<MultipartFile> imagenes) {
+    public ResponseEntity<?> subirImagenes(@PathVariable Long id,
+            @RequestParam("imagenes") List<MultipartFile> imagenes) {
         Restaurante restaurante = restauranteService.obtenerRestaurantePorUsuario(id);
         if (restaurante == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Restaurante no encontrado"));
@@ -285,7 +287,6 @@ public class RestauranteController {
                 nuevasRutas.add(nombre);
             }
 
-            // 📥 Guardar nombres en la BD
             restaurante.getImagenes().addAll(nuevasRutas);
             restauranteService.guardar(restaurante);
 
@@ -303,21 +304,22 @@ public class RestauranteController {
             @PathVariable String nombreImagen) {
 
         Restaurante restaurante = restauranteService.obtenerRestaurantePorUsuario(id);
-        if (restaurante == null) return ResponseEntity.notFound().build();
+        if (restaurante == null)
+            return ResponseEntity.notFound().build();
 
-        Path ruta = Paths.get(System.getProperty("user.dir"), "uploads", "restaurantes", String.valueOf(id), nombreImagen);
+        Path ruta = Paths.get(System.getProperty("user.dir"), "uploads", "restaurantes", String.valueOf(id),
+                nombreImagen);
 
         try {
             if (Files.exists(ruta)) {
                 Files.delete(ruta);
             }
 
-            // 💾 Eliminar referencia en base de datos
             List<String> imagenes = restaurante.getImagenes();
             boolean removido = imagenes.remove(nombreImagen);
 
             if (removido) {
-                restaurante.setImagenes(imagenes); // redundante pero explícito
+                restaurante.setImagenes(imagenes);
                 restauranteService.guardar(restaurante);
             }
 
@@ -328,10 +330,11 @@ public class RestauranteController {
                     .body(Map.of("error", "❌ Error al eliminar la imagen: " + e.getMessage()));
         }
     }
+
     @GetMapping("/uploads/{id}/{nombre:.+}")
     public ResponseEntity<Resource> obtenerImagenRestaurante(
-        @PathVariable Long id,
-        @PathVariable String nombre) throws IOException {
+            @PathVariable Long id,
+            @PathVariable String nombre) throws IOException {
 
         Path ruta = Paths.get(System.getProperty("user.dir"), "uploads", "restaurantes", String.valueOf(id), nombre);
 
@@ -342,12 +345,13 @@ public class RestauranteController {
         Resource recurso = new UrlResource(ruta.toUri());
 
         String mimeType = Files.probeContentType(ruta);
-        if (mimeType == null) mimeType = "application/octet-stream";
+        if (mimeType == null)
+            mimeType = "application/octet-stream";
 
         return ResponseEntity.ok()
-            .contentType(MediaType.parseMediaType(mimeType))
-            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + nombre + "\"")
-            .body(recurso);
+                .contentType(MediaType.parseMediaType(mimeType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + nombre + "\"")
+                .body(recurso);
     }
 
 }

@@ -3,12 +3,7 @@
   <!-- 🔔 Notificaciones del ADMIN -->
   <div *ngIf="notificaciones.length > 0" class="notificaciones-admin">
     <div *ngFor="let n of notificaciones" class="alert alert-dark d-flex justify-content-between align-items-center shadow-sm">
-      <div>
-        <i class="fas fa-bell"></i> {{ n.mensaje }}
-        <br />
-        <small *ngIf="n.usuario">👤 Usuario: {{ n.usuario?.nombre }} {{ n.usuario?.apellidos }}</small>
-        <small *ngIf="n.restaurante">🍽️ Restaurante: {{ n.restaurante?.nombre }}</small>
-      </div>
+      <div><i class="fas fa-bell"></i> {{ n.mensaje }}</div>
       <button (click)="marcarComoVista(n.id)" class="btn btn-sm btn-outline-danger">
         <i class="fas fa-times"></i>
       </button>
@@ -68,7 +63,7 @@
     </div>
   </section>
 
-  <!-- ✏️ MODIFICAR DATOS RESTAURANTES -->
+  <!-- ✏️ MODIFICAR DATOS -->
   <section class="accordion">
     <button class="accordion-toggle" (click)="toggleSeccion('modificar')">
       <i class="fas fa-pen-square"></i> Modificar datos de Restaurantes
@@ -110,6 +105,34 @@
     </div>
   </section>
 
+  <!-- 🧑‍💻 MODIFICACIONES USUARIOS -->
+  <section class="accordion">
+    <button class="accordion-toggle" (click)="toggleSeccion('modificacionUsuario')">
+      <i class="fas fa-user-edit"></i> Modificar datos de Usuarios
+      <i class="fas" [ngClass]="{ 'fa-chevron-down': !seccionesAbiertas.modificacionUsuario, 'fa-chevron-up': seccionesAbiertas.modificacionUsuario }"></i>
+    </button>
+    <div class="accordion-content" [class.open]="seccionesAbiertas.modificacionUsuario">
+      <p *ngIf="modificacionesUsuario.length === 0" class="empty-message">
+        <i class="fas fa-inbox"></i> No hay solicitudes de modificación de usuarios.
+      </p>
+
+      <div *ngFor="let m of modificacionesUsuario" class="admin-card minimal">
+        <h3><i class="fas fa-user-edit"></i> Solicitud de modificación</h3>
+        <p><strong><i class="fas fa-user"></i> Usuario:</strong> {{ m.usuario.nombre }} {{ m.usuario.apellidos }}</p>
+        <p><strong><i class="fas fa-envelope"></i> Email:</strong> {{ m.usuario.email }}</p>
+        <p><strong><i class="fas fa-keyboard"></i> Campo solicitado:</strong> {{ m.campo }}</p>
+        <p><strong><i class="fas fa-sync-alt"></i> Nuevo valor:</strong> {{ m.nuevoValor }}</p>
+
+        <div class="actions">
+          <button class="btn secondary" (click)="modificarUsuario(m.id, m.usuario.id, m.campo, m.nuevoValor)">
+        <i class="fas fa-edit"></i> Modificar
+        </button>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- 👤 BAJAS USUARIOS -->
   <section class="accordion">
     <button class="accordion-toggle" (click)="toggleSeccion('usuarios')">
@@ -137,46 +160,4 @@
     </div>
   </section>
 
-  <!-- ✏️ MODIFICAR DATOS USUARIOS -->
-  <section class="accordion">
-    <button class="accordion-toggle" (click)="toggleSeccion('modificacionUsuario')">
-      <i class="fas fa-user-edit"></i> Modificar datos de Usuarios
-      <i class="fas" [ngClass]="{ 'fa-chevron-down': !seccionesAbiertas.modificacionUsuario, 'fa-chevron-up': seccionesAbiertas.modificacionUsuario }"></i>
-    </button>
-    <div class="accordion-content" [class.open]="seccionesAbiertas.modificacionUsuario">
-      <p *ngIf="modificacionesUsuario.length === 0" class="empty-message">
-        <i class="fas fa-inbox"></i> No hay solicitudes de modificación de usuarios.
-      </p>
-
-      <div *ngFor="let m of modificacionesUsuario" class="admin-card minimal">
-        <h3><i class="fas fa-user-edit"></i> Solicitud de modificación de usuario</h3>
-        <p><strong><i class="fas fa-user"></i> Usuario:</strong> {{ m.usuario.nombre }} {{ m.usuario.apellidos }}</p>
-        <p><strong><i class="fas fa-envelope"></i> Email:</strong> {{ m.usuario.email }}</p>
-        <p><strong><i class="fas fa-keyboard"></i> Campo solicitado:</strong> {{ m.campo }}</p>
-        <p><strong><i class="fas fa-sync-alt"></i> Nuevo valor:</strong> {{ m.nuevoValor }}</p>
-
-        <div class="modificacion-campo">
-          <label><i class="fas fa-check-double"></i> Confirmar campo:</label>
-          <select [(ngModel)]="campoSeleccionadoUsuario[m.usuario.id]">
-            <option value="">-- Selecciona --</option>
-            <option value="nombre">Nombre</option>
-            <option value="apellidos">Apellidos</option>
-            <option value="email">Email</option>
-          </select>
-
-          <input
-            *ngIf="campoSeleccionadoUsuario[m.usuario.id]"
-            [(ngModel)]="nuevoValorUsuario[m.usuario.id]"
-            type="text"
-            placeholder="Nuevo valor confirmado" />
-
-          <div class="actions">
-            <button class="btn primary" (click)="actualizarCampoUsuario(m.usuario.id)">
-              <i class="fas fa-check-circle"></i> Aceptar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 </div>

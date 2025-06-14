@@ -1,6 +1,7 @@
 package com.example.demo.repositories;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -16,5 +17,7 @@ public interface SolicitudModificacionUsuarioRepository extends JpaRepository<So
     List<SolicitudModificacionUsuario> findByUsuarioId(Long usuarioId);
 
     List<SolicitudModificacionUsuario> findByGestionadaFalse();
+
+    SolicitudModificacionUsuario findByUsuarioIdAndCampo(Long usuarioId, String campo);
 
 }

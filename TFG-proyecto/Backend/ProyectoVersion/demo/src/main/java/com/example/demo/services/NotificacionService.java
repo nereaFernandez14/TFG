@@ -3,12 +3,10 @@ package com.example.demo.services;
 import com.example.demo.entities.Notificacion;
 import com.example.demo.entities.Restaurante;
 import com.example.demo.entities.SolicitudModificacion;
-import com.example.demo.entities.SolicitudModificacionUsuario;
 import com.example.demo.entities.Usuario;
 import com.example.demo.repositories.NotificacionRepository;
 import com.example.demo.repositories.RestauranteRepository;
 import com.example.demo.repositories.SolicitudModificacionRepository;
-import com.example.demo.repositories.SolicitudModificacionUsuarioRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +20,6 @@ public class NotificacionService {
     private final NotificacionRepository notificacionRepository;
     private final RestauranteRepository restauranteRepository;
     private final SolicitudModificacionRepository solicitudModificacionRepository;
-    private final SolicitudModificacionUsuarioRepository solicitudModificacionUsuarioRepository;
 
     // 🔔 Notificación dirigida a un restaurante específico
     public void crearParaRestaurante(Restaurante destino, String mensaje) {
@@ -31,16 +28,18 @@ public class NotificacionService {
         noti.setDestinatarioRestaurante(destino);
         noti.setVista(false);
         noti.setParaAdmin(false);
+        noti.setGestionada(false);
         notificacionRepository.save(noti);
     }
 
     // 🔔 Notificación dirigida a un usuario específico
-    public void crearParaUsuario(Usuario usuario, String mensaje) {
+    public void crearParaUsuario(Usuario destino, String mensaje) {
         Notificacion noti = new Notificacion();
         noti.setMensaje(mensaje);
-        noti.setDestinatarioUsuario(usuario);
-        noti.setVista(false);
         noti.setParaAdmin(false);
+        noti.setDestinatarioUsuario(destino);
+        noti.setVista(false);
+        noti.setGestionada(false);
         notificacionRepository.save(noti);
     }
 
@@ -51,6 +50,7 @@ public class NotificacionService {
         noti.setParaAdmin(true);
         noti.setGeneradaPorRestaurante(generadoPor);
         noti.setVista(false);
+        noti.setGestionada(false);
         notificacionRepository.save(noti);
     }
 
@@ -61,6 +61,7 @@ public class NotificacionService {
         noti.setParaAdmin(true);
         noti.setGeneradaPorUsuario(generadoPor);
         noti.setVista(false);
+        noti.setGestionada(false);
         notificacionRepository.save(noti);
     }
 
@@ -70,6 +71,7 @@ public class NotificacionService {
         noti.setMensaje(mensaje);
         noti.setParaAdmin(true);
         noti.setVista(false);
+        noti.setGestionada(false);
         notificacionRepository.save(noti);
     }
 
@@ -86,7 +88,6 @@ public class NotificacionService {
         return notificacionRepository.findByDestinatarioRestauranteAndVistaFalse(restaurante);
     }
 
-    // 🔍 Todas las no vistas para un usuario
     public List<Notificacion> obtenerNoVistas(Usuario usuario) {
         return notificacionRepository.findByDestinatarioUsuarioAndVistaFalse(usuario);
     }
@@ -96,13 +97,14 @@ public class NotificacionService {
         return notificacionRepository.findByParaAdminTrueAndVistaFalse();
     }
 
-    // 🛠️ Solicitud de modificación + notificación al admin desde restaurante
+    // 🛠️ Solicitud de modificación + notificación al admin (restaurante)
     public void crearSolicitudConNotificacion(Restaurante restaurante, String campo, String nuevoValor) {
         boolean yaExiste = solicitudModificacionRepository
                 .existsByRestauranteAndCampoAndNuevoValor(restaurante, campo, nuevoValor);
 
-        if (yaExiste)
+        if (yaExiste) {
             return;
+        }
 
         SolicitudModificacion solicitud = new SolicitudModificacion();
         solicitud.setCampo(campo);
@@ -115,31 +117,11 @@ public class NotificacionService {
         crearParaAdmin(msg, restaurante);
     }
 
-    // 🛠️ Solicitud de modificación + notificación al admin desde usuario
-    public void crearSolicitudUsuarioConNotificacion(Usuario usuario, String campo, String nuevoValor) {
-        boolean yaExiste = solicitudModificacionUsuarioRepository
-                .existsByUsuarioAndCampoAndNuevoValor(usuario, campo, nuevoValor);
-
-        if (yaExiste)
-            return;
-
-        SolicitudModificacionUsuario solicitud = new SolicitudModificacionUsuario();
-        solicitud.setCampo(campo);
-        solicitud.setNuevoValor(nuevoValor);
-        solicitud.setUsuario(usuario);
-        solicitudModificacionUsuarioRepository.save(solicitud);
-
-        String msg = "✏️ El usuario '" + usuario.getNombre() + "' solicita modificar el campo \"" + campo
-                + "\" con valor: '" + nuevoValor + "'";
-        crearParaAdmin(msg, usuario);
-    }
-
-    // Alias para restaurante
+    // Alias
     public void crear(Restaurante restaurante, String mensaje) {
         crearParaRestaurante(restaurante, mensaje);
     }
 
-    // Alias para usuario
     public void crear(Usuario usuario, String mensaje) {
         crearParaUsuario(usuario, mensaje);
     }

@@ -11,34 +11,35 @@ export interface UsuarioRegistro {
   apellidos: string;
   email: string;
   password: string;
-  rol: string;
+  rol: string; // El front envía string
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsuarioService {
-
-  private readonly apiUrl = `${environment.apiUrl}`;
+  private readonly apiUrl = `${environment.apiUrl}/api`;
 
   constructor(private http: HttpClient) {}
 
   /**
-   * 🔐 Registra un nuevo usuario
+   * Registra un nuevo usuario.
    * POST /api/register
    */
   registrar(usuario: UsuarioRegistro): Observable<any> {
-    return this.http.post(`${this.apiUrl}/api/register`, usuario, {
+    return this.http.post(`${this.apiUrl}/register`, usuario, {
       withCredentials: true
-    }).pipe(catchError(this.handleError));
+    }).pipe(
+      catchError(this.handleError)
+    );
   }
 
   /**
-   * 👤 Obtiene los datos del usuario autenticado desde el backend
-   * GET /usuarios/perfil ✅ RUTA ACTUALIZADA
+   * Obtiene los datos del usuario autenticado.
+   * GET /api/perfil
    */
   obtenerPerfil(): Observable<Usuario> {
-    return this.http.get<Usuario>(`${this.apiUrl}/usuarios/perfil`, {
+    return this.http.get<Usuario>(`${this.apiUrl}/perfil`, {
       withCredentials: true
     }).pipe(
       map((usuario: any) => ({
@@ -50,34 +51,38 @@ export class UsuarioService {
   }
 
   /**
-   * 📦 Obtiene el usuario actual desde localStorage
-   */
-  obtenerUsuario(): Usuario | null {
-    const data = localStorage.getItem('usuario');
-    return data ? JSON.parse(data) as Usuario : null;
-  }
-
-  /**
-   * 🔒 Cambia la contraseña del usuario autenticado
+   * Cambia la contraseña del usuario autenticado.
    * POST /change-password
    */
   cambiarPassword(passwordActual: string, nuevaPassword: string): Observable<any> {
-    return this.http.post(
-      `${this.apiUrl}/change-password`,
-      {
-        currentPassword: passwordActual,
-        newPassword: nuevaPassword
-      },
-      {
-        withCredentials: true,
-        responseType: 'json'
-      }
-    );
+  return this.http.post(
+    `${environment.apiUrl}/change-password`,
+    {
+      currentPassword: passwordActual,
+      newPassword: nuevaPassword
+    },
+    {
+      withCredentials: true,
+      responseType: 'json'
+    }
+  );
+}
+
+  private getCookie(name: string): string | null {
+    const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+    return match ? match[2] : null;
   }
+
+  /**
+   * Cierra la sesión del usuario autenticado.
+   * POST /api/logout
+   */
   logout(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/api/logout`, {}, {
+    return this.http.post(`${this.apiUrl}/logout`, {}, {
       withCredentials: true
-    }).pipe(catchError(this.handleError));
+    }).pipe(
+      catchError(this.handleError)
+    );
   }
 
   /**
@@ -96,19 +101,12 @@ export class UsuarioService {
       withCredentials: true
     });
   }
-
-  /**
-   * ❌ Solicita la baja del usuario
-   */
-  solicitarBaja(id: number): Observable<any> {
+  solicitarBaja(id: number) {
     return this.http.post(`${this.apiUrl}/usuarios/${id}/solicitar-baja`, {}, {
       withCredentials: true
     });
-  }
 
-  /**
-   * 🖼️ Subida de imágenes para restaurante
-   */
+  }
   subirImagenes(formData: FormData): Observable<any> {
     return this.http.post(`${this.apiUrl}/usuarios/subir-imagenes`, formData, {
       withCredentials: true
@@ -119,6 +117,13 @@ export class UsuarioService {
       withCredentials: true
     });
   }
+
+  solicitarModificacion(id: number, payload: { campo: string; nuevoValor: string }) {
+  return this.http.post(`${this.apiUrl}/usuarios/${id}/solicitar-modificacion`, payload, {
+    withCredentials: true
+  });
+}
+
 
 
 }

@@ -1,10 +1,12 @@
 package com.example.demo.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Data
+@Getter
+@Setter
 public class SolicitudModificacion {
 
     @Id
@@ -15,7 +17,10 @@ public class SolicitudModificacion {
     private String nuevoValor;
 
     @ManyToOne
+    @JoinColumn(name = "restaurante_id")
     private Restaurante restaurante;
 
     private boolean gestionada = false;
+    private Boolean aceptada; // puede ser null inicialmente
+
 }

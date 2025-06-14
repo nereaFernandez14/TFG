@@ -90,34 +90,44 @@ public class AdminController {
     }
 
     @PutMapping("/usuarios/{id}/modificar")
-    public ResponseEntity<?> modificarDatosUsuario(
-            @PathVariable Long id,
+    public ResponseEntity<?> modificarUsuarioDesdeAdmin(@PathVariable Long id,
             @RequestBody Map<String, String> payload) {
+
+        String campo = payload.get("campo");
+        String nuevoValor = payload.get("nuevoValor");
+
+        if (campo == null || nuevoValor == null) {
+            return ResponseEntity.badRequest().body("Faltan datos");
+        }
 
         Usuario usuario = usuarioRepository.findById(id).orElse(null);
         if (usuario == null) {
             return ResponseEntity.status(404).body("Usuario no encontrado");
         }
 
-        String campo = payload.get("campo");
-        String nuevoValor = payload.get("nuevoValor");
-
-        if (campo == null || nuevoValor == null || campo.isBlank() || nuevoValor.isBlank()) {
-            return ResponseEntity.badRequest().body("Campo y valor son requeridos");
-        }
-
-        switch (campo) {
+        switch (campo.toLowerCase()) {
             case "nombre" -> usuario.setNombre(nuevoValor);
-            case "apellidos", "apellido" -> usuario.setApellidos(nuevoValor);
+            case "apellidos" -> usuario.setApellidos(nuevoValor);
             case "email" -> usuario.setEmail(nuevoValor);
             default -> {
-                return ResponseEntity.badRequest().body("Campo inválido");
+                return ResponseEntity.badRequest().body("Campo no válido");
             }
         }
 
-        adminService.actualizarDatosUsuario(id, usuario);
+        usuarioRepository.save(usuario);
 
-        return ResponseEntity.ok(Map.of("mensaje", "✅ Usuario actualizado"));
+        // 🔄 MARCAR LA SOLICITUD COMO GESTIONADA
+        SolicitudModificacionUsuario solicitud = solicitudUsuarioRepository.findByUsuarioIdAndCampo(id, campo);
+        if (solicitud != null) {
+            solicitud.setGestionada(true);
+            solicitud.setAceptada(true);
+            solicitudUsuarioRepository.save(solicitud);
+        }
+
+        notificacionService.crear(usuario,
+                "✅ El administrador ha aceptado tu solicitud de modificación del campo '" + campo + "'");
+
+        return ResponseEntity.ok(Map.of("mensaje", "Usuario actualizado"));
     }
 
     @GetMapping("/modificaciones")
@@ -126,7 +136,31 @@ public class AdminController {
     }
 
     @GetMapping("/modificaciones-usuarios")
-    public ResponseEntity<List<SolicitudModificacionUsuario>> obtenerSolicitudesUsuarios() {
-        return ResponseEntity.ok(adminService.obtenerSolicitudesModificacionUsuario());
+    public List<SolicitudModificacionUsuario> obtenerSolicitudesModificacionUsuario() {
+        return solicitudUsuarioRepository.findByGestionadaFalse();
+    }
+
+    @PostMapping("/modificaciones/{id}/aceptar")
+    public ResponseEntity<?> aceptarModificacionRestaurante(@PathVariable Long id) {
+        adminService.resolverModificacionRestaurante(id, true);
+        return ResponseEntity.ok(Map.of("mensaje", "Solicitud aceptada"));
+    }
+
+    @PostMapping("/modificaciones/{id}/rechazar")
+    public ResponseEntity<?> rechazarModificacionRestaurante(@PathVariable Long id) {
+        adminService.resolverModificacionRestaurante(id, false);
+        return ResponseEntity.ok(Map.of("mensaje", "Solicitud rechazada"));
+    }
+
+    @PostMapping("/modificaciones-usuarios/{id}/aceptar")
+    public ResponseEntity<?> aceptarModificacionUsuario(@PathVariable Long id) {
+        adminService.resolverModificacionUsuario(id, true);
+        return ResponseEntity.ok(Map.of("mensaje", "Solicitud aceptada"));
+    }
+
+    @PostMapping("/modificaciones-usuarios/{id}/rechazar")
+    public ResponseEntity<?> rechazarModificacionUsuario(@PathVariable Long id) {
+        adminService.resolverModificacionUsuario(id, false);
+        return ResponseEntity.ok(Map.of("mensaje", "Solicitud rechazada"));
     }
 }

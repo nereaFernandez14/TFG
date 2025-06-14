@@ -36,7 +36,7 @@ public class Restaurante {
     @OneToOne
     private Usuario usuario;
 
-    @OneToMany(mappedBy = "restaurante", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("restaurante-resenyas")
     private List<Resenya> resenyas = new ArrayList<>();
 
@@ -66,6 +66,15 @@ public class Restaurante {
 
     @Column(nullable = false)
     private int visitas = 0;
+
+    @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SolicitudModificacion> solicitudesModificacion = new ArrayList<>();
+
+    @OneToMany(mappedBy = "destinatarioUsuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notificacion> notificacionesRecibidas = new ArrayList<>();
+
+    @OneToMany(mappedBy = "generadaPorUsuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notificacion> notificacionesGeneradas = new ArrayList<>();
 
     public Restaurante() {
     }
