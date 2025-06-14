@@ -26,132 +26,147 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity(prePostEnabled = true, jsr250Enabled = true)
 public class SecurityConfig {
 
-        @Bean
-        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-                http
-                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                                .csrf(csrf -> csrf
-                                                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                                                .ignoringRequestMatchers(
-                                                                "/register",
-                                                                "/api/register",
-                                                                "/api/login",
-                                                                "/api/logout",
-                                                                "/api/rol",
-                                                                "/api/sesion",
-                                                                "/restaurantes/buscar",
-                                                                "/restaurantes/**",
-                                                                "/resenyas/**",
-                                                                "/roles",
-                                                                "/change-password",
-                                                                "/usuarios/*/solicitar-baja",
-                                                                "/api/usuarios/*/solicitar-baja",
-                                                                "/admin/**",
-                                                                "/api/usuarios/subir-imagenes",
-                                                                "/usuarios/subir-imagenes",
-                                                                "/api/restaurantes/*/solicitar-modificacion",
-                                                                "/api/notificaciones/**", // ✅ Ignorar CSRF para
-                                                                                          // notificaciones
-                                                                "/notificaciones/**" // ✅ Incluye también sin prefijo
-                                                                                     // /api
-                                                ))
-                                .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .ignoringRequestMatchers(
+                    "/register",
+                    "/api/register",
+                    "/api/login",
+                    "/api/logout",
+                    "/api/rol",
+                    "/api/sesion",
+                    "/restaurantes/buscar",
+                    "/restaurantes/**",
+                    "/resenyas/**",
+                    "/roles",
+                    "/change-password",
+                    "/usuarios/*/solicitar-baja",
+                    "/api/usuarios/*/solicitar-baja",
+                    "/admin/**",
+                    "/api/usuarios/subir-imagenes",
+                    "/usuarios/subir-imagenes",
+                    "/api/restaurantes/*/solicitar-modificacion",
+                    "/api/notificaciones/**",
+                    "/notificaciones/**",
+                    "/api/resenyas/**",
+                    "/api/imagenes/**",
+                    "/uploads/**",
+                    "/api/usuarios/*/preferencias-dieteticas",
+                     "/usuarios/*/favoritos/**"
 
-                                                // 👇 Endpoints públicos
-                                                .requestMatchers(
-                                                                "/register",
-                                                                "/api/register",
-                                                                "/api/csrf",
-                                                                "/api/login",
-                                                                "/api/logout",
-                                                                "/api/rol",
-                                                                "/api/sesion",
-                                                                "/restaurantes/buscar",
-                                                                "/roles",
-                                                                "/change-password",
-                                                                "/error",
-                                                                "/restaurantes/filtrar-avanzado",
-                                                                "/restaurantes/menus/**",
-                                                                "/resenyas/**")
-                                                .permitAll()
+                ))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                                                // 👇 Roles específicos
-                                                .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO")
-                                                .requestMatchers(HttpMethod.POST, "/restaurantes/subir-menu")
-                                                .hasRole("RESTAURANTE")
-                                                .requestMatchers(HttpMethod.POST,
-                                                                "/api/restaurantes/*/solicitar-modificacion")
-                                                .hasRole("RESTAURANTE")
+                // 🔓 Endpoints públicos
+                .requestMatchers(
+                    "/register",
+                    "/api/register",
+                    "/api/csrf",
+                    "/api/login",
+                    "/api/logout",
+                    "/api/rol",
+                    "/api/sesion",
+                    "/restaurantes/buscar",
+                    "/roles",
+                    "/change-password",
+                    "/error",
+                    "/restaurantes/filtrar-avanzado",
+                    "/restaurantes/menus/**",
+                    "/uploads/**",
+                    "/imagenes/**",
+                    "/api/imagenes/**",
+                    "/resenyas/**",
+                    "/api/restaurantes/**", // ✅ perfiles de restaurante públicos
+                    "/api/resenyas/**",      // ✅ reseñas públicas
+                    "/restaurantes/**"       // ✅ compatibilidad si usas "/restaurantes" sin /api
+                ).permitAll()
 
-                                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                // 🔐 Acciones protegidas
+                .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO")
+                .requestMatchers(HttpMethod.PUT, "/resenyas").hasRole("USUARIO")
+                .requestMatchers(HttpMethod.PATCH, "/api/resenyas/**").hasRole("USUARIO")
+                .requestMatchers(HttpMethod.DELETE, "/api/imagenes/**").hasRole("USUARIO")
+                .requestMatchers(HttpMethod.GET, "/usuarios/*/favoritos").hasRole("USUARIO")
+                .requestMatchers(HttpMethod.POST, "/usuarios/*/favoritos/*").hasRole("USUARIO")
+                .requestMatchers(HttpMethod.DELETE, "/usuarios/*/favoritos/*").hasRole("USUARIO")
 
-                                                // ✅ Notificaciones (ADMIN y RESTAURANTE)
-                                                .requestMatchers(HttpMethod.GET, "/api/notificaciones")
-                                                .hasRole("RESTAURANTE")
-                                                .requestMatchers(HttpMethod.GET, "/api/notificaciones/admin")
-                                                .hasRole("ADMIN")
-                                                .requestMatchers(HttpMethod.PUT, "/api/notificaciones/*/marcar-vista")
-                                                .hasAnyRole("RESTAURANTE", "ADMIN")
 
-                                                .anyRequest().authenticated())
-                                .sessionManagement(session -> session
-                                                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
-                                .formLogin(form -> form.disable())
-                                .httpBasic(httpBasic -> httpBasic.disable())
-                                .logout(logout -> logout
-                                                .logoutUrl("/api/logout")
-                                                .invalidateHttpSession(true)
-                                                .deleteCookies("JSESSIONID", "XSRF-TOKEN")
-                                                .logoutSuccessHandler((request, response, authentication) -> {
-                                                        response.setStatus(HttpServletResponse.SC_OK);
-                                                        response.setContentType("application/json");
-                                                        PrintWriter writer = response.getWriter();
-                                                        writer.write("{\"message\": \"Logout exitoso\"}");
-                                                        writer.flush();
-                                                }));
 
-                return http.build();
-        }
+                .requestMatchers(HttpMethod.POST, "/restaurantes/subir-menu").hasRole("RESTAURANTE")
+                .requestMatchers(HttpMethod.POST, "/api/restaurantes/*/solicitar-modificacion").hasRole("RESTAURANTE")
 
-        @Bean
-        public CorsConfigurationSource corsConfigurationSource() {
-                CorsConfiguration config = new CorsConfiguration();
-                config.setAllowedOrigins(List.of("https://localhost:4200"));
-                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "X-XSRF-TOKEN"));
-                config.setExposedHeaders(List.of("Authorization", "X-XSRF-TOKEN", "Set-Cookie"));
-                config.setAllowCredentials(true);
+                .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-                source.registerCorsConfiguration("/**", config);
-                return source;
-        }
+                .requestMatchers(HttpMethod.GET, "/api/notificaciones").hasRole("RESTAURANTE")
+                .requestMatchers(HttpMethod.GET, "/api/notificaciones/admin").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/notificaciones/*/marcar-vista")
+                    .hasAnyRole("RESTAURANTE", "ADMIN")
 
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-                return new BCryptPasswordEncoder();
-        }
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+            .formLogin(form -> form.disable())
+            .httpBasic(httpBasic -> httpBasic.disable())
+            .logout(logout -> logout
+                .logoutUrl("/api/logout")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID", "XSRF-TOKEN")
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.setContentType("application/json");
+                    PrintWriter writer = response.getWriter();
+                    writer.write("{\"message\": \"Logout exitoso\"}");
+                    writer.flush();
+                })
+            );
 
-        @Bean
-        public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-                return authConfig.getAuthenticationManager();
-        }
+        return http.build();
+    }
 
-        @Bean
-        public FilterRegistrationBean<Filter> logRequestFilter() {
-                FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>();
-                registration.setFilter((request, response, chain) -> {
-                        HttpServletRequest req = (HttpServletRequest) request;
-                        System.out.println("🛸 Melody interceptó: " + req.getMethod() + " " + req.getRequestURI());
-                        System.out.println("🛰️ Origin: " + req.getHeader("Origin"));
-                        System.out.println("🍪 Cookie: " + req.getHeader("Cookie"));
-                        chain.doFilter(request, response);
-                });
-                registration.setOrder(1);
-                return registration;
-        }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("https://localhost:4200"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "X-XSRF-TOKEN"));
+        config.setExposedHeaders(List.of("Authorization", "X-XSRF-TOKEN", "Set-Cookie"));
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
+    }
+
+    @Bean
+    public FilterRegistrationBean<Filter> logRequestFilter() {
+        FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>();
+        registration.setFilter((request, response, chain) -> {
+            HttpServletRequest req = (HttpServletRequest) request;
+            System.out.println("🛸 Melody interceptó: " + req.getMethod() + " " + req.getRequestURI());
+            System.out.println("🛰️ Origin: " + req.getHeader("Origin"));
+            System.out.println("🍪 Cookie: " + req.getHeader("Cookie"));
+            chain.doFilter(request, response);
+        });
+        registration.setOrder(1);
+        return registration;
+    }
 }

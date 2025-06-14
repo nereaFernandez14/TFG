@@ -21,19 +21,6 @@ import { FooterComponent } from './footer/footer.component';
     <app-header></app-header>
     <router-outlet></router-outlet>
     <app-footer></app-footer>
-
-    <div class="mensajes" *ngIf="mensajes.length > 0; else noMensajes">
-      <h2>Mensajes desde el backend:</h2>
-      <ul>
-        <li *ngFor="let mensaje of mensajes">
-          {{ mensaje.contenido || mensaje }}
-        </li>
-      </ul>
-    </div>
-
-    <ng-template #noMensajes>
-      <p>No hay mensajes disponibles o no estás autenticado.</p>
-    </ng-template>
   `
 })
 export class AppComponent implements OnInit {

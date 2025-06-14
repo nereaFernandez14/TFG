@@ -104,4 +104,8 @@ export class HeaderComponent implements OnInit {
   cerrarSidebar(): void {
     this.sidebarOpen = false;
   }
+  irAFavoritos(): void {
+    this.router.navigate(['/favoritos']);
+  }
+
 }

@@ -1,15 +1,18 @@
 <div class="admin-container">
+
   <!-- 🔔 Notificaciones del ADMIN -->
   <div *ngIf="notificaciones.length > 0" class="notificaciones-admin">
     <div *ngFor="let n of notificaciones" class="alert alert-dark d-flex justify-content-between align-items-center shadow-sm">
-      <div>📝 {{ n.mensaje }}</div>
-      <button (click)="marcarComoVista(n.id)" class="btn btn-sm btn-outline-danger">✖</button>
+      <div><i class="fas fa-bell"></i> {{ n.mensaje }}</div>
+      <button (click)="marcarComoVista(n.id)" class="btn btn-sm btn-outline-danger">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
   </div>
 
   <h1><i class="fas fa-tools"></i> Panel de Administración</h1>
 
-  <!-- SECCIÓN: DENUNCIAS -->
+  <!-- 🔎 DENUNCIAS -->
   <section class="accordion">
     <button class="accordion-toggle" (click)="toggleSeccion('denuncias')">
       <i class="fas fa-comment-dots"></i> Denuncias de Comentarios
@@ -22,8 +25,8 @@
 
       <div *ngFor="let denuncia of denuncias" class="admin-card minimal">
         <h3><i class="fas fa-flag"></i> Comentario denunciado</h3>
-        <p><strong>Comentario:</strong> "{{ denuncia.contenido }}"</p>
-        <p><strong>Restaurante:</strong> {{ denuncia.restaurante.nombre }}</p>
+        <p><strong><i class="fas fa-comment"></i> Comentario:</strong> "{{ denuncia.contenido }}"</p>
+        <p><strong><i class="fas fa-store"></i> Restaurante:</strong> {{ denuncia.restaurante.nombre }}</p>
         <div class="actions">
           <button class="btn primary" (click)="aceptarDenuncia(denuncia.id)">
             <i class="fas fa-check-circle"></i> Aceptar
@@ -36,7 +39,7 @@
     </div>
   </section>
 
-  <!-- SECCIÓN: BAJAS RESTAURANTES -->
+  <!-- 🏪 BAJAS RESTAURANTES -->
   <section class="accordion">
     <button class="accordion-toggle" (click)="toggleSeccion('restaurantes')">
       <i class="fas fa-store-alt-slash"></i> Bajas de Restaurantes
@@ -49,8 +52,8 @@
 
       <div *ngFor="let r of bajasRestaurantes" class="admin-card minimal">
         <h3><i class="fas fa-utensils"></i> Restaurante en revisión</h3>
-        <p><strong>Nombre:</strong> {{ r.nombre }}</p>
-        <p><strong>Email:</strong> {{ r.email }}</p>
+        <p><strong><i class="fas fa-store"></i> Nombre:</strong> {{ r.nombre }}</p>
+        <p><strong><i class="fas fa-envelope"></i> Email:</strong> {{ r.email }}</p>
         <div class="actions">
           <button class="btn danger" (click)="eliminarRestaurante(r.id)">
             <i class="fas fa-trash-alt"></i> Eliminar
@@ -60,7 +63,7 @@
     </div>
   </section>
 
-  <!-- SECCIÓN: MODIFICAR DATOS RESTAURANTES -->
+  <!-- ✏️ MODIFICAR DATOS -->
   <section class="accordion">
     <button class="accordion-toggle" (click)="toggleSeccion('modificar')">
       <i class="fas fa-pen-square"></i> Modificar datos de Restaurantes
@@ -73,16 +76,18 @@
 
       <div *ngFor="let m of modificaciones" class="admin-card minimal">
         <h3><i class="fas fa-edit"></i> Modificar restaurante</h3>
-        <p><strong>Restaurante:</strong> {{ m.restaurante.nombre }}</p>
-        <p><strong>Email:</strong> {{ m.restaurante.email }}</p>
-        <p><strong>Campo solicitado:</strong> {{ m.campo }}</p>
-        <p><strong>Nuevo valor:</strong> {{ m.nuevoValor }}</p>
+        <p><strong><i class="fas fa-store"></i> Restaurante:</strong> {{ m.restaurante.nombre }}</p>
+        <p><strong><i class="fas fa-envelope"></i> Email:</strong> {{ m.restaurante.email }}</p>
+        <p><strong><i class="fas fa-keyboard"></i> Campo solicitado:</strong> {{ m.campo }}</p>
+        <p><strong><i class="fas fa-sync-alt"></i> Nuevo valor:</strong> {{ m.nuevoValor }}</p>
 
         <div class="modificacion-campo">
-          <label>Confirmar campo:</label>
+          <label><i class="fas fa-check-double"></i> Confirmar campo:</label>
           <select [(ngModel)]="campoSeleccionado[m.restaurante.id]">
             <option value="">-- Selecciona --</option>
-            <option *ngFor="let campo of camposEditables" [value]="campo.value">{{ campo.label }}</option>
+            <option *ngFor="let campo of camposEditables" [value]="campo.value">
+              {{ campo.label }}
+            </option>
           </select>
 
           <input
@@ -100,7 +105,7 @@
     </div>
   </section>
 
-  <!-- SECCIÓN: BAJAS USUARIOS -->
+  <!-- 👤 BAJAS USUARIOS -->
   <section class="accordion">
     <button class="accordion-toggle" (click)="toggleSeccion('usuarios')">
       <i class="fas fa-user-slash"></i> Bajas de Usuarios
@@ -113,8 +118,8 @@
 
       <div *ngFor="let u of bajasUsuarios" class="admin-card minimal">
         <h3><i class="fas fa-user-clock"></i> Usuario en revisión</h3>
-        <p><strong>Nombre:</strong> {{ u.nombre }} {{ u.apellidos }}</p>
-        <p><strong>Email:</strong> {{ u.email }}</p>
+        <p><strong><i class="fas fa-user"></i> Nombre:</strong> {{ u?.nombre }} {{ u?.apellidos }}</p>
+        <p><strong><i class="fas fa-envelope"></i> Email:</strong> {{ u.email }}</p>
         <div class="actions">
           <button class="btn danger" (click)="eliminarUsuario(u.id)">
             <i class="fas fa-user-times"></i> Eliminar Usuario
@@ -126,4 +131,5 @@
       </div>
     </div>
   </section>
+
 </div>

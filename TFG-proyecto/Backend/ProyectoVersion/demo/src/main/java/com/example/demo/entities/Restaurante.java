@@ -4,6 +4,8 @@ import com.example.demo.enums.Barrio;
 import com.example.demo.enums.RangoPrecio;
 import com.example.demo.enums.RestriccionDietetica;
 import com.example.demo.enums.TipoCocina;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -36,6 +38,7 @@ public class Restaurante {
     private Usuario usuario;
 
     @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL)
+    @JsonManagedReference("restaurante-resenyas")
     private List<Resenya> resenyas = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)

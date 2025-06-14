@@ -266,3 +266,13 @@
   margin: 0;
   word-break: break-all;
 }
+.chip {
+  display: inline-block;
+  background-color: #e0f2f1;
+  color: #00695c;
+  padding: 4px 10px;
+  margin: 2px 6px 2px 0;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}

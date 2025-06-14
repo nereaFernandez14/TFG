@@ -1,19 +1,22 @@
+/* Estrellas: contenedor */
 .estrella-container {
   font-size: 2rem;
   margin-bottom: 10px;
+}
+
+/* Estrellas inactivas */
+::ng-deep .estrella {
   color: #ccc;
   cursor: pointer;
+  transition: color 0.2s ease-in-out;
 }
 
-.estrella {
-  transition: color 0.3s;
-  margin-right: 5px;
+/* Estrellas activas → ⭐️ en dorado */
+::ng-deep .estrella.activa {
+  color: gold !important;
 }
 
-.estrella.activa {
-  color: gold;
-}
-
+/* TEXTAREA */
 textarea {
   width: 100%;
   padding: 10px;
@@ -24,10 +27,12 @@ textarea {
   margin-top: 10px;
 }
 
+/* FILE INPUT */
 input[type="file"] {
   margin-top: 10px;
 }
 
+/* VISTA PREVIA DE IMÁGENES */
 .preview-img {
   max-width: 150px;
   max-height: 120px;
@@ -43,6 +48,7 @@ input[type="file"] {
   margin-top: 10px;
 }
 
+/* BOTONES */
 .botones {
   margin-top: 20px;
 }
@@ -68,6 +74,7 @@ button:hover:not([disabled]) {
   background-color: #303f9f;
 }
 
+/* MENSAJES */
 .error {
   color: red;
   margin-top: 10px;

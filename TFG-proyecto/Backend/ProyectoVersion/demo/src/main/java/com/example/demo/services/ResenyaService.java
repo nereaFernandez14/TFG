@@ -158,15 +158,14 @@ public class ResenyaService {
             }
         }
     }
+
     public void enviarDenunciaAlAdmin(Long resenyaId) {
         Resenya resenya = resenyaRepository.findById(resenyaId)
-            .orElseThrow(() -> new RuntimeException("Reseña no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Reseña no encontrada"));
 
-        // Simulación: enviar email/log, notificación admin...
         System.out.println("📢 Denuncia enviada al admin sobre la reseña: " + resenya.getContenido());
-
-        // Aquí podrías guardarlo en una tabla de denuncias o enviar un correo real
     }
+
     public Optional<Resenya> obtenerPorId(Long id) {
         return resenyaRepository.findById(id);
     }
@@ -175,5 +174,41 @@ public class ResenyaService {
         return resenyaRepository.save(resenya);
     }
 
+    @Transactional
+    public void borrarResenya(Long id, String email) {
+        Resenya resenya = resenyaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Reseña no encontrada"));
 
+        if (!resenya.getAutor().getEmail().equalsIgnoreCase(email)) {
+            throw new IllegalArgumentException("No puedes eliminar esta reseña");
+        }
+
+        resenyaRepository.delete(resenya); // Cascade ALL borrará las imágenes asociadas
+    }
+
+    @Transactional
+    public void borrarImagen(Long imagenId, String email) {
+        ImagenResenya imagen = imagenResenyaRepository.findById(imagenId)
+                .orElseThrow(() -> new IllegalArgumentException("Imagen no encontrada"));
+
+        Resenya resenya = imagen.getResenya();
+
+        if (!resenya.getAutor().getEmail().equalsIgnoreCase(email)) {
+            throw new IllegalArgumentException("No puedes eliminar esta imagen");
+        }
+
+        imagenResenyaRepository.delete(imagen);
+    }
+
+    @Transactional
+    public boolean borrarContenidoResenya(Long id) {
+        Optional<Resenya> optional = resenyaRepository.findById(id);
+        if (optional.isEmpty())
+            return false;
+
+        Resenya resenya = optional.get();
+        resenya.setContenido(null);
+        resenyaRepository.save(resenya);
+        return true;
+    }
 }

@@ -1,0 +1,147 @@
+.imagenes-modificar-wrapper {
+  max-width: 960px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.imagenes-modificar-wrapper h2 {
+  font-size: clamp(1.6rem, 2.5vw, 2rem);
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 2rem;
+}
+
+.imagenes-actuales h3,
+.subir-nuevas h3 {
+  font-size: clamp(1.2rem, 2vw, 1.4rem);
+  color: #34495e;
+  margin-top: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.imagenes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.imagen-card {
+  position: relative;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  background-color: #fefefe;
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.imagen-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.imagen-card img {
+  width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+  border-radius: 6px;
+  background-color: #f8f8f8;
+  aspect-ratio: 4 / 3;
+  margin-bottom: 0.8rem;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.05);
+}
+
+.eliminar-btn {
+  background-color: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.eliminar-btn i {
+  font-size: 1rem;
+}
+
+.eliminar-btn:hover {
+  background-color: #c0392b;
+}
+
+.subir-nuevas {
+  margin-top: 2rem;
+}
+
+.subir-nuevas input[type="file"] {
+  display: block;
+  margin: 1rem 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.subir-nuevas p {
+  color: #7f8c8d;
+  font-style: italic;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.subir-btn {
+  background-color: #2980b9;
+  color: white;
+  border: none;
+  padding: 0.7rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.3s;
+}
+
+.subir-btn i {
+  font-size: 1.1rem;
+}
+
+.subir-btn:hover {
+  background-color: #1f6391;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .imagenes-modificar-wrapper {
+    padding: 1.2rem;
+  }
+
+  .imagenes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .imagen-card img {
+    max-height: 220px;
+    aspect-ratio: auto;
+  }
+
+  .eliminar-btn,
+  .subir-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

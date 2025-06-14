@@ -70,7 +70,7 @@ export class RestauranteComponent implements OnInit {
       tipoCocinaPersonalizado: [''],
       barrio: ['', Validators.required],
       rangoPrecio: ['', Validators.required],
-      restriccionesDieteticas: [[]]
+      restricciones: [[]]
     });
 
     this.restauranteForm.get('tipoCocina')?.valueChanges.subscribe(value => {

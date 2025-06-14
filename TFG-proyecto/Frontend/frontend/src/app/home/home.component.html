@@ -48,7 +48,7 @@
               [checked]="filtros.restricciones.includes(restriccion)"
               (change)="onCheckboxChange($event)"
             />
-            {{ restriccion }}
+            {{ restriccion | formatearRestriccion }}
           </label>
         </div>
       </div>
@@ -66,13 +66,29 @@
   </div>
 </div>
 
-<!-- 📋 RESULTADOS -->
+<!-- 📋 RESULTADOS PERSONALIZADOS -->
 <div *ngIf="restaurantes.length > 0" class="resultados-container">
-  <h2><i class="fas fa-utensils"></i> Restaurantes encontrados</h2>
+  <h2>
+    <i class="fas fa-heart"></i>
+    {{
+      filtros.tipoCocina || filtros.barrio || filtros.rangoPrecio || filtros.restricciones.length || searchQuery
+        ? 'Restaurantes encontrados'
+        : 'Restaurantes recomendados para ti'
+    }}
+  </h2>
+
+  <p *ngIf="!filtros.tipoCocina && !filtros.barrio && !filtros.rangoPrecio && !filtros.restricciones.length && !searchQuery">
+    Basado en tus preferencias dietéticas:
+    <strong>
+      <span *ngFor="let r of preferenciasUsuario; let last = last">
+        {{ r | formatearRestriccion }}<ng-container *ngIf="!last">, </ng-container>
+      </span>
+    </strong>
+  </p>
 
   <div
     *ngFor="let restaurante of restaurantes"
-    class="restaurante-card clickable"
+    class="restaurante-card recomendado clickable"
     (click)="verPerfil(restaurante.id!)"
   >
     <h3><i class="fas fa-store"></i> {{ restaurante.nombre }}</h3>
@@ -86,10 +102,24 @@
       <span class="etiqueta"><i class="fas fa-euro-sign"></i> {{ restaurante.rangoPrecio }}</span>
       <span
         *ngFor="let restriccion of restaurante.restriccionesDieteticas"
-        class="etiqueta"
+        class="etiqueta restriccion"
       >
-        <i class="fas fa-leaf"></i> {{ restriccion }}
+        <i class="fas fa-leaf"></i> {{ restriccion | formatearRestriccion }}
       </span>
     </div>
   </div>
 </div>
+<!-- ❗ No hay resultados con preferencias dietéticas -->
+<div
+  *ngIf="busquedaRealizada && preferenciasUsuario.length > 0 && restaurantes.length === 0"
+  class="sin-resultados"
+>
+  <h2><i class="fas fa-frown"></i> No se encontraron restaurantes con tus preferencias</h2>
+  <p>Te mostramos algunos destacados:</p>
+
+  <div *ngFor="let destacado of destacados" class="restaurante-card destacado">
+    <h3><i class="fas fa-star"></i> {{ destacado.nombre }}</h3>
+    <p>{{ destacado.descripcion }}</p>
+  </div>
+</div>
+

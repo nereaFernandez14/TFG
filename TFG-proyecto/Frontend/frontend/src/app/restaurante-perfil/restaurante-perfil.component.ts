@@ -5,6 +5,7 @@ import { ResenyaComponent } from '../resenya/resenya.component';
 import { HttpClient } from '@angular/common/http';
 import { AutenticacionService } from '../services/autenticacion.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { FavoritosService } from '../services/favoritos.service';
 
 @Component({
   selector: 'app-perfil-restaurante',
@@ -17,66 +18,104 @@ export class RestaurantePerfilComponent implements OnInit {
   restauranteId!: number;
   restaurante: any;
   resenas: any[] = [];
-  mostrarFormularioResena: boolean = false;
-  modalAbierto: boolean = false;
-  imagenActual: number = 0;
+  mostrarFormularioResena = false;
+  modalAbierto = false;
+  yaTieneResena: boolean = false;
+  imagenActual = 0;
   menuSanitizado: SafeResourceUrl | null = null;
+  resenaDelUsuario: any = null;
+  esFavorito = false;
+  esUsuario = false;
+  usuarioId!: number;
+  mensajeFavorito: string | null = null;
+
 
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient,
     private authService: AutenticacionService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private favoritosService: FavoritosService
   ) {}
 
   ngOnInit(): void {
     this.restauranteId = +this.route.snapshot.paramMap.get('id')!;
-
     this.http.get(`/api/restaurantes/${this.restauranteId}`).subscribe(data => {
       this.restaurante = data;
-
-      // Solo si hay menú, generamos URL segura
       if (this.restaurante?.rutaMenu) {
         const archivo = this.obtenerNombreArchivo(this.restaurante.rutaMenu);
         const url = `https://localhost:8443/restaurantes/menus/${archivo}`;
         this.menuSanitizado = this.sanitizer.bypassSecurityTrustResourceUrl(url);
       }
     });
-
     this.recargarResenas();
-
     this.mostrarFormularioResena = this.authService.isAuthenticated();
+    const usuario = this.authService.usuarioActual();
+    if (usuario?.rol === 'USUARIO') {
+      this.usuarioId = usuario.id;
+      this.esUsuario = true;
+
+      this.favoritosService.obtenerFavoritos(this.usuarioId).subscribe(favs => {
+        this.esFavorito = favs.some(f => f.id === this.restauranteId);
+      });
+    }
   }
 
-  abrirModalResena() {
-    this.modalAbierto = true;
-  }
-
-  cerrarModal() {
-    this.modalAbierto = false;
-  }
+  abrirModalResena() { this.modalAbierto = true; }
+  cerrarModal() { this.modalAbierto = false; }
+  obtenerNombreArchivo(ruta: string): string { return ruta.split(/[/\\]/).pop() || ''; }
 
   recargarResenas() {
-    this.http.get<any[]>(`/api/restaurantes/${this.restauranteId}/resenas`).subscribe(data => {
-      this.resenas = data;
-      console.log('🖼️ Reseñas recibidas con imágenes:', this.resenas);
+    this.http.get<any[]>(`/api/restaurantes/${this.restauranteId}/resenas`).subscribe({
+      next: data => {
+        this.resenas = data;
+        const email = this.authService.getEmailUsuario(); 
+        this.resenaDelUsuario = data.find(r => r.autorEmail === email) || null;
+        this.yaTieneResena = !!this.resenaDelUsuario;
+      },
+      error: err => {
+        console.error("❌ Error al recargar reseñas", err);
+      }
     });
   }
 
-  obtenerNombreArchivo(ruta: string): string {
-    return ruta.split(/[/\\]/).pop() || '';
+  esAutorDeResena(emailAutor: string): boolean {
+    return this.authService.esAutorDeResena(emailAutor);
   }
-  
+
+
+  borrarResena(id: number) {
+    this.http.delete(`/api/resenyas/${id}`, { withCredentials: true }).subscribe(() => {
+      this.recargarResenas();
+    });
+  }
+
   anteriorImagen() {
     if (this.restaurante?.imagenes?.length) {
       this.imagenActual = (this.imagenActual - 1 + this.restaurante.imagenes.length) % this.restaurante.imagenes.length;
     }
   }
-
   siguienteImagen() {
     if (this.restaurante?.imagenes?.length) {
       this.imagenActual = (this.imagenActual + 1) % this.restaurante.imagenes.length;
     }
   }
+  mostrarMensaje(mensaje: string) {
+    this.mensajeFavorito = mensaje;
+    setTimeout(() => this.mensajeFavorito = null, 3000);
+  }
 
+  toggleFavorito() {
+    if (this.esFavorito) {
+      this.favoritosService.eliminarFavorito(this.usuarioId, this.restauranteId).subscribe(() => {
+        this.esFavorito = false;
+        this.mostrarMensaje('Restaurante eliminado de favoritos');
+      });
+    } else {
+      this.favoritosService.agregarFavorito(this.usuarioId, this.restauranteId).subscribe(() => {
+        this.esFavorito = true;
+        this.mostrarMensaje('Restaurante añadido a favoritos');
+      });
+    }
+  }
 }

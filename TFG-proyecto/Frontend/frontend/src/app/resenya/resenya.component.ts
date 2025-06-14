@@ -15,6 +15,7 @@ export class ResenyaComponent implements OnInit {
   @Input() restauranteId!: number;
   @Input() restauranteNombre: string = '';
   @Output() resenaEnviada = new EventEmitter<void>();
+  @Input() resenaExistente: any; 
 
   resenyaForm: FormGroup;
   estrellas: number[] = [1, 2, 3, 4, 5];
@@ -23,8 +24,6 @@ export class ResenyaComponent implements OnInit {
   mostrarExito = false;
   mostrarError = false;
   mensajeError = '';
-  visible = true;
-
   imagenes: File[] = [];
   vistaPrevia: string[] = [];
   palabrasMalas = ['puta', 'mierda', 'gilipollas', 'estúpido'];
@@ -44,23 +43,34 @@ export class ResenyaComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.http.get<{ yaExiste: boolean, puntuacion?: number }>(`/api/resenyas/usuario/${this.restauranteId}`, {
-      withCredentials: true
-    }).subscribe({
-      next: (res) => {
-        this.yaTieneResena = res.yaExiste;
-        this.puntuacionSeleccionada = res.puntuacion ?? 0;
-        this.cargandoEstadoResena = false;
-      },
-      error: (err) => {
-        console.error('❌ Error verificando existencia de reseña:', err);
-        this.cargandoEstadoResena = false;
-      }
-    });
+    if (this.resenaExistente) {
+      this.yaTieneResena = true;
+      this.puntuacionSeleccionada = this.resenaExistente.valoracion ?? 0;
+      this.resenyaForm.patchValue({ comentario: this.resenaExistente.contenido || '' });
+      this.cargandoEstadoResena = false;
+    } else {
+      this.http.get<{ yaExiste: boolean, puntuacion?: number, contenido?: string }>(
+        `/api/resenyas/usuario/${this.restauranteId}`,
+        { withCredentials: true }
+      ).subscribe({
+        next: (res) => {
+          this.yaTieneResena = res.yaExiste;
+          this.puntuacionSeleccionada = res.puntuacion ?? 0;
+          this.resenyaForm.patchValue({ comentario: res.contenido || '' });
+          this.cargandoEstadoResena = false;
+        },
+        error: (err) => {
+          console.error('❌ Error verificando existencia de reseña:', err);
+          this.cargandoEstadoResena = false;
+        }
+      });
+    }
   }
 
+
+
   seleccionarPuntuacion(valor: number) {
-    if (this.yaTieneResena) return; // ❌ no permitir modificar la puntuación
+    if (this.yaTieneResena) return;
     this.puntuacionSeleccionada = valor;
   }
 
@@ -76,14 +86,13 @@ export class ResenyaComponent implements OnInit {
 
   enviarResena() {
     this.validarComentario();
-    this.resetMensajes();
+    this.resetearEstados();
     if (!this.comentarioValido) return;
 
     const formData = new FormData();
     formData.append('restauranteId', this.restauranteId.toString());
     formData.append('contenido', this.resenyaForm.value.comentario);
     formData.append('valoracion', this.puntuacionSeleccionada.toString());
-
     this.imagenes.forEach(file => formData.append('imagenes', file));
 
     this.http.post(`/api/resenyas`, formData, { withCredentials: true }).subscribe({
@@ -98,12 +107,13 @@ export class ResenyaComponent implements OnInit {
 
   actualizarResena() {
     this.validarComentario();
-    this.resetMensajes();
+    this.resetearEstados();
     if (!this.comentarioValido) return;
 
     const formData = new FormData();
     formData.append('restauranteId', this.restauranteId.toString());
     formData.append('contenido', this.resenyaForm.value.comentario);
+    formData.append('valoracion', this.puntuacionSeleccionada.toString());
     this.imagenes.forEach(file => formData.append('imagenes', file));
 
     this.http.put(`/api/resenyas`, formData, { withCredentials: true }).subscribe({
@@ -125,44 +135,35 @@ export class ResenyaComponent implements OnInit {
     } else if (err.status === 401) {
       this.mensajeError = '⚠️ Necesitas estar autenticado para hacer una reseña.';
     } else {
-      this.mensajeError = '❌ Ha ocurrido un error inesperado al procesar la reseña.';
+      this.mensajeError = '❌ Ha ocurrido un error inesperado.';
     }
   }
 
-  resetMensajes() {
+  resetearEstados() {
     this.mostrarError = false;
-    this.mensajeError = '';
     this.mostrarExito = false;
+    this.mensajeError = '';
   }
 
   recargarPagina() {
-    this.router.navigate([`/restaurantes/${this.restauranteId}`]).then(() => {
-      window.location.reload();
-    });
-  }
-
-  cerrarSinGuardar() {
-    this.visible = false;
+    this.router.navigate([`/restaurantes/${this.restauranteId}`])
+      .then(() => window.location.reload());
   }
 
   handleFileInput(event: Event) {
     const input = event.target as HTMLInputElement;
     if (!input.files) return;
-
     this.imagenes = Array.from(input.files);
     this.vistaPrevia = [];
-
     this.imagenes.forEach(file => {
       const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.vistaPrevia.push(e.target.result);
-      };
+      reader.onload = (e: any) => this.vistaPrevia.push(e.target.result);
       reader.readAsDataURL(file);
     });
   }
 
   validarComentario() {
     const texto = this.resenyaForm.value.comentario.toLowerCase();
-    this.comentarioValido = !this.palabrasMalas.some(palabra => texto.includes(palabra));
+    this.comentarioValido = !this.palabrasMalas.some(p => texto.includes(p));
   }
 }

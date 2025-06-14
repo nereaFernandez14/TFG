@@ -1,0 +1,28 @@
+<div class="imagenes-modificar-wrapper">
+  <h2><i class="fas fa-images"></i> Modificar Imágenes del Restaurante</h2>
+
+  <!-- 🖼️ Imágenes actuales -->
+  <div class="imagenes-actuales">
+    <h3><i class="fas fa-photo-video"></i> Imágenes actuales</h3>
+    <div class="imagenes-grid">
+      <div *ngFor="let imagen of imagenesActuales" class="imagen-card">
+        <img [src]="'/uploads/restaurantes/' + restauranteId + '/' + imagen" alt="Imagen del restaurante" />
+        <button class="eliminar-btn" (click)="eliminarImagen(imagen)">
+          <i class="fas fa-trash-alt"></i> Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ➕ Subir nuevas imágenes -->
+  <div class="subir-nuevas">
+    <h3><i class="fas fa-plus-circle"></i> Añadir nuevas imágenes</h3>
+    <input type="file" accept="image/*" multiple (change)="onImagenSeleccionada($event)" />
+    <p *ngIf="nombresNuevasImagenes.length">
+      <i class="fas fa-paperclip"></i> Seleccionadas: {{ nombresNuevasImagenes.join(', ') }}
+    </p>
+    <button class="subir-btn" (click)="subirNuevasImagenes()">
+      <i class="fas fa-upload"></i> Subir Imágenes
+    </button>
+  </div>
+</div>
