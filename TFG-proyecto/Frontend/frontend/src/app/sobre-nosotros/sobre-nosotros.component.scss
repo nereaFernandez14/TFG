@@ -1,5 +1,59 @@
-.sobre-nosotros {
-  padding: 2rem;
-  background-color: #f9f9f9;
-  border-radius: 1rem;
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Fuente general */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    background-color: #f9f9f9;
+    line-height: 1.6;
+}
+
+/* Contenedor */
+.container {
+    max-width: 900px;
+    margin: 50px auto;
+    padding: 20px 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Título principal */
+h1 {
+    font-size: 2.5rem;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Párrafos */
+p {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+}
+
+/* Énfasis en el final */
+p strong {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+/* Adaptativo */
+@media (max-width: 600px) {
+    .container {
+        padding: 15px 20px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    p {
+        font-size: 1rem;
+    }
 }

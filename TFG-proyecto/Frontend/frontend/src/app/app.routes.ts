@@ -30,25 +30,22 @@ export const routes: Routes = [
     canActivate: [RedirectIfAuthenticatedGuard]
   },
   {
+  path: 'sobre-nosotros',
+  loadComponent: () =>
+    import('./sobre-nosotros/sobre-nosotros.component').then(m => m.SobreNosotrosComponent)
+  },
+
+  {
     path: 'home',
     component: HomeComponent,
     canActivate: [redirectRestauranteGuard, redirectAdminGuard]
   },
   {
-<<<<<<< HEAD
-    path: 'sobre-nosotros',
-    component: SobreNosotrosComponent
-  },
-  {
-    path: 'admin',
-    component: AdminComponent,
-    canActivate: [AuthGuard, RoleGuard],
-    data: { rol: 'admin' }
-=======
+
     path: 'admin-panel',
     loadComponent: () => import('./admin-panel/admin-panel-component').then(m => m.AdminPanelComponent),
     canActivate: [AdminGuard] 
->>>>>>> origin/Rama_Alexandra
+
   },
   {
     path: 'profile',
