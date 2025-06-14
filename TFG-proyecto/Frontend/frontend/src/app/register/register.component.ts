@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { UsuarioService } from '../services/usuario.service';
@@ -36,10 +36,18 @@ export class RegisterComponent implements OnInit {
       error: (err) => console.warn('⚠️ No se pudo obtener el token CSRF:', err)
     });
 
+    // 🛡️ Validador personalizado
+    const sinPalabrasMalSonantes = (control: AbstractControl): ValidationErrors | null => {
+      const prohibidas = ['puta', 'mierda', 'gilipollas', 'imbécil', 'estúpido'];
+      const valor = control.value?.toLowerCase() || '';
+      const contiene = prohibidas.some(palabra => valor.includes(palabra));
+      return contiene ? { malsonante: true } : null;
+    };
+
     // 🧾 Formulario reactivo
     this.registerForm = this.fb.group({
-      nombre: ['', Validators.required],
-      apellidos: ['', Validators.required],
+      nombre: ['', [Validators.required, sinPalabrasMalSonantes]],
+      apellidos: ['', [Validators.required, sinPalabrasMalSonantes]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       rol: [RolNombre.USUARIO, Validators.required] // Valor por defecto

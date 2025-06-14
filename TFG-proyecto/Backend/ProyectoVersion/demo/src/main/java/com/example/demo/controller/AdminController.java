@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.ResenyaDenunciaDTO;
 import com.example.demo.dto.RestauranteUpdateRequest;
 import com.example.demo.entities.Resenya;
 import com.example.demo.entities.Restaurante;
@@ -31,7 +32,7 @@ public class AdminController {
     private final SolicitudModificacionUsuarioRepository solicitudUsuarioRepository;
 
     @GetMapping("/denuncias")
-    public ResponseEntity<List<Resenya>> obtenerDenuncias() {
+    public ResponseEntity<List<ResenyaDenunciaDTO>> obtenerDenuncias() {
         return ResponseEntity.ok(adminService.obtenerResenyasDenunciadas());
     }
 

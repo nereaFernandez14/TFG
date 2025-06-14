@@ -18,6 +18,9 @@ import java.util.stream.Collectors;
 
 import com.example.demo.entities.Usuario;
 import com.example.demo.enums.RestriccionDietetica;
+import com.example.demo.enums.RolNombre;
+import com.example.demo.exception.DangerException;
+import com.example.demo.dto.RegistroRequest;
 import com.example.demo.dto.RestauranteDTO;
 import com.example.demo.entities.Restaurante;
 import com.example.demo.entities.SolicitudModificacionUsuario;
@@ -25,6 +28,8 @@ import com.example.demo.repositories.UsuarioRepository;
 import com.example.demo.repositories.RestauranteRepository;
 import com.example.demo.repositories.SolicitudModificacionUsuarioRepository;
 import com.example.demo.services.NotificacionService;
+import com.example.demo.services.UsuarioService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.core.Authentication;
@@ -45,6 +50,9 @@ public class UsuarioController {
 
     @Autowired
     private NotificacionService notificacionService;
+
+    @Autowired
+    private UsuarioService usuarioService;
 
     public record UsuarioDTO(
             Long id,
@@ -260,5 +268,4 @@ public class UsuarioController {
                     .body("Error inesperado al procesar la solicitud: " + e.getMessage());
         }
     }
-
 }

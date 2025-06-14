@@ -6,24 +6,42 @@
     <div class="form-group">
       <label for="name"><i class="fas fa-user"></i> Nombre:</label>
       <input id="name" formControlName="nombre" type="text" placeholder="Introduce tu nombre">
+      <div class="error" *ngIf="registerForm.get('nombre')?.invalid && (registerForm.get('nombre')?.dirty || registerForm.get('nombre')?.touched)">
+        El nombre es obligatorio.
+      </div>
+      <div class="error" *ngIf="registerForm.get('nombre')?.errors?.['malsonante'] && registerForm.get('nombre')?.touched">
+        El nombre contiene palabras no permitidas.
+      </div>
     </div>
 
     <!-- Apellidos -->
     <div class="form-group">
       <label for="apellidos"><i class="fas fa-user-tag"></i> Apellidos:</label>
       <input id="apellidos" formControlName="apellidos" type="text" placeholder="Introduce tus apellidos">
+      <div class="error" *ngIf="registerForm.get('apellidos')?.invalid && (registerForm.get('apellidos')?.dirty || registerForm.get('apellidos')?.touched)">
+        Los apellidos son obligatorios.
+      </div>
+      <div class="error" *ngIf="registerForm.get('apellidos')?.errors?.['malsonante'] && registerForm.get('apellidos')?.touched">
+        Los apellidos contienen palabras no permitidas.
+      </div>
     </div>
 
     <!-- Email -->
     <div class="form-group">
       <label for="email"><i class="fas fa-envelope"></i> Email:</label>
       <input id="email" formControlName="email" type="email" placeholder="tucorreo@ejemplo.com">
+      <div class="error" *ngIf="registerForm.get('email')?.invalid && (registerForm.get('email')?.dirty || registerForm.get('email')?.touched)">
+        Introduce un email válido.
+      </div>
     </div>
 
     <!-- Contraseña -->
     <div class="form-group">
       <label for="password"><i class="fas fa-lock"></i> Contraseña:</label>
       <input id="password" formControlName="password" type="password" placeholder="••••••••">
+      <div class="error" *ngIf="registerForm.get('password')?.invalid && (registerForm.get('password')?.dirty || registerForm.get('password')?.touched)">
+        La contraseña debe tener al menos 6 caracteres.
+      </div>
     </div>
 
     <!-- Rol -->
@@ -34,6 +52,11 @@
           {{ rol | titlecase }}
         </option>
       </select>
+    </div>
+
+    <!-- Error del servidor -->
+    <div class="error" *ngIf="errorMessage">
+      {{ errorMessage }}
     </div>
 
     <button type="submit" [disabled]="registerForm.invalid">

@@ -1,5 +1,6 @@
 package com.example.demo.services;
 
+import com.example.demo.dto.ResenyaDenunciaDTO;
 import com.example.demo.dto.RestauranteUpdateRequest;
 import com.example.demo.entities.Resenya;
 import com.example.demo.entities.Restaurante;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,8 +31,11 @@ public class AdminService {
     private final SolicitudModificacionRepository solicitudModificacionRepository;
     private final SolicitudModificacionUsuarioRepository solicitudUsuarioRepository;
 
-    public List<Resenya> obtenerResenyasDenunciadas() {
-        return resenyaRepository.findByDenunciadoTrue();
+    public List<ResenyaDenunciaDTO> obtenerResenyasDenunciadas() {
+        return resenyaRepository.findByDenunciadoTrue()
+                .stream()
+                .map(ResenyaDenunciaDTO::new)
+                .collect(Collectors.toList());
     }
 
     public void aceptarDenuncia(Long idResenya) {
