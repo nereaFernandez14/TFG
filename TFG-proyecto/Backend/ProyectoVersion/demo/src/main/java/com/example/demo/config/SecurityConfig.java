@@ -57,7 +57,9 @@ public class SecurityConfig {
                                 "/api/usuarios/subir-imagenes",
                                 "/usuarios/subir-imagenes",
                                 "/api/notificaciones/**",
-                                "/notificaciones/**"))
+                                "/notificaciones/**",
+                                "/usuarios/*/favoritos/**",
+                                "/api/usuarios/*/preferencias-dieteticas"))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
@@ -74,11 +76,16 @@ public class SecurityConfig {
                                 "/change-password",
                                 "/error",
                                 "/restaurantes/filtrar-avanzado",
-                                "/restaurantes/menus/**",
-                                "/resenyas/**")
+                                "/resenyas/**",
+                                "/api/restaurantes/**",
+                                "/restaurantes/**")
                         .permitAll()
 
                         .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO")
+                        .requestMatchers(HttpMethod.GET, "/usuarios/*/favoritos").hasRole("USUARIO")
+                        .requestMatchers(HttpMethod.POST, "/usuarios/*/favoritos/*").hasRole("USUARIO")
+                        .requestMatchers(HttpMethod.DELETE, "/usuarios/*/favoritos/*").hasRole("USUARIO")
+
                         .requestMatchers(HttpMethod.POST, "/restaurantes/subir-menu").hasRole("RESTAURANTE")
                         .requestMatchers(HttpMethod.POST, "/api/restaurantes/*/solicitar-modificacion")
                         .hasRole("RESTAURANTE")
@@ -92,6 +99,7 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.GET, "/api/notificaciones").hasRole("RESTAURANTE")
+                        .requestMatchers(HttpMethod.POST, "/api/restaurantes/*/solicitar-modificacion").hasRole("RESTAURANTE")
                         .requestMatchers(HttpMethod.GET, "/api/notificaciones/admin").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/notificaciones/*/marcar-vista")
                         .hasAnyRole("RESTAURANTE", "ADMIN", "USUARIO")

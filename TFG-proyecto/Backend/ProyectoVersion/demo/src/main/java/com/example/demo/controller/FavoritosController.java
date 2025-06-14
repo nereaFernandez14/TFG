@@ -5,6 +5,9 @@ import com.example.demo.entities.Restaurante;
 import com.example.demo.entities.Usuario;
 import com.example.demo.repositories.RestauranteRepository;
 import com.example.demo.repositories.UsuarioRepository;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,11 +15,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/usuarios") // 🔥 SIN /api
+@RequestMapping("/usuarios")
 public class FavoritosController {
 
     @Autowired
@@ -37,6 +41,7 @@ public class FavoritosController {
 
     @PostMapping("/{id}/favoritos/{restauranteId}")
     @PreAuthorize("hasRole('USUARIO')")
+    @Transactional
     public ResponseEntity<?> agregarFavorito(@PathVariable Long id, @PathVariable Long restauranteId, Authentication auth) {
     System.out.println("🧪 Usuario autenticado: " + auth.getName());
     System.out.println("🧪 Authorities actuales: " + auth.getAuthorities());
@@ -45,6 +50,9 @@ public class FavoritosController {
         Restaurante restaurante = restauranteRepository.findById(restauranteId)
                 .orElseThrow(() -> new ResponseStatusException(404, "Restaurante no encontrado", null));
 
+        if (usuario.getFavoritos() == null) {
+            usuario.setFavoritos(new HashSet<>());
+        }
         usuario.getFavoritos().add(restaurante);
         usuarioRepository.save(usuario);
 

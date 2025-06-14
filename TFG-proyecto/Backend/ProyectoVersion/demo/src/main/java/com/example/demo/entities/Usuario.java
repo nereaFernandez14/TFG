@@ -15,14 +15,16 @@ import java.util.Set;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Entity
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(nullable = false)
@@ -55,10 +57,18 @@ public class Usuario {
     private Set<RestriccionDietetica> restriccionesDieteticas = new HashSet<>();
 
     @ManyToMany
-    @JoinTable(name = "favoritos", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "restaurante_id"))
+    @JoinTable(
+        name = "favoritos",
+        joinColumns = @JoinColumn(name = "usuario_id"),
+        inverseJoinColumns = @JoinColumn(name = "restaurante_id")
+    )
     private Set<Restaurante> favoritos = new HashSet<>();
 
+
+
     @OneToOne(mappedBy = "usuario")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Restaurante restaurante;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)

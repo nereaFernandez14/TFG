@@ -26,7 +26,7 @@
       <div *ngFor="let denuncia of denuncias" class="admin-card minimal">
         <h3><i class="fas fa-flag"></i> Comentario denunciado</h3>
         <p><strong><i class="fas fa-comment"></i> Comentario:</strong> "{{ denuncia.contenido }}"</p>
-        <p><strong><i class="fas fa-store"></i> Restaurante:</strong> {{ denuncia.restaurante.nombre }}</p>
+        <p><strong><i class="fas fa-store"></i> Restaurante:</strong> {{ denuncia.restaurante?.nombre }}</p>
         <div class="actions">
           <button class="btn primary" (click)="aceptarDenuncia(denuncia.id)">
             <i class="fas fa-check-circle"></i> Aceptar
@@ -52,8 +52,8 @@
 
       <div *ngFor="let r of bajasRestaurantes" class="admin-card minimal">
         <h3><i class="fas fa-utensils"></i> Restaurante en revisión</h3>
-        <p><strong><i class="fas fa-store"></i> Nombre:</strong> {{ r.nombre }}</p>
-        <p><strong><i class="fas fa-envelope"></i> Email:</strong> {{ r.email }}</p>
+        <p><strong><i class="fas fa-store"></i> Nombre:</strong> {{ r?.nombre }}</p>
+        <p><strong><i class="fas fa-envelope"></i> Email:</strong> {{ r?.email }}</p>
         <div class="actions">
           <button class="btn danger" (click)="eliminarRestaurante(r.id)">
             <i class="fas fa-trash-alt"></i> Eliminar
@@ -76,8 +76,8 @@
 
       <div *ngFor="let m of modificaciones" class="admin-card minimal">
         <h3><i class="fas fa-edit"></i> Modificar restaurante</h3>
-        <p><strong><i class="fas fa-store"></i> Restaurante:</strong> {{ m.restaurante.nombre }}</p>
-        <p><strong><i class="fas fa-envelope"></i> Email:</strong> {{ m.restaurante.email }}</p>
+        <p><strong><i class="fas fa-store"></i> Restaurante:</strong> {{ m.restaurante?.nombre }}</p>
+        <p><strong><i class="fas fa-envelope"></i> Email:</strong> {{ m.restaurante?.email }}</p>
         <p><strong><i class="fas fa-keyboard"></i> Campo solicitado:</strong> {{ m.campo }}</p>
         <p><strong><i class="fas fa-sync-alt"></i> Nuevo valor:</strong> {{ m.nuevoValor }}</p>
 
