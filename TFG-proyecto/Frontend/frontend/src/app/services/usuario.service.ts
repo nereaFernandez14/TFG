@@ -124,6 +124,15 @@ export class UsuarioService {
   });
 }
 
+verificarEmail(email: string): Observable<boolean> {
+  return this.http.get<{ existe: boolean }>(
+    '/api/api/usuarios/existe-email',  // <-- ¡Aquí va el doble `/api/api`!
+    { params: { email } }
+  ).pipe(map(resp => resp.existe));
+}
+
+
+
 
 
 }

@@ -26,7 +26,7 @@
       <div *ngFor="let denuncia of denuncias" class="admin-card minimal">
         <h3><i class="fas fa-flag"></i> Comentario denunciado</h3>
         <p><strong><i class="fas fa-comment"></i> Comentario:</strong> "{{ denuncia.contenido }}"</p>
-        <p><strong><i class="fas fa-store"></i> Restaurante:</strong> {{ denuncia.restaurante?.nombre }}</p>
+        <p><strong><i class="fas fa-store"></i> Restaurante:</strong> {{ denuncia.restauranteNombre }}</p>
         <div class="actions">
           <button class="btn primary" (click)="aceptarDenuncia(denuncia.id)">
             <i class="fas fa-check-circle"></i> Aceptar
@@ -125,9 +125,8 @@
 
         <div class="actions">
           <button class="btn secondary" (click)="modificarUsuario(m.id, m.usuario.id, m.campo, m.nuevoValor)">
-        <i class="fas fa-edit"></i> Modificar
-        </button>
-
+            <i class="fas fa-edit"></i> Modificar
+          </button>
         </div>
       </div>
     </div>

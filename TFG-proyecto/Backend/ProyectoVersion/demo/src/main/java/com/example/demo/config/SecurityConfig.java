@@ -59,7 +59,10 @@ public class SecurityConfig {
                                 "/api/notificaciones/**",
                                 "/notificaciones/**",
                                 "/usuarios/*/favoritos/**",
-                                "/api/usuarios/*/preferencias-dieteticas"))
+                                "/api/usuarios/*/preferencias-dieteticas",
+                                "/api/usuarios/existe-email",
+                                "/usuarios/existe-email" // ✅ Añadido aquí
+                        ))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
@@ -78,8 +81,10 @@ public class SecurityConfig {
                                 "/restaurantes/filtrar-avanzado",
                                 "/resenyas/**",
                                 "/api/restaurantes/**",
-                                "/restaurantes/**")
-                        .permitAll()
+                                "/restaurantes/**",
+                                "/api/usuarios/existe-email",
+                                "/usuarios/existe-email" // ✅ Añadido aquí también
+                        ).permitAll()
 
                         .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO")
                         .requestMatchers(HttpMethod.GET, "/usuarios/*/favoritos").hasRole("USUARIO")
@@ -99,7 +104,8 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.GET, "/api/notificaciones").hasRole("RESTAURANTE")
-                        .requestMatchers(HttpMethod.POST, "/api/restaurantes/*/solicitar-modificacion").hasRole("RESTAURANTE")
+                        .requestMatchers(HttpMethod.POST, "/api/restaurantes/*/solicitar-modificacion")
+                        .hasRole("RESTAURANTE")
                         .requestMatchers(HttpMethod.GET, "/api/notificaciones/admin").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/notificaciones/*/marcar-vista")
                         .hasAnyRole("RESTAURANTE", "ADMIN", "USUARIO")

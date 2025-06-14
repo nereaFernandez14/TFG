@@ -268,4 +268,11 @@ public class UsuarioController {
                     .body("Error inesperado al procesar la solicitud: " + e.getMessage());
         }
     }
+
+    @GetMapping("/usuarios/existe-email")
+    public ResponseEntity<?> verificarEmailExistente(@RequestParam String email) {
+        boolean existe = usuarioRepository.existsByEmail(email);
+        return ResponseEntity.ok(Map.of("existe", existe));
+    }
+
 }

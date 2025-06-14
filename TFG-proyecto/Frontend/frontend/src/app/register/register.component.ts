@@ -1,10 +1,19 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+  AbstractControl,
+  ValidationErrors,
+  AsyncValidatorFn
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { UsuarioService } from '../services/usuario.service';
 import { AutenticacionService } from '../services/autenticacion.service';
 import { RolNombre } from '../models/enums/RolNombre.enum';
+import { map, catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-register',
@@ -19,8 +28,11 @@ export class RegisterComponent implements OnInit {
   isSubmitting = false;
   errorMessage: string | null = null;
 
-  // ✅ Usamos enum y excluimos ADMIN
+  errorNombrePersonalizado: string | null = null;
+  errorApellidosPersonalizado: string | null = null;
+
   roles = Object.values(RolNombre).filter(rol => rol !== RolNombre.ADMIN);
+  palabrasProhibidas = ['puta', 'mierda', 'gilipollas', 'imbécil', 'estúpido'];
 
   constructor(
     private readonly fb: FormBuilder,
@@ -30,27 +42,32 @@ export class RegisterComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // ✅ Token CSRF inicial
     this.authService.obtenerCsrfToken().subscribe({
       next: () => console.log('✅ Token CSRF obtenido correctamente'),
       error: (err) => console.warn('⚠️ No se pudo obtener el token CSRF:', err)
     });
 
-    // 🛡️ Validador personalizado
     const sinPalabrasMalSonantes = (control: AbstractControl): ValidationErrors | null => {
-      const prohibidas = ['puta', 'mierda', 'gilipollas', 'imbécil', 'estúpido'];
       const valor = control.value?.toLowerCase() || '';
-      const contiene = prohibidas.some(palabra => valor.includes(palabra));
+      const contiene = this.palabrasProhibidas.some(p => valor.includes(p));
       return contiene ? { malsonante: true } : null;
     };
 
-    // 🧾 Formulario reactivo
+    const emailNoRegistrado: AsyncValidatorFn = (control: AbstractControl) => {
+      const email = control.value;
+      if (!email) return of(null);
+      return this.usuarioService.verificarEmail(email).pipe(
+        map((existe) => (existe ? { emailYaRegistrado: true } : null)),
+        catchError(() => of(null))
+      );
+    };
+
     this.registerForm = this.fb.group({
       nombre: ['', [Validators.required, sinPalabrasMalSonantes]],
       apellidos: ['', [Validators.required, sinPalabrasMalSonantes]],
-      email: ['', [Validators.required, Validators.email]],
+      email: ['', [Validators.required, Validators.email], [emailNoRegistrado]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      rol: [RolNombre.USUARIO, Validators.required] // Valor por defecto
+      rol: [RolNombre.USUARIO, Validators.required]
     });
   }
 
@@ -58,7 +75,13 @@ export class RegisterComponent implements OnInit {
     this.formSubmitted = false;
     this.errorMessage = null;
 
-    if (this.registerForm.invalid) {
+    const nombre = this.registerForm.get('nombre')?.value?.toLowerCase() || '';
+    const apellidos = this.registerForm.get('apellidos')?.value?.toLowerCase() || '';
+
+    this.errorNombrePersonalizado = this.palabrasProhibidas.some(p => nombre.includes(p)) ? 'El nombre contiene palabras no permitidas' : null;
+    this.errorApellidosPersonalizado = this.palabrasProhibidas.some(p => apellidos.includes(p)) ? 'Los apellidos contienen palabras no permitidas' : null;
+
+    if (this.registerForm.invalid || this.errorNombrePersonalizado || this.errorApellidosPersonalizado) {
       this.registerForm.markAllAsTouched();
       return;
     }
@@ -68,18 +91,9 @@ export class RegisterComponent implements OnInit {
 
     this.usuarioService.registrar(formData).subscribe({
       next: () => {
-        console.log('✅ Registro exitoso. Iniciando sesión automáticamente...');
-
-        // 🔐 Login automático tras registro
         this.authService.login(formData.email, formData.password).subscribe({
-          next: () => {
-            console.log('✅ Login automático completado');
-            this.router.navigate(['/home']);
-          },
-          error: (loginErr) => {
-            console.error('❌ Error al iniciar sesión automáticamente:', loginErr);
-            this.router.navigate(['/login']);
-          }
+          next: () => this.router.navigate(['/home']),
+          error: () => this.router.navigate(['/login'])
         });
       },
       error: (err) => {
