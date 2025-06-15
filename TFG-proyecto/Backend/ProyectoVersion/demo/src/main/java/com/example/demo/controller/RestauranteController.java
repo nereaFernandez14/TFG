@@ -57,12 +57,13 @@ public class RestauranteController {
     }
 
     @GetMapping("/mio")
-    public ResponseEntity<Restaurante> getRestauranteByUsuario(@RequestParam Long idUsuario) {
+    public ResponseEntity<RestauranteDTO> getRestauranteByUsuario(@RequestParam Long idUsuario) {
         Restaurante restaurante = restauranteService.obtenerRestaurantePorUsuario(idUsuario);
         if (restaurante == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(restaurante);
+        RestauranteDTO dto = new RestauranteDTO(restaurante);
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/destacados")

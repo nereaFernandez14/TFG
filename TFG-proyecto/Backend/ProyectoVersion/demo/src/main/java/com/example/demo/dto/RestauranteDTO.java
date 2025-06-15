@@ -44,6 +44,7 @@ public class RestauranteDTO {
 
     private List<String> comentarios;
     private String rutaMenu; 
+    private List<String> imagenes;
  
 
     // ✅ NUEVOS CAMPOS PARA DASHBOARD
@@ -81,6 +82,7 @@ public class RestauranteDTO {
         this.visitas = restaurante.getVisitas();
         this.cantidadComentarios = restaurante.getResenyas() != null ? restaurante.getResenyas().size() : 0;
         this.rutaMenu = restaurante.getRutaMenu();
+        this.imagenes = restaurante.getImagenes();
 
     }
 
