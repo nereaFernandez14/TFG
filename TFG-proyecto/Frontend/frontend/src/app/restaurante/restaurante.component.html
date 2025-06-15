@@ -97,7 +97,7 @@
       <label>Rango de Precio*</label>
       <select formControlName="rangoPrecio">
         <option value="">Seleccionar</option>
-        <option *ngFor="let r of rangosPrecio" [value]="r">{{ r }}</option>
+        <option *ngFor="let r of rangosPrecio" [value]="r">{{ r | formatearRangoPrecio}}</option>
       </select>
       <div *ngIf="restauranteForm.get('rangoPrecio')?.touched && restauranteForm.get('rangoPrecio')?.invalid" class="error">
         Selecciona un rango de precio.
@@ -108,7 +108,7 @@
     <div class="form-group">
       <label>Restricciones Dietéticas</label>
       <select formControlName="restricciones" multiple>
-        <option *ngFor="let r of restricciones" [value]="r">{{ r }}</option>
+        <option *ngFor="let r of restricciones" [value]="r">{{ r | formatearRestriccion}}</option>
       </select>
     </div>
 

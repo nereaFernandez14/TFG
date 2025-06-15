@@ -9,11 +9,12 @@ import { TipoCocina } from '../models/enums/tipo-cocina.enum';
 import { Barrio } from '../models/enums/barrio.enum';
 import { RangoPrecio } from '../models/enums/rango-precio.enum';
 import { RestriccionDietetica } from '../models/enums/restriccion-dietetica.enum';
+import { FormatearRangoPrecioPipe } from '../pipes/formatearRangoPrecio.pipe';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, FormatearRangoPrecioPipe],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })

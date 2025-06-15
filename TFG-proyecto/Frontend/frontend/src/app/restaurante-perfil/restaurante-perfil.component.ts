@@ -7,11 +7,12 @@ import { HttpClient } from '@angular/common/http';
 import { AutenticacionService } from '../services/autenticacion.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FavoritosService } from '../services/favoritos.service';
+import { FormatearRangoPrecioPipe } from '../pipes/formatearRangoPrecio.pipe';
 
 @Component({
   selector: 'app-perfil-restaurante',
   standalone: true,
-  imports: [CommonModule, ResenyaComponent],
+  imports: [CommonModule, ResenyaComponent, FormatearRangoPrecioPipe],
   templateUrl: './restaurante-perfil.component.html',
   styleUrls: ['./restaurante-perfil.component.css']
 })

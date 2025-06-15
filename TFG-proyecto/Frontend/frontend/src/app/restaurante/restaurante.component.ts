@@ -9,11 +9,13 @@ import { Barrio } from '../models/enums/barrio.enum';
 import { RangoPrecio } from '../models/enums/rango-precio.enum';
 import { RestriccionDietetica } from '../models/enums/restriccion-dietetica.enum';
 import { HttpClient } from '@angular/common/http';
+import { FormatearRangoPrecioPipe } from '../pipes/formatearRangoPrecio.pipe';
+import { FormatearRestriccionPipe } from '../pipes/formatearRestriccion.pipe';
 
 @Component({
   selector: 'app-restaurante',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, FormatearRangoPrecioPipe, FormatearRestriccionPipe],
   templateUrl: './restaurante.component.html',
   styleUrls: ['./restaurante.component.css']
 })

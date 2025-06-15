@@ -6,11 +6,12 @@ import { Router } from '@angular/router';
 import { Restaurante } from '../models/restaurante.model';
 import { RestauranteService } from '../services/restaurante.service';
 import { RestriccionDietetica } from '../models/enums/restriccion-dietetica.enum';
+import { FormatearRangoPrecioPipe } from '../pipes/formatearRangoPrecio.pipe';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FormatearRangoPrecioPipe],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })

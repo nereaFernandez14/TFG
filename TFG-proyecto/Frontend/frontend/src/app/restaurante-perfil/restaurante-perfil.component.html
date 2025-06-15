@@ -24,7 +24,7 @@
   <div class="etiquetas">
     <span class="etiqueta"><i class="fas fa-utensils"></i> {{ restaurante.tipoCocina }}</span>
     <span class="etiqueta"><i class="fas fa-city"></i> {{ restaurante.barrio }}</span>
-    <span class="etiqueta"><i class="fas fa-euro-sign"></i> {{ restaurante.rangoPrecio }}</span>
+    <span class="etiqueta"><i class="fas fa-euro-sign"></i> {{ restaurante.rangoPrecio | formatearRangoPrecio}}</span>
     <span *ngFor="let restriccion of restaurante.restriccionesDieteticas" class="etiqueta">
       <i class="fas fa-leaf"></i> {{ restriccion }}
     </span>

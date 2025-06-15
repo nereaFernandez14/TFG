@@ -42,7 +42,7 @@
           <p><strong>Tipo de Cocina:</strong>
             {{ restaurante.tipoCocina === 'OTRO' ? restaurante.tipoCocinaPersonalizado : restaurante.tipoCocina }}
           </p>
-          <p><strong>Rango de Precio:</strong> {{ restaurante.rangoPrecio }}</p>
+          <p><strong>Rango de Precio:</strong> {{ restaurante.rangoPrecio | formatearRangoPrecio}}</p>
           <p *ngIf="restaurante.descripcion"><strong>Descripción:</strong> {{ restaurante.descripcion }}</p>
           <p *ngIf="restaurante.restriccionesDieteticas?.length">
             <strong>Restricciones dietéticas:</strong>

@@ -97,7 +97,7 @@
       <label>Nuevo valor: </label>
       <select [(ngModel)]="nuevoValor">
         <option value="" disabled>-- Selecciona un rango --</option>
-        <option *ngFor="let val of rangoPrecioEnum" [value]="val">{{ val }}</option>
+        <option *ngFor="let val of rangoPrecioEnum" [value]="val">{{ val | formatearRangoPrecio }}</option>
       </select>
     </div>
 

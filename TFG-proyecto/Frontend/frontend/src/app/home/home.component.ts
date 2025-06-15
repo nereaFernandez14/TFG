@@ -13,10 +13,11 @@ import { RangoPrecio } from '../models/enums/rango-precio.enum';
 import { RestriccionDietetica } from '../models/enums/restriccion-dietetica.enum';
 import { UsuarioService } from '../services/usuario.service';
 import { FormatearRestriccionPipe } from '../pipes/formatearRestriccion.pipe';
+import { FormatearRangoPrecioPipe } from '../pipes/formatearRangoPrecio.pipe';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, FormsModule, FormatearRestriccionPipe],
+  imports: [CommonModule, FormsModule, FormatearRestriccionPipe, FormatearRangoPrecioPipe],
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
