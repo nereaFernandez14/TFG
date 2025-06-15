@@ -47,21 +47,6 @@
       <i class="fas fa-user-slash"></i> Solicitar baja del restaurante
     </button>
   </div>
-
-  <!-- 🖼️ Carrusel de imágenes -->
-  <div class="carrusel-container" *ngIf="imagenes.length > 0">
-    <button type="button" class="carrusel-btn" (click)="retrocederCarrusel()" aria-label="Imagen anterior">&#x276E;</button>
-    <div class="carrusel-vista">
-      <div class="img-preview-wrapper">
-        <img
-          [src]="imagenes[indiceInicio]"
-          alt="Imagen del restaurante"
-          class="preview-img"
-        />
-      </div>
-    </div>
-    <button type="button" class="carrusel-btn" (click)="avanzarCarrusel()" aria-label="Imagen siguiente">&#x276F;</button>
-  </div>
 </div>
 
 <ng-template #cargando>

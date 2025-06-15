@@ -29,9 +29,6 @@ export class DashboardComponent implements OnInit {
 
   notificaciones: { id: number, mensaje: string }[] = [];
 
-  imagenes: string[] = [];
-  indiceInicio: number = 0;
-
   readonly backendUrl = 'https://localhost:8443';
 
   camposDisponibles = [
@@ -62,12 +59,11 @@ export class DashboardComponent implements OnInit {
       this.dashboardService.obtenerResumen(restaurante.id).subscribe({
         next: (data) => {
           this.datos = data;
-          this.cargarImagenes(data.id); // ✅ Usamos el ID del restaurante para cargar las imágenes
         },
         error: (err) => console.error('❌ Error cargando resumen dashboard', err)
       });
 
-      this.http.get<{ id: number, mensaje: string }[]>(`/api/notificaciones?restauranteId=${restaurante.id}`)
+      this.http.get<{ id: number, mensaje: string }[]>("/api/notificaciones?restauranteId=${restaurante.id}")
         .subscribe({
           next: (mensajes) => this.notificaciones = mensajes,
           error: () => console.warn('ℹ️ No hay notificaciones nuevas')
@@ -75,23 +71,12 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  cargarImagenes(idRestaurante: number) {
-    this.http.get<any[]>(`${this.backendUrl}/restaurantes/${idRestaurante}/imagenes`)
-      .subscribe({
-        next: (lista) => {
-          this.imagenes = lista.map(img => `${this.backendUrl}/restaurantes/imagenes/${img.id}`); // ✅ URL BLOB
-          this.indiceInicio = 0;
-        },
-        error: (err) => console.error('❌ Error cargando imágenes', err)
-      });
-  }
-
   obtenerUrlImagen(nombreArchivo: string): string {
-    return `${this.backendUrl}/restaurantes/uploads/${this.datos.id}/${nombreArchivo}`;
+    return "${this.backendUrl}/restaurantes/uploads/${this.datos.id}/${nombreArchivo}";
   }
 
   marcarComoVista(id: number): void {
-    this.http.put(`/api/notificaciones/${id}/marcar-vista`, {}).subscribe({
+    this.http.put("/api/notificaciones/${id}/marcar-vista", {}).subscribe({
       next: () => {
         this.notificaciones = this.notificaciones.filter(n => n.id !== id);
       },
@@ -204,7 +189,7 @@ export class DashboardComponent implements OnInit {
 
     this.botonDeshabilitado = true;
 
-    this.http.post(`/api/restaurantes/${this.datos.id}/solicitar-modificacion`, {
+    this.http.post("/api/restaurantes/${this.datos.id}/solicitar-modificacion", {
       campo,
       nuevoValor
     }).subscribe({
@@ -218,15 +203,5 @@ export class DashboardComponent implements OnInit {
         this.botonDeshabilitado = false;
       }
     });
-  }
-
-  avanzarCarrusel() {
-    if (this.imagenes.length === 0) return;
-    this.indiceInicio = (this.indiceInicio + 1) % this.imagenes.length;
-  }
-
-  retrocederCarrusel() {
-    if (this.imagenes.length === 0) return;
-    this.indiceInicio = (this.indiceInicio - 1 + this.imagenes.length) % this.imagenes.length;
   }
 }
