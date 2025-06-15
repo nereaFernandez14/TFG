@@ -63,7 +63,7 @@ export class DashboardComponent implements OnInit {
         error: (err) => console.error('❌ Error cargando resumen dashboard', err)
       });
 
-      this.http.get<{ id: number, mensaje: string }[]>("/api/notificaciones?restauranteId=${restaurante.id}")
+      this.http.get<{ id: number, mensaje: string }[]>(`/api/notificaciones?restauranteId=${restaurante.id}`)
         .subscribe({
           next: (mensajes) => this.notificaciones = mensajes,
           error: () => console.warn('ℹ️ No hay notificaciones nuevas')
@@ -72,11 +72,11 @@ export class DashboardComponent implements OnInit {
   }
 
   obtenerUrlImagen(nombreArchivo: string): string {
-    return "${this.backendUrl}/restaurantes/uploads/${this.datos.id}/${nombreArchivo}";
+    return `${this.backendUrl}/restaurantes/uploads/${this.datos.id}/${nombreArchivo}`;
   }
 
   marcarComoVista(id: number): void {
-    this.http.put("/api/notificaciones/${id}/marcar-vista", {}).subscribe({
+    this.http.put(`/api/notificaciones/${id}/marcar-vista`, {}).subscribe({
       next: () => {
         this.notificaciones = this.notificaciones.filter(n => n.id !== id);
       },
@@ -189,7 +189,7 @@ export class DashboardComponent implements OnInit {
 
     this.botonDeshabilitado = true;
 
-    this.http.post("/api/restaurantes/${this.datos.id}/solicitar-modificacion", {
+    this.http.post(`/api/restaurantes/${this.datos.id}/solicitar-modificacion`, {
       campo,
       nuevoValor
     }).subscribe({

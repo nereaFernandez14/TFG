@@ -56,9 +56,15 @@ public class RestauranteController {
     }
 
     @GetMapping("/{id}")
-    public Restaurante getRestauranteById(@PathVariable Long id) {
-        return restauranteService.obtenerYIncrementarVisitas(id);
+    public ResponseEntity<RestauranteDTO> getRestauranteById(@PathVariable Long id) {
+        Restaurante restaurante = restauranteService.obtenerYIncrementarVisitas(id);
+        if (restaurante == null) {
+            return ResponseEntity.notFound().build();
+        }
+        RestauranteDTO dto = new RestauranteDTO(restaurante);
+        return ResponseEntity.ok(dto);
     }
+
 
     @GetMapping("/mio")
     public ResponseEntity<RestauranteDTO> getRestauranteByUsuario(@RequestParam Long idUsuario) {
@@ -197,11 +203,10 @@ public class RestauranteController {
 
         return ResponseEntity.ok(restaurante.getResenyas());
     }
-
+    @PostMapping("/{idRestaurante}/solicitar-baja")
     @PreAuthorize("hasRole('RESTAURANTE')")
-    @PostMapping("/{idUsuario}/solicitar-baja")
-    public ResponseEntity<?> solicitarBaja(@PathVariable Long idUsuario) {
-        Restaurante restaurante = restauranteService.obtenerRestaurantePorUsuario(idUsuario);
+    public ResponseEntity<?> solicitarBaja(@PathVariable Long idRestaurante) {
+        Restaurante restaurante = restauranteService.obtenerRestaurantePorId(idRestaurante);
         if (restaurante == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Restaurante no encontrado");
 

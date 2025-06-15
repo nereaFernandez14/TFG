@@ -149,9 +149,9 @@ export class AdminPanelComponent implements OnInit {
     });
   }
 
-  actualizarCampoRestaurante(id: number) {
-    const campo = this.campoSeleccionado[id];
-    const valor = this.nuevoValor[id];
+  actualizarCampoRestaurante(solicitudId: number, restauranteId: number) {
+    const campo = this.campoSeleccionado[restauranteId];
+    const valor = this.nuevoValor[restauranteId];
 
     if (!campo || valor === undefined || valor === '') {
       alert('⚠️ Debes seleccionar un campo y escribir un valor válido.');
@@ -167,19 +167,31 @@ export class AdminPanelComponent implements OnInit {
       payload[campo] = valor;
     }
 
-    this.http.put(`/api/admin/restaurantes/${id}`, payload).subscribe({
+    // 1️⃣ Actualiza los datos en la entidad Restaurante
+    this.http.put(`/api/admin/restaurantes/${restauranteId}`, payload).subscribe({
       next: () => {
-        alert('✅ Restaurante actualizado correctamente');
-        this.modificaciones = this.eliminarItemPorId(this.modificaciones, id);
-        this.campoSeleccionado[id] = '';
-        this.nuevoValor[id] = '';
+        // 2️⃣ Marca la solicitud como aceptada
+        this.http.post(`/api/admin/modificaciones/${solicitudId}/aceptar`, {}).subscribe({
+          next: () => {
+            alert('✅ Restaurante actualizado y solicitud aceptada');
+            this.modificaciones = this.eliminarItemPorId(this.modificaciones, solicitudId);
+            this.campoSeleccionado[restauranteId] = '';
+            this.nuevoValor[restauranteId] = '';
+          },
+          error: err => {
+            console.error('❌ Error al aceptar solicitud', err);
+            alert('⚠️ Error al aceptar solicitud');
+          }
+        });
       },
-      error: (err) => {
+      error: err => {
         console.error('❌ Error al actualizar restaurante', err);
         alert('⚠️ Error al actualizar el restaurante');
       }
     });
   }
+
+
 
   modificarUsuario(solicitudId: number, usuarioId: number, campo: string, nuevoValor: string) {
     if (!campo || !nuevoValor) {

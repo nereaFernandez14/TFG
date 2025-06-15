@@ -7,6 +7,10 @@ import com.example.demo.entities.Restaurante;
 import com.example.demo.entities.SolicitudModificacion;
 import com.example.demo.entities.SolicitudModificacionUsuario;
 import com.example.demo.entities.Usuario;
+import com.example.demo.enums.Barrio;
+import com.example.demo.enums.RangoPrecio;
+import com.example.demo.enums.RestriccionDietetica;
+import com.example.demo.enums.TipoCocina;
 import com.example.demo.repositories.ResenyaRepository;
 import com.example.demo.repositories.RestauranteRepository;
 import com.example.demo.repositories.SolicitudModificacionRepository;
@@ -15,6 +19,7 @@ import com.example.demo.repositories.UsuarioRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -91,9 +96,23 @@ public class AdminService {
 
         restauranteService.actualizarDatosRestaurante(id, request);
 
+        // ✅ Buscar solicitudes relacionadas no gestionadas y aceptarlas
+        List<SolicitudModificacion> solicitudes = solicitudModificacionRepository
+                .findByRestauranteIdAndGestionadaFalse(id);
+
+        for (SolicitudModificacion solicitud : solicitudes) {
+            // Puedes ser más específico aquí si solo aplicas ciertos campos
+            solicitud.setGestionada(true);
+            solicitud.setAceptada(true); // 👈 esto es lo que faltaba
+        }
+
+        solicitudModificacionRepository.saveAll(solicitudes);
+
+        // 🔔 Notificación al restaurante
         notificacionService.crearParaRestaurante(
                 restaurante, "📌 El administrador ha aplicado los cambios solicitados en tus datos.");
     }
+
 
     public List<SolicitudModificacion> obtenerSolicitudesModificacion() {
         // Cambiado para obtener solo solicitudes no gestionadas
@@ -115,21 +134,50 @@ public class AdminService {
                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
     }
 
-    // ✔️ Resolución para restaurante
+    @Transactional
     public void resolverModificacionRestaurante(Long id, boolean aceptada) {
+        System.out.println("🧪 Entrando en resolverModificacionRestaurante con id=" + id + " aceptada=" + aceptada);
         SolicitudModificacion solicitud = obtenerSolicitudRestaurantePorId(id);
+        Restaurante restaurante = solicitud.getRestaurante();
+
+        if (aceptada) {
+            String campo = solicitud.getCampo();
+            String nuevoValor = solicitud.getNuevoValor();
+
+            switch (campo) {
+                case "nombre" -> restaurante.setNombre(nuevoValor);
+                case "email" -> restaurante.setEmail(nuevoValor);
+                case "telefono" -> restaurante.setTelefono(nuevoValor);
+                case "direccion" -> restaurante.setDireccion(nuevoValor);
+                case "tipoCocina" -> restaurante.setTipoCocina(Enum.valueOf(TipoCocina.class, nuevoValor));
+                case "tipoCocinaPersonalizado" -> restaurante.setTipoCocinaPersonalizado(nuevoValor);
+                case "barrio" -> restaurante.setBarrio(Enum.valueOf(Barrio.class, nuevoValor));
+                case "rangoPrecio" -> restaurante.setRangoPrecio(Enum.valueOf(RangoPrecio.class, nuevoValor));
+                case "restriccionesDieteticas" -> {
+                    List<RestriccionDietetica> restricciones = List.of(nuevoValor.split(",")).stream()
+                            .map(String::trim)
+                            .map(r -> Enum.valueOf(RestriccionDietetica.class, r))
+                            .toList();
+                    restaurante.setRestriccionesDieteticas(restricciones);
+                }
+                default -> throw new IllegalArgumentException("Campo no soportado: " + campo);
+            }
+
+            restauranteRepository.save(restaurante);
+        }
 
         solicitud.setGestionada(true);
-        solicitud.setAceptada(aceptada);
+        solicitud.setAceptada(Boolean.valueOf(aceptada));
         solicitudModificacionRepository.save(solicitud);
 
         String msg = aceptada
                 ? "✅ Tu solicitud de modificación del campo '" + solicitud.getCampo() + "' fue aceptada."
                 : "❌ Tu solicitud de modificación del campo '" + solicitud.getCampo() + "' fue rechazada.";
 
-        notificacionService.crear(solicitud.getRestaurante(), msg);
+        notificacionService.crear(restaurante, msg);
     }
 
+    
     public void resolverModificacionUsuario(Long id, boolean aceptada) {
         SolicitudModificacionUsuario solicitud = obtenerSolicitudUsuarioPorId(id);
 
