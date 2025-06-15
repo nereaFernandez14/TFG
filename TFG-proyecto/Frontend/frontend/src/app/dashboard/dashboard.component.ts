@@ -29,6 +29,11 @@ export class DashboardComponent implements OnInit {
 
   notificaciones: { id: number, mensaje: string }[] = [];
 
+  imagenes: string[] = [];
+  indiceInicio: number = 0;
+
+  readonly backendUrl = 'https://localhost:8443';
+
   camposDisponibles = [
     { label: 'Nombre', value: 'nombre' },
     { label: 'Dirección', value: 'direccion' },
@@ -55,7 +60,10 @@ export class DashboardComponent implements OnInit {
     const restaurante = this.authService.obtenerUsuario();
     if (restaurante?.id) {
       this.dashboardService.obtenerResumen(restaurante.id).subscribe({
-        next: (data) => (this.datos = data),
+        next: (data) => {
+          this.datos = data;
+          this.cargarImagenes(data.id);
+        },
         error: (err) => console.error('❌ Error cargando resumen dashboard', err)
       });
 
@@ -67,11 +75,29 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  marcarComoVista(id: number) {
-    this.http.put(`/api/notificaciones/${id}/marcar-vista`, {})
-      .subscribe(() => {
-        this.notificaciones = this.notificaciones.filter(n => n.id !== id);
+  cargarImagenes(idRestaurante: number) {
+    this.http.get<string[]>(`${this.backendUrl}/restaurantes/${idRestaurante}/imagenes`)
+      .subscribe({
+        next: (lista) => {
+          this.imagenes = lista.map(nombre => `${this.backendUrl}/restaurantes/uploads/${idRestaurante}/${nombre}`);
+        },
+        error: (err) => console.error('❌ Error cargando imágenes', err)
       });
+  }
+
+  obtenerUrlImagen(nombreArchivo: string): string {
+    return `${this.backendUrl}/restaurantes/uploads/${this.datos.id}/${nombreArchivo}`;
+  }
+
+  marcarComoVista(id: number): void {
+    this.http.put(`/api/notificaciones/${id}/marcar-vista`, {}).subscribe({
+      next: () => {
+        this.notificaciones = this.notificaciones.filter(n => n.id !== id);
+      },
+      error: (err) => {
+        console.error('❌ Error al marcar notificación como vista', err);
+      }
+    });
   }
 
   pedirBajaRestaurante() {
@@ -191,5 +217,15 @@ export class DashboardComponent implements OnInit {
         this.botonDeshabilitado = false;
       }
     });
+  }
+
+  avanzarCarrusel() {
+    if (this.imagenes.length === 0) return;
+    this.indiceInicio = (this.indiceInicio + 1) % this.imagenes.length;
+  }
+
+  retrocederCarrusel() {
+    if (this.imagenes.length === 0) return;
+    this.indiceInicio = (this.indiceInicio - 1 + this.imagenes.length) % this.imagenes.length;
   }
 }

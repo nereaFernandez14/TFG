@@ -59,7 +59,12 @@ public class SecurityConfig {
                                 "/api/notificaciones/**",
                                 "/notificaciones/**",
                                 "/usuarios/*/favoritos/**",
-                                "/api/usuarios/*/preferencias-dieteticas"))
+                                "/api/usuarios/*/preferencias-dieteticas",
+                                "/api/usuarios/existe-email",
+                                "/usuarios/existe-email", // ✅ Añadido aquí
+                                "/uploads/**", // ✅ NUEVO
+                                "/api/uploads/**" // ✅ NUEVO
+                        ))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
@@ -78,8 +83,12 @@ public class SecurityConfig {
                                 "/restaurantes/filtrar-avanzado",
                                 "/resenyas/**",
                                 "/api/restaurantes/**",
-                                "/restaurantes/**")
-                        .permitAll()
+                                "/restaurantes/**",
+                                "/api/usuarios/existe-email",
+                                "/usuarios/existe-email", // ✅ Añadido aquí también
+                                "/uploads/**", // ✅ NUEVO
+                                "/api/uploads/**" // ✅ NUEVO
+                        ).permitAll()
 
                         .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO")
                         .requestMatchers(HttpMethod.GET, "/usuarios/*/favoritos").hasRole("USUARIO")
@@ -92,14 +101,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/restaurantes/*/solicitar-modificacion")
                         .hasRole("RESTAURANTE")
 
-                        // ✅ NUEVO: Solicitudes de modificación de usuario
                         .requestMatchers(HttpMethod.POST, "/api/usuarios/*/solicitar-modificacion").hasRole("USUARIO")
                         .requestMatchers(HttpMethod.POST, "/usuarios/*/solicitar-modificacion").hasRole("USUARIO")
 
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.GET, "/api/notificaciones").hasRole("RESTAURANTE")
-                        .requestMatchers(HttpMethod.POST, "/api/restaurantes/*/solicitar-modificacion").hasRole("RESTAURANTE")
+                        .requestMatchers(HttpMethod.POST, "/api/restaurantes/*/solicitar-modificacion")
+                        .hasRole("RESTAURANTE")
                         .requestMatchers(HttpMethod.GET, "/api/notificaciones/admin").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/notificaciones/*/marcar-vista")
                         .hasAnyRole("RESTAURANTE", "ADMIN", "USUARIO")

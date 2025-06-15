@@ -67,10 +67,16 @@ public class Restaurante {
     @Column(nullable = false)
     private boolean solicitaBaja = false;
 
+    @Column(length = 1000)
+    private String descripcion;
+
     @ElementCollection
     @CollectionTable(name = "restaurante_imagenes", joinColumns = @JoinColumn(name = "restaurante_id"))
     @Column(name = "nombre_imagen")
     private List<String> imagenes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ImagenRestaurante> imagenesBlob = new ArrayList<>();
 
     @ElementCollection(targetClass = RestriccionDietetica.class)
     @Enumerated(EnumType.STRING)

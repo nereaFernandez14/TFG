@@ -2,6 +2,7 @@ package com.example.demo.services;
 
 import com.example.demo.dto.RestauranteDTO;
 import com.example.demo.dto.RestauranteUpdateRequest;
+import com.example.demo.entities.ImagenRestaurante;
 import com.example.demo.entities.Restaurante;
 import com.example.demo.entities.Usuario;
 import com.example.demo.enums.Barrio;
@@ -9,12 +10,18 @@ import com.example.demo.enums.RangoPrecio;
 import com.example.demo.enums.RestriccionDietetica;
 import com.example.demo.enums.TipoCocina;
 import com.example.demo.enums.RolNombre;
+import com.example.demo.repositories.ImagenRestauranteRepository;
 import com.example.demo.repositories.RestauranteRepository;
 import com.example.demo.repositories.UsuarioRepository;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +37,9 @@ public class RestauranteService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ImagenRestauranteRepository imagenRestauranteRepository;
 
     public Restaurante crearDesdeDTO(Long idUsuario, RestauranteDTO dto) {
         Usuario usuario = usuarioRepository.findById(idUsuario)
@@ -50,6 +60,7 @@ public class RestauranteService {
         restaurante.setRangoPrecio(dto.getRangoPrecio());
         restaurante.setTipoCocinaPersonalizado(dto.getTipoCocinaPersonalizado());
         restaurante.setRestriccionesDieteticas(dto.getRestricciones());
+        restaurante.setDescripcion(dto.getDescripcion()); // <-- Añadido para descripción
 
         if (dto.getTelefono() != null && !dto.getTelefono().isBlank()) {
             restaurante.setPassword(passwordEncoder.encode(dto.getTelefono()));
@@ -135,6 +146,8 @@ public class RestauranteService {
             restaurante.setTelefono(request.getTelefono());
         if (request.getEmail() != null)
             restaurante.setEmail(request.getEmail());
+        if (request.getDescripcion() != null)
+            restaurante.setDescripcion(request.getDescripcion());
         if (request.getTipoCocina() != null) {
             restaurante.setTipoCocina(request.getTipoCocina());
 
@@ -154,5 +167,33 @@ public class RestauranteService {
 
         restauranteRepository.save(restaurante);
     }
-    
+
+    @Transactional
+    public void guardarImagenesBlob(Long restauranteId, MultipartFile[] archivos) {
+        Restaurante restaurante = restauranteRepository.findById(restauranteId)
+                .orElseThrow(() -> new RuntimeException("Restaurante no encontrado"));
+
+        for (MultipartFile archivo : archivos) {
+            if (!archivo.isEmpty()) {
+                try {
+                    ImagenRestaurante imagen = new ImagenRestaurante();
+                    imagen.setNombreArchivo(archivo.getOriginalFilename());
+                    imagen.setTipo(archivo.getContentType());
+                    imagen.setDatos(archivo.getBytes());
+                    imagen.setRestaurante(restaurante);
+                    restaurante.getImagenesBlob().add(imagen);
+                } catch (IOException e) {
+                    throw new RuntimeException("Error procesando imagen", e);
+                }
+            }
+        }
+
+        restauranteRepository.save(restaurante);
+    }
+
+    public ImagenRestaurante obtenerImagenBlob(Long id) {
+        return imagenRestauranteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Imagen no encontrada"));
+    }
+
 }

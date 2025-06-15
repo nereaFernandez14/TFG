@@ -1,6 +1,6 @@
 package com.example.demo.dto;
 
-import com.example.demo.entities.ImagenResenya;
+import com.example.demo.entities.ImagenRestaurante;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,12 +8,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ImagenResenyaResponse {
+public class ImagenRestauranteResponse {
     private Long id;
     private String nombreArchivo;
     private String tipoArchivo;
 
-    public ImagenResenyaResponse(ImagenResenya imagen) {
+    public ImagenRestauranteResponse(ImagenRestaurante imagen) {
         this.id = imagen.getId();
         this.nombreArchivo = imagen.getNombreArchivo();
         this.tipoArchivo = imagen.getTipo();

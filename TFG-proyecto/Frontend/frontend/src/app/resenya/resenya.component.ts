@@ -15,7 +15,7 @@ export class ResenyaComponent implements OnInit {
   @Input() restauranteId!: number;
   @Input() restauranteNombre: string = '';
   @Output() resenaEnviada = new EventEmitter<void>();
-  @Input() resenaExistente: any; 
+  @Input() resenaExistente: any;
 
   resenyaForm: FormGroup;
   estrellas: number[] = [1, 2, 3, 4, 5];
@@ -25,12 +25,15 @@ export class ResenyaComponent implements OnInit {
   mostrarError = false;
   mensajeError = '';
   imagenes: File[] = [];
-  vistaPrevia: string[] = [];
+  vistaPrevia: { tipo: 'imagen' | 'video', src: string }[] = [];
   palabrasMalas = ['puta', 'mierda', 'gilipollas', 'estúpido'];
   comentarioValido = true;
 
   yaTieneResena = false;
   cargandoEstadoResena = true;
+
+  indiceInicio = 0;
+  cantidadVisible = 3;
 
   constructor(
     private fb: FormBuilder,
@@ -66,8 +69,6 @@ export class ResenyaComponent implements OnInit {
       });
     }
   }
-
-
 
   seleccionarPuntuacion(valor: number) {
     if (this.yaTieneResena) return;
@@ -116,7 +117,7 @@ export class ResenyaComponent implements OnInit {
     formData.append('valoracion', this.puntuacionSeleccionada.toString());
     this.imagenes.forEach(file => formData.append('imagenes', file));
 
-    this.http.put(`/api/resenyas`, formData, { withCredentials: true }).subscribe({
+    this.http.post(`/api/resenyas/actualizar`, formData, { withCredentials: true }).subscribe({
       next: () => {
         this.mostrarExito = true;
         this.resenaEnviada.emit();
@@ -153,17 +154,58 @@ export class ResenyaComponent implements OnInit {
   handleFileInput(event: Event) {
     const input = event.target as HTMLInputElement;
     if (!input.files) return;
-    this.imagenes = Array.from(input.files);
-    this.vistaPrevia = [];
-    this.imagenes.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (e: any) => this.vistaPrevia.push(e.target.result);
-      reader.readAsDataURL(file);
+
+    const tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg', 'video/mp4', 'video/webm', 'video/ogg'];
+    const errores: string[] = [];
+
+    Array.from(input.files).forEach(file => {
+      const yaExiste = this.imagenes.some(existing =>
+        existing.name === file.name &&
+        existing.size === file.size &&
+        existing.lastModified === file.lastModified
+      );
+      if (yaExiste) {
+        errores.push(`⚠️ El archivo "${file.name}" ya fue añadido anteriormente.`);
+      } else if (tiposPermitidos.includes(file.type)) {
+        this.imagenes.push(file);
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+          const tipo = file.type.startsWith('image/') ? 'imagen' : 'video';
+          this.vistaPrevia.push({ tipo, src: e.target.result });
+        };
+        reader.readAsDataURL(file);
+      } else {
+        errores.push(`❌ "${file.name}" no es un archivo válido.`);
+      }
     });
+
+    if (errores.length > 0) {
+      this.mostrarError = true;
+      this.mensajeError = errores.join('<br/>');
+    }
   }
 
   validarComentario() {
     const texto = this.resenyaForm.value.comentario.toLowerCase();
     this.comentarioValido = !this.palabrasMalas.some(p => texto.includes(p));
+  }
+
+  avanzarCarrusel() {
+    if (this.vistaPrevia.length === 0) return;
+    this.indiceInicio = (this.indiceInicio + 1) % this.vistaPrevia.length;
+  }
+
+  retrocederCarrusel() {
+    if (this.vistaPrevia.length === 0) return;
+    this.indiceInicio = (this.indiceInicio - 1 + this.vistaPrevia.length) % this.vistaPrevia.length;
+  }
+
+  eliminarImagen(index: number) {
+    const realIndex = (this.indiceInicio + index) % this.vistaPrevia.length;
+    this.vistaPrevia.splice(realIndex, 1);
+    this.imagenes.splice(realIndex, 1);
+    if (this.indiceInicio >= this.vistaPrevia.length && this.indiceInicio > 0) {
+      this.indiceInicio--;
+    }
   }
 }

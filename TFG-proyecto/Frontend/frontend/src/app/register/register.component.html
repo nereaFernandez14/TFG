@@ -30,8 +30,21 @@
     <div class="form-group">
       <label for="email"><i class="fas fa-envelope"></i> Email:</label>
       <input id="email" formControlName="email" type="email" placeholder="tucorreo@ejemplo.com">
-      <div class="error" *ngIf="registerForm.get('email')?.invalid && (registerForm.get('email')?.dirty || registerForm.get('email')?.touched)">
+
+      <div class="error" *ngIf="registerForm.get('email')?.errors?.['required'] && registerForm.get('email')?.touched">
+        El email es obligatorio.
+      </div>
+
+      <div class="error" *ngIf="registerForm.get('email')?.errors?.['email'] && registerForm.get('email')?.touched">
         Introduce un email válido.
+      </div>
+
+      <div class="error" *ngIf="registerForm.get('email')?.errors?.['formatoEmailInvalido'] && registerForm.get('email')?.touched">
+        El email debe terminar en un dominio válido como .com, .es, .net, .org o .edu
+      </div>
+
+      <div class="error" *ngIf="registerForm.get('email')?.errors?.['emailYaRegistrado'] && registerForm.get('email')?.touched">
+        Este correo ya está registrado. Prueba con otro.
       </div>
     </div>
 

@@ -211,7 +211,6 @@ public class RestauranteController {
         return ResponseEntity.ok().build();
     }
 
-    // 🔧 LÓGICA CORREGIDA DE SOLICITAR MODIFICACIÓN
     @PreAuthorize("hasRole('RESTAURANTE')")
     @PostMapping("/{id}/solicitar-modificacion")
     public ResponseEntity<?> solicitarModificacion(
@@ -241,7 +240,7 @@ public class RestauranteController {
         try {
             notificacionService.crearSolicitudConNotificacion(restaurante, campo, nuevoValor);
         } catch (Exception e) {
-            e.printStackTrace(); // 👈 Esto te va a decir la causa del 500
+            e.printStackTrace();
             return ResponseEntity.status(500).body("Error interno al procesar la solicitud");
         }
         return ResponseEntity.ok(Map.of("mensaje", "Modificación enviada y en espera de revisión"));
@@ -354,5 +353,4 @@ public class RestauranteController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + nombre + "\"")
                 .body(recurso);
     }
-
 }

@@ -33,19 +33,21 @@ public class RestauranteDTO {
 
     @NotNull(message = "El rango de precio es obligatorio.")
     private RangoPrecio rangoPrecio;
+
     @NotNull(message = "El teléfono es obligatorio.")
     private String telefono;
 
     private String tipoCocinaPersonalizado;
+
+    private String descripcion; // <-- Añadido aquí
 
     private double mediaPuntuacion;
 
     private List<RestriccionDietetica> restricciones;
 
     private List<String> comentarios;
-    private String rutaMenu; 
-    private List<String> imagenes;
- 
+
+    private String rutaMenu;
 
     // ✅ NUEVOS CAMPOS PARA DASHBOARD
     private int visitas;
@@ -69,6 +71,7 @@ public class RestauranteDTO {
         this.telefono = restaurante.getTelefono();
         this.rangoPrecio = restaurante.getRangoPrecio();
         this.tipoCocinaPersonalizado = restaurante.getTipoCocinaPersonalizado();
+        this.descripcion = restaurante.getDescripcion();
         this.mediaPuntuacion = restaurante.getMediaPuntuacion();
         this.restricciones = restaurante.getRestriccionesDieteticas();
 
@@ -78,15 +81,11 @@ public class RestauranteDTO {
                 .limit(5)
                 .collect(Collectors.toList());
 
-        // 👇 Datos nuevos del dashboard
         this.visitas = restaurante.getVisitas();
         this.cantidadComentarios = restaurante.getResenyas() != null ? restaurante.getResenyas().size() : 0;
         this.rutaMenu = restaurante.getRutaMenu();
-        this.imagenes = restaurante.getImagenes();
-
     }
 
     public RestauranteDTO() {
-        // Constructor vacío para creación/edición
     }
 }
