@@ -3,8 +3,9 @@ import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideRouter, Routes, withRouterConfig } from '@angular/router';
 import {
   HttpClientModule,
-  HttpClientXsrfModule
-} from '@angular/common/http'; // 👈 incluimos XsrfModule
+  HttpClientXsrfModule,
+  HTTP_INTERCEPTORS
+} from '@angular/common/http'; // 👈 incluimos XsrfModule y HTTP_INTERCEPTORS
 
 import { LoginComponent } from './login/login.component';
 import { HomeComponent } from './home/home.component';
@@ -22,7 +23,7 @@ import { MisResenyasComponent } from './mis-resenyas/mis-resenyas.component';
 import { AdminGuard } from './guards/admin.guard';
 import { redirectAdminGuard } from './guards/redirectAdminGuard';
 
-
+import { CsrfInterceptor } from './interceptors/csrf.interceptor';
 
 export const routes: Routes = [
   { path: 'header', component: HeaderComponent },
@@ -42,9 +43,9 @@ export const routes: Routes = [
     canActivate: [redirectRestauranteGuard, redirectAdminGuard]
   },
   {
-      path: 'admin-panel',
-      loadComponent: () => import('./admin-panel/admin-panel-component').then(m => m.AdminPanelComponent),
-      canActivate: [AdminGuard] 
+    path: 'admin-panel',
+    loadComponent: () => import('./admin-panel/admin-panel-component').then(m => m.AdminPanelComponent),
+    canActivate: [AdminGuard]
   },
   {
     path: 'change-password',
@@ -132,6 +133,11 @@ export const appConfig: ApplicationConfig = {
         cookieName: 'XSRF-TOKEN',
         headerName: 'X-XSRF-TOKEN'
       }) // 👈 protección CSRF para Angular
-    )
+    ),
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: CsrfInterceptor,
+      multi: true
+    }
   ]
 };

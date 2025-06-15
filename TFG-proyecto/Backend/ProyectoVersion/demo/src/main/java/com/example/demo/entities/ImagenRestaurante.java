@@ -23,4 +23,12 @@ public class ImagenRestaurante {
     @ManyToOne
     @JsonBackReference
     private Restaurante restaurante;
+
+    public String getNombreImagen() {
+        return nombreArchivo;
+    }
+
+    public void setNombreImagen(String nombre) {
+        this.nombreArchivo = nombre;
+    }
 }

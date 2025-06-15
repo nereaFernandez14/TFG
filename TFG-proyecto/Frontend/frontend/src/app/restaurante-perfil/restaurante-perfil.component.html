@@ -30,6 +30,7 @@
     </span>
   </div>
 
+  <!-- ✅ Carrusel corregido con imágenes desde BLOB -->
   <div *ngIf="restaurante.imagenes?.length" class="carrusel">
     <button class="nav-btn" (click)="anteriorImagen()" title="Anterior">
       <i class="fas fa-chevron-left"></i>
@@ -37,11 +38,11 @@
 
     <div class="carrusel-imagen">
       <img
-        *ngIf="restaurante.imagenes?.length"
-        [src]="'https://localhost:8443/uploads/restaurantes/' + restaurante.id + '/' + restaurante.imagenes[imagenActual]"
-        alt="Imagen del restaurante"
-        class="img-carrusel fade-in"
+    [src]="'api/restaurantes/imagenes/' + restaurante.imagenes[imagenActual]?.id"
+    [alt]="restaurante.imagenes[imagenActual]?.nombreArchivo"
+    class="img-carrusel fade-in"
       />
+
     </div>
 
     <button class="nav-btn" (click)="siguienteImagen()" title="Siguiente">

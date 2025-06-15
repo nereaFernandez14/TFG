@@ -14,7 +14,7 @@
     <!-- Dirección -->
     <div class="form-group">
       <label>Dirección*</label>
-      <input type="text" formControlName="direccion" placeholder="Ej: Calle Mayor 12, 3ºA, 28013 Madrid, Comunidad de Madrid" />
+      <input type="text" formControlName="direccion" placeholder="Ej: Calle mayor 12, piso 3, madrid centro, madrid, 28013" />
       <div *ngIf="restauranteForm.get('direccion')?.touched && restauranteForm.get('direccion')?.invalid" class="error">
         La dirección es obligatoria o inválida.
       </div>

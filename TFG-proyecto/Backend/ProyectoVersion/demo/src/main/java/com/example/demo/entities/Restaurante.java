@@ -70,11 +70,7 @@ public class Restaurante {
     @Column(length = 1000)
     private String descripcion;
 
-    @ElementCollection
-    @CollectionTable(name = "restaurante_imagenes", joinColumns = @JoinColumn(name = "restaurante_id"))
-    @Column(name = "nombre_imagen")
-    private List<String> imagenes = new ArrayList<>();
-
+    // ✅ ÚNICA RELACIÓN válida para imágenes persistidas en BLOB
     @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ImagenRestaurante> imagenesBlob = new ArrayList<>();
 

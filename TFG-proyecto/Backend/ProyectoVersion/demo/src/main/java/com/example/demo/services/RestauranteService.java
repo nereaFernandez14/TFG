@@ -60,7 +60,7 @@ public class RestauranteService {
         restaurante.setRangoPrecio(dto.getRangoPrecio());
         restaurante.setTipoCocinaPersonalizado(dto.getTipoCocinaPersonalizado());
         restaurante.setRestriccionesDieteticas(dto.getRestricciones());
-        restaurante.setDescripcion(dto.getDescripcion()); // <-- Añadido para descripción
+        restaurante.setDescripcion(dto.getDescripcion());
 
         if (dto.getTelefono() != null && !dto.getTelefono().isBlank()) {
             restaurante.setPassword(passwordEncoder.encode(dto.getTelefono()));
@@ -151,7 +151,6 @@ public class RestauranteService {
         if (request.getTipoCocina() != null) {
             restaurante.setTipoCocina(request.getTipoCocina());
 
-            // 🧼 Limpiar tipo personalizado si ya no es OTRO
             if (request.getTipoCocina() != TipoCocina.OTRO) {
                 restaurante.setTipoCocinaPersonalizado(null);
             }
@@ -181,6 +180,7 @@ public class RestauranteService {
                     imagen.setTipo(archivo.getContentType());
                     imagen.setDatos(archivo.getBytes());
                     imagen.setRestaurante(restaurante);
+                    // 👇 AÑADIDO A LA LISTA CORRECTA
                     restaurante.getImagenesBlob().add(imagen);
                 } catch (IOException e) {
                     throw new RuntimeException("Error procesando imagen", e);

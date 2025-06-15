@@ -22,6 +22,7 @@ import com.example.demo.enums.RolNombre;
 import com.example.demo.exception.DangerException;
 import com.example.demo.dto.RegistroRequest;
 import com.example.demo.dto.RestauranteDTO;
+import com.example.demo.entities.ImagenRestaurante;
 import com.example.demo.entities.Restaurante;
 import com.example.demo.entities.SolicitudModificacionUsuario;
 import com.example.demo.repositories.UsuarioRepository;
@@ -112,6 +113,7 @@ public class UsuarioController {
     public ResponseEntity<?> subirImagenesRestaurante(
             @RequestParam("imagenes") List<MultipartFile> imagenes,
             @RequestParam("email") String email) {
+
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
@@ -133,18 +135,28 @@ public class UsuarioController {
                 Files.createDirectories(destino.getParent());
                 Files.copy(imagen.getInputStream(), destino, StandardCopyOption.REPLACE_EXISTING);
 
-                restaurante.getImagenes().add(nombreArchivo);
+                try {
+                    ImagenRestaurante imagenRestaurante = new ImagenRestaurante();
+                    imagenRestaurante.setNombreArchivo(nombreArchivo); // 👈 usamos el nombre limpio que generaste
+                    imagenRestaurante.setTipo(imagen.getContentType());
+                    imagenRestaurante.setDatos(imagen.getBytes());
+                    imagenRestaurante.setRestaurante(restaurante);
+
+                    restaurante.getImagenesBlob().add(imagenRestaurante);
+                } catch (IOException e) {
+                    throw new RuntimeException("❌ Error leyendo bytes de archivo", e);
+                }
             }
 
             restauranteRepository.save(restaurante);
 
             return ResponseEntity.ok(Map.of(
-                    "mensaje", "Imágenes subidas y registradas en BD",
+                    "mensaje", "✅ Imágenes subidas y registradas en BD",
                     "imagenesCargadas", imagenes.size()));
 
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    Map.of("error", "Error al guardar imágenes", "detalle", e.getMessage()));
+                    Map.of("error", "❌ Error al guardar imágenes", "detalle", e.getMessage()));
         }
     }
 
