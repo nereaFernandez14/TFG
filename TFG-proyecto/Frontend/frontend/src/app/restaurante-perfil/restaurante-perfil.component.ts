@@ -88,13 +88,14 @@ export class RestaurantePerfilComponent implements OnInit {
   abrirModalResena() { this.modalAbierto = true; }
   cerrarModal() { this.modalAbierto = false; }
   obtenerNombreArchivo(ruta: string): string { return ruta.split(/[/\\]/).pop() || ''; }
-
   recargarResenas() {
     this.http.get<any[]>(`/api/restaurantes/${this.restauranteId}/resenas`).subscribe({
       next: data => {
-        this.resenas = data;
+        // Reinicia el índice de cada reseña al recargar
+        this.resenas = data.map(r => ({ ...r, _indice: 0 }));
+
         const email = this.authService.getEmailUsuario();
-        this.resenaDelUsuario = data.find(r => r.autorEmail === email) || null;
+        this.resenaDelUsuario = this.resenas.find(r => r.autorEmail === email) || null;
         this.yaTieneResena = !!this.resenaDelUsuario;
       },
       error: err => {
@@ -102,6 +103,7 @@ export class RestaurantePerfilComponent implements OnInit {
       }
     });
   }
+
 
   esAutorDeResena(emailAutor: string): boolean {
     return this.authService.esAutorDeResena(emailAutor);

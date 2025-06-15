@@ -30,19 +30,12 @@
     <button type="button" class="carrusel-btn" (click)="retrocederCarrusel()">⟨</button>
 
     <div class="carrusel-vista">
-      <div class="img-preview-wrapper" *ngFor="let offset of [0,1,2]; let i = index">
-        <ng-container [ngSwitch]="vistaPrevia[(indiceInicio + offset) % vistaPrevia.length].tipo">
-          <img *ngSwitchCase="'imagen'"
-               [src]="vistaPrevia[(indiceInicio + offset) % vistaPrevia.length].src"
-               class="preview-img" />
-          <video *ngSwitchCase="'video'"
-                 [src]="vistaPrevia[(indiceInicio + offset) % vistaPrevia.length].src"
-                 class="preview-img"
-                 controls></video>
+      <div class="img-preview-wrapper" *ngFor="let preview of imagenesVisibles; let i = index">
+        <ng-container [ngSwitch]="preview.tipo">
+          <img *ngSwitchCase="'imagen'" [src]="preview.src" class="preview-img" />
+          <video *ngSwitchCase="'video'" [src]="preview.src" class="preview-img" controls></video>
         </ng-container>
-        <button type="button"
-                class="btn-eliminar-img"
-                (click)="eliminarImagen(i)">
+        <button type="button" class="btn-eliminar-img" (click)="eliminarImagen(i)">
           ✖
         </button>
       </div>

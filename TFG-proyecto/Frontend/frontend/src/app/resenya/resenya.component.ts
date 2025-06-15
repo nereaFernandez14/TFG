@@ -152,38 +152,43 @@ export class ResenyaComponent implements OnInit {
   }
 
   handleFileInput(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (!input.files) return;
+  const input = event.target as HTMLInputElement;
+  if (!input.files) return;
 
-    const tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg', 'video/mp4', 'video/webm', 'video/ogg'];
-    const errores: string[] = [];
+  const tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg', 'video/mp4', 'video/webm', 'video/ogg'];
+  const errores: string[] = [];
 
-    Array.from(input.files).forEach(file => {
-      const yaExiste = this.imagenes.some(existing =>
-        existing.name === file.name &&
-        existing.size === file.size &&
-        existing.lastModified === file.lastModified
-      );
-      if (yaExiste) {
-        errores.push(`⚠️ El archivo "${file.name}" ya fue añadido anteriormente.`);
-      } else if (tiposPermitidos.includes(file.type)) {
-        this.imagenes.push(file);
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          const tipo = file.type.startsWith('image/') ? 'imagen' : 'video';
-          this.vistaPrevia.push({ tipo, src: e.target.result });
-        };
-        reader.readAsDataURL(file);
-      } else {
-        errores.push(`❌ "${file.name}" no es un archivo válido.`);
-      }
-    });
+  Array.from(input.files).forEach(file => {
+    const yaExiste = this.imagenes.some(existing =>
+      existing.name === file.name &&
+      existing.size === file.size &&
+      existing.lastModified === file.lastModified
+    );
 
-    if (errores.length > 0) {
-      this.mostrarError = true;
-      this.mensajeError = errores.join('<br/>');
+    if (yaExiste) {
+      errores.push(`⚠️ El archivo "${file.name}" ya fue añadido anteriormente.`);
+      return; // ❗️Evita duplicación
     }
+
+    if (tiposPermitidos.includes(file.type)) {
+      this.imagenes.push(file);
+      
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        const tipo = file.type.startsWith('image/') ? 'imagen' : 'video';
+        this.vistaPrevia.push({ tipo, src: e.target.result });
+      };
+      reader.readAsDataURL(file);
+    } else {
+      errores.push(`❌ "${file.name}" no es un archivo válido.`);
+    }
+  });
+
+  if (errores.length > 0) {
+    this.mostrarError = true;
+    this.mensajeError = errores.join('<br/>');
   }
+}
 
   validarComentario() {
     const texto = this.resenyaForm.value.comentario.toLowerCase();
@@ -200,12 +205,18 @@ export class ResenyaComponent implements OnInit {
     this.indiceInicio = (this.indiceInicio - 1 + this.vistaPrevia.length) % this.vistaPrevia.length;
   }
 
-  eliminarImagen(index: number) {
-    const realIndex = (this.indiceInicio + index) % this.vistaPrevia.length;
+  eliminarImagen(indexRelativo: number) {
+    const realIndex = this.indiceInicio + indexRelativo;
     this.vistaPrevia.splice(realIndex, 1);
     this.imagenes.splice(realIndex, 1);
+
     if (this.indiceInicio >= this.vistaPrevia.length && this.indiceInicio > 0) {
       this.indiceInicio--;
     }
   }
+
+  get imagenesVisibles() {
+    return this.vistaPrevia.slice(this.indiceInicio, this.indiceInicio + this.cantidadVisible);
+  }
+
 }
