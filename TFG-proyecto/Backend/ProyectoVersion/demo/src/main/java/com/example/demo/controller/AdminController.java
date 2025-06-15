@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.ResenyaDenunciaDTO;
 import com.example.demo.dto.RestauranteUpdateRequest;
+import com.example.demo.dto.SolicitudModificacionDTO;
 import com.example.demo.entities.Resenya;
 import com.example.demo.entities.Restaurante;
 import com.example.demo.entities.SolicitudModificacion;
@@ -132,8 +133,14 @@ public class AdminController {
     }
 
     @GetMapping("/modificaciones")
-    public ResponseEntity<List<SolicitudModificacion>> obtenerSolicitudesModificacion() {
-        return ResponseEntity.ok(adminService.obtenerSolicitudesModificacion());
+    public ResponseEntity<List<SolicitudModificacionDTO>> obtenerSolicitudesModificacion() {
+        List<SolicitudModificacion> solicitudes = adminService.obtenerSolicitudesModificacion();
+
+        List<SolicitudModificacionDTO> dtos = solicitudes.stream()
+                .map(SolicitudModificacionDTO::new)
+                .toList();
+
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/modificaciones-usuarios")

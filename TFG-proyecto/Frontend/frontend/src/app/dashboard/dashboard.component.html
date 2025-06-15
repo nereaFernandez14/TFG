@@ -32,7 +32,7 @@
       <p>Haz clic aquí para editar tu menú</p>
     </a>
     <a class="card link-card" routerLink="/imagenes/modificar">
-      <h3><i class="fas fa-images"></i> Modificar Imágenes</h3>
+      <h3><i class="fas fa-images"></i> Modificar/Subir Imágenes</h3>
       <p>Gestiona las fotos del restaurante</p>
     </a>
     <button class="card link-card" (click)="abrirVentanaModificacion()">
@@ -46,21 +46,6 @@
     <button class="card danger-card" (click)="pedirBajaRestaurante()">
       <i class="fas fa-user-slash"></i> Solicitar baja del restaurante
     </button>
-  </div>
-
-  <!-- 🖼️ Carrusel de imágenes -->
-  <div class="carrusel-container" *ngIf="imagenes.length > 0">
-    <button type="button" class="carrusel-btn" (click)="retrocederCarrusel()" aria-label="Imagen anterior">&#x276E;</button>
-    <div class="carrusel-vista">
-      <div class="img-preview-wrapper">
-        <img
-          [src]="imagenes[indiceInicio]"
-          alt="Imagen del restaurante"
-          class="preview-img"
-        />
-      </div>
-    </div>
-    <button type="button" class="carrusel-btn" (click)="avanzarCarrusel()" aria-label="Imagen siguiente">&#x276F;</button>
   </div>
 </div>
 

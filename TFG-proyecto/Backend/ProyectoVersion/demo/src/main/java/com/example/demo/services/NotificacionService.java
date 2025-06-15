@@ -4,9 +4,11 @@ import com.example.demo.entities.Notificacion;
 import com.example.demo.entities.Restaurante;
 import com.example.demo.entities.SolicitudModificacion;
 import com.example.demo.entities.Usuario;
+import com.example.demo.enums.RolNombre;
 import com.example.demo.repositories.NotificacionRepository;
 import com.example.demo.repositories.RestauranteRepository;
 import com.example.demo.repositories.SolicitudModificacionRepository;
+import com.example.demo.repositories.UsuarioRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ public class NotificacionService {
     private final NotificacionRepository notificacionRepository;
     private final RestauranteRepository restauranteRepository;
     private final SolicitudModificacionRepository solicitudModificacionRepository;
+    private final UsuarioRepository usuarioRepository;
 
     // 🔔 Notificación dirigida a un restaurante específico
     public void crearParaRestaurante(Restaurante destino, String mensaje) {
@@ -51,6 +54,11 @@ public class NotificacionService {
         noti.setGeneradaPorRestaurante(generadoPor);
         noti.setVista(false);
         noti.setGestionada(false);
+
+        Usuario admin = usuarioRepository.findFirstByRol(RolNombre.ADMIN)
+                .orElseThrow(() -> new IllegalStateException("❌ No hay un admin configurado"));
+
+        noti.setDestinatarioUsuario(admin); // ✅ Agregado
         notificacionRepository.save(noti);
     }
 
@@ -62,6 +70,13 @@ public class NotificacionService {
         noti.setGeneradaPorUsuario(generadoPor);
         noti.setVista(false);
         noti.setGestionada(false);
+
+        // ✅ Establecer destinatario explícito
+        Usuario admin = usuarioRepository.findFirstByRol(RolNombre.ADMIN)
+                .orElseThrow(() -> new IllegalStateException("❌ No hay un admin configurado"));
+
+        noti.setDestinatarioUsuario(admin);
+
         notificacionRepository.save(noti);
     }
 
@@ -72,6 +87,12 @@ public class NotificacionService {
         noti.setParaAdmin(true);
         noti.setVista(false);
         noti.setGestionada(false);
+
+        Usuario admin = usuarioRepository.findFirstByRol(RolNombre.ADMIN)
+                .orElseThrow(() -> new IllegalStateException("❌ No hay un admin configurado"));
+
+        noti.setDestinatarioUsuario(admin);
+
         notificacionRepository.save(noti);
     }
 
@@ -83,7 +104,6 @@ public class NotificacionService {
         notificacionRepository.save(n);
     }
 
-    // 🔍 Todas las no vistas para un restaurante
     public List<Notificacion> obtenerNoVistas(Restaurante restaurante) {
         return notificacionRepository.findByDestinatarioRestauranteAndVistaFalse(restaurante);
     }
@@ -92,12 +112,10 @@ public class NotificacionService {
         return notificacionRepository.findByDestinatarioUsuarioAndVistaFalse(usuario);
     }
 
-    // 🔍 Todas las no vistas para el admin
     public List<Notificacion> obtenerTodasParaAdminNoVistas() {
         return notificacionRepository.findByParaAdminTrueAndVistaFalse();
     }
 
-    // 🛠️ Solicitud de modificación + notificación al admin (restaurante)
     public void crearSolicitudConNotificacion(Restaurante restaurante, String campo, String nuevoValor) {
         boolean yaExiste = solicitudModificacionRepository
                 .existsByRestauranteAndCampoAndNuevoValor(restaurante, campo, nuevoValor);
@@ -117,7 +135,6 @@ public class NotificacionService {
         crearParaAdmin(msg, restaurante);
     }
 
-    // Alias
     public void crear(Restaurante restaurante, String mensaje) {
         crearParaRestaurante(restaurante, mensaje);
     }

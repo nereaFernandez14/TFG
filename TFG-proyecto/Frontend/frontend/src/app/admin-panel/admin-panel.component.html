@@ -41,27 +41,29 @@
 
   <!-- 🏪 BAJAS RESTAURANTES -->
   <section class="accordion">
-    <button class="accordion-toggle" (click)="toggleSeccion('restaurantes')">
-      <i class="fas fa-store-alt-slash"></i> Bajas de Restaurantes
-      <i class="fas" [ngClass]="{ 'fa-chevron-down': !seccionesAbiertas.restaurantes, 'fa-chevron-up': seccionesAbiertas.restaurantes }"></i>
-    </button>
-    <div class="accordion-content" [class.open]="seccionesAbiertas.restaurantes">
-      <p *ngIf="bajasRestaurantes.length === 0" class="empty-message">
-        <i class="fas fa-inbox"></i> No hay peticiones.
-      </p>
+  <button class="accordion-toggle" (click)="toggleSeccion('restaurantes')">
+    <i class="fas fa-store-alt-slash"></i> Bajas de Restaurantes
+    <i class="fas" [ngClass]="{ 'fa-chevron-down': !seccionesAbiertas.restaurantes, 'fa-chevron-up': seccionesAbiertas.restaurantes }"></i>
+  </button>
+  <div class="accordion-content" [class.open]="seccionesAbiertas.restaurantes">
+   <p *ngIf="bajasRestaurantes.length === 0" class="empty-message">
+  <i class="fas fa-inbox"></i> No hay peticiones.
+</p>
 
-      <div *ngFor="let r of bajasRestaurantes" class="admin-card minimal">
-        <h3><i class="fas fa-utensils"></i> Restaurante en revisión</h3>
-        <p><strong><i class="fas fa-store"></i> Nombre:</strong> {{ r?.nombre }}</p>
-        <p><strong><i class="fas fa-envelope"></i> Email:</strong> {{ r?.email }}</p>
-        <div class="actions">
-          <button class="btn danger" (click)="eliminarRestaurante(r.id)">
-            <i class="fas fa-trash-alt"></i> Eliminar
-          </button>
-        </div>
-      </div>
+<!-- 🔁 Esto faltaba -->
+<div *ngFor="let r of bajasRestaurantes" class="admin-card minimal">
+  <h3><i class="fas fa-utensils"></i> Restaurante en revisión</h3>
+  <p><strong><i class="fas fa-store"></i> Nombre:</strong> {{ r.nombre }}</p>
+  <p><strong><i class="fas fa-envelope"></i> Email:</strong> {{ r.email }}</p>
+  <div class="actions">
+    <button class="btn danger" (click)="eliminarRestaurante(r.id)">
+      <i class="fas fa-trash-alt"></i> Eliminar
+    </button>
+  </div>
+</div>
     </div>
-  </section>
+</section>
+
 
   <!-- ✏️ MODIFICAR DATOS -->
   <section class="accordion">
@@ -74,34 +76,36 @@
         <i class="fas fa-inbox"></i> No hay solicitudes de modificación.
       </p>
 
-      <div *ngFor="let m of modificaciones" class="admin-card minimal">
-        <h3><i class="fas fa-edit"></i> Modificar restaurante</h3>
-        <p><strong><i class="fas fa-store"></i> Restaurante:</strong> {{ m.restaurante?.nombre }}</p>
-        <p><strong><i class="fas fa-envelope"></i> Email:</strong> {{ m.restaurante?.email }}</p>
-        <p><strong><i class="fas fa-keyboard"></i> Campo solicitado:</strong> {{ m.campo }}</p>
-        <p><strong><i class="fas fa-sync-alt"></i> Nuevo valor:</strong> {{ m.nuevoValor }}</p>
+      <ng-container *ngFor="let m of modificaciones">
+  <div class="admin-card minimal">
+    <h3><i class="fas fa-edit"></i> Modificar restaurante</h3>
+    <p><strong><i class="fas fa-store"></i> Restaurante:</strong> {{ m.nombreRestaurante }}</p>
+    <p><strong><i class="fas fa-keyboard"></i> Campo solicitado:</strong> {{ m.campo }}</p>
+    <p><strong><i class="fas fa-sync-alt"></i> Nuevo valor:</strong> {{ m.nuevoValor }}</p>
 
-        <div class="modificacion-campo">
-          <label><i class="fas fa-check-double"></i> Confirmar campo:</label>
-          <select [(ngModel)]="campoSeleccionado[m.restaurante.id]">
-            <option value="">-- Selecciona --</option>
-            <option *ngFor="let campo of camposEditables" [value]="campo.value">
-              {{ campo.label }}
-            </option>
-          </select>
+    <div class="modificacion-campo">
+      <label><i class="fas fa-check-double"></i> Confirmar campo:</label>
+      <select [(ngModel)]="campoSeleccionado[m.restauranteId]">
+        <option value="">-- Selecciona --</option>
+        <option *ngFor="let campo of camposEditables" [value]="campo.value">
+          {{ campo.label }}
+        </option>
+      </select>
 
-          <input
-            *ngIf="campoSeleccionado[m.restaurante.id]"
-            [(ngModel)]="nuevoValor[m.restaurante.id]"
-            type="text"
-            placeholder="Nuevo valor confirmado"
-          />
+      <input
+        *ngIf="campoSeleccionado[m.restauranteId]"
+        [(ngModel)]="nuevoValor[m.restauranteId]"
+        type="text"
+        placeholder="Nuevo valor confirmado"
+      />
 
-          <button class="btn secondary" (click)="actualizarCampoRestaurante(m.restaurante.id)">
-            <i class="fas fa-edit"></i> Modificar
-          </button>
-        </div>
-      </div>
+      <button class="btn secondary" (click)="actualizarCampoRestaurante(m.id, m.restauranteId)">
+        <i class="fas fa-edit"></i> Modificar
+      </button>
+    </div>
+  </div>
+</ng-container>
+
     </div>
   </section>
 
@@ -118,13 +122,13 @@
 
       <div *ngFor="let m of modificacionesUsuario" class="admin-card minimal">
         <h3><i class="fas fa-user-edit"></i> Solicitud de modificación</h3>
-        <p><strong><i class="fas fa-user"></i> Usuario:</strong> {{ m.usuario.nombre }} {{ m.usuario.apellidos }}</p>
-        <p><strong><i class="fas fa-envelope"></i> Email:</strong> {{ m.usuario.email }}</p>
+        <p><strong><i class="fas fa-user"></i> Usuario:</strong> {{ m.usuario?.nombre }} {{ m.usuario?.apellidos }}</p>
+        <p><strong><i class="fas fa-envelope"></i> Email:</strong> {{ m.usuario?.email }}</p>
         <p><strong><i class="fas fa-keyboard"></i> Campo solicitado:</strong> {{ m.campo }}</p>
         <p><strong><i class="fas fa-sync-alt"></i> Nuevo valor:</strong> {{ m.nuevoValor }}</p>
 
         <div class="actions">
-          <button class="btn secondary" (click)="modificarUsuario(m.id, m.usuario.id, m.campo, m.nuevoValor)">
+          <button class="btn secondary" (click)="modificarUsuario(m.id, m.usuario?.id, m.campo, m.nuevoValor)">
             <i class="fas fa-edit"></i> Modificar
           </button>
         </div>
@@ -146,7 +150,7 @@
       <div *ngFor="let u of bajasUsuarios" class="admin-card minimal">
         <h3><i class="fas fa-user-clock"></i> Usuario en revisión</h3>
         <p><strong><i class="fas fa-user"></i> Nombre:</strong> {{ u?.nombre }} {{ u?.apellidos }}</p>
-        <p><strong><i class="fas fa-envelope"></i> Email:</strong> {{ u.email }}</p>
+        <p><strong><i class="fas fa-envelope"></i> Email:</strong> {{ u?.email }}</p>
         <div class="actions">
           <button class="btn danger" (click)="eliminarUsuario(u.id)">
             <i class="fas fa-user-times"></i> Eliminar Usuario

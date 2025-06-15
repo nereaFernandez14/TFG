@@ -29,9 +29,6 @@ export class DashboardComponent implements OnInit {
 
   notificaciones: { id: number, mensaje: string }[] = [];
 
-  imagenes: string[] = [];
-  indiceInicio: number = 0;
-
   readonly backendUrl = 'https://localhost:8443';
 
   camposDisponibles = [
@@ -62,7 +59,6 @@ export class DashboardComponent implements OnInit {
       this.dashboardService.obtenerResumen(restaurante.id).subscribe({
         next: (data) => {
           this.datos = data;
-          this.cargarImagenes(data.id); // ✅ Usamos el ID del restaurante para cargar las imágenes
         },
         error: (err) => console.error('❌ Error cargando resumen dashboard', err)
       });
@@ -73,17 +69,6 @@ export class DashboardComponent implements OnInit {
           error: () => console.warn('ℹ️ No hay notificaciones nuevas')
         });
     }
-  }
-
-  cargarImagenes(idRestaurante: number) {
-    this.http.get<any[]>(`${this.backendUrl}/restaurantes/${idRestaurante}/imagenes`)
-      .subscribe({
-        next: (lista) => {
-          this.imagenes = lista.map(img => `${this.backendUrl}/restaurantes/imagenes/${img.id}`); // ✅ URL BLOB
-          this.indiceInicio = 0;
-        },
-        error: (err) => console.error('❌ Error cargando imágenes', err)
-      });
   }
 
   obtenerUrlImagen(nombreArchivo: string): string {
@@ -218,15 +203,5 @@ export class DashboardComponent implements OnInit {
         this.botonDeshabilitado = false;
       }
     });
-  }
-
-  avanzarCarrusel() {
-    if (this.imagenes.length === 0) return;
-    this.indiceInicio = (this.indiceInicio + 1) % this.imagenes.length;
-  }
-
-  retrocederCarrusel() {
-    if (this.imagenes.length === 0) return;
-    this.indiceInicio = (this.indiceInicio - 1 + this.imagenes.length) % this.imagenes.length;
   }
 }

@@ -56,17 +56,24 @@ public class RestauranteController {
     }
 
     @GetMapping("/{id}")
-    public Restaurante getRestauranteById(@PathVariable Long id) {
-        return restauranteService.obtenerYIncrementarVisitas(id);
+    public ResponseEntity<RestauranteDTO> getRestauranteById(@PathVariable Long id) {
+        Restaurante restaurante = restauranteService.obtenerYIncrementarVisitas(id);
+        if (restaurante == null) {
+            return ResponseEntity.notFound().build();
+        }
+        RestauranteDTO dto = new RestauranteDTO(restaurante);
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/mio")
-    public ResponseEntity<Restaurante> getRestauranteByUsuario(@RequestParam Long idUsuario) {
+    public ResponseEntity<RestauranteDTO> getRestauranteByUsuario(@RequestParam Long idUsuario) {
         Restaurante restaurante = restauranteService.obtenerRestaurantePorUsuario(idUsuario);
         if (restaurante == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(restaurante);
+        List<ImagenRestaurante> imagenes = imagenRestauranteRepository.findByRestauranteId(restaurante.getId());
+        RestauranteDTO dto = new RestauranteDTO(restaurante, imagenes);
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/destacados")
@@ -106,8 +113,37 @@ public class RestauranteController {
         if (restaurante == null) {
             return ResponseEntity.notFound().build();
         }
-        RestauranteDTO dto = new RestauranteDTO(restaurante);
+        List<ImagenRestaurante> imagenes = imagenRestauranteRepository.findByRestauranteId(restaurante.getId());
+        RestauranteDTO dto = new RestauranteDTO(restaurante, imagenes);
         return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/usuario/{idUsuario}/imagenes")
+    public ResponseEntity<List<ImagenRestauranteResponse>> obtenerImagenesPorUsuario(@PathVariable Long idUsuario) {
+        Restaurante restaurante = restauranteService.obtenerRestaurantePorUsuario(idUsuario);
+        if (restaurante == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        List<ImagenRestaurante> imagenes = imagenRestauranteRepository.findByRestauranteId(restaurante.getId());
+        List<ImagenRestauranteResponse> response = imagenes.stream()
+                .map(ImagenRestauranteResponse::new)
+                .toList();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}/imagenes")
+    public ResponseEntity<List<ImagenRestauranteResponse>> obtenerImagenesPorIdRestaurante(@PathVariable Long id) {
+        Restaurante restaurante = restauranteService.obtenerRestaurantePorId(id);
+        if (restaurante == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        List<ImagenRestaurante> imagenes = imagenRestauranteRepository.findByRestauranteId(restaurante.getId());
+        List<ImagenRestauranteResponse> response = imagenes.stream()
+                .map(ImagenRestauranteResponse::new)
+                .toList();
+        return ResponseEntity.ok(response);
     }
 
     @PreAuthorize("hasRole('RESTAURANTE')")
@@ -150,7 +186,7 @@ public class RestauranteController {
             }
 
             String nombreArchivoSanitizado = restaurante.getNombre()
-                    .replaceAll("[^a-zA-Z0-9\\-_]", "_") + "_" + archivo.getOriginalFilename();
+                    .replaceAll("[^a-zA-Z0-9\\-]", "") + "_" + archivo.getOriginalFilename();
 
             String basePath = System.getProperty("user.dir") + "/uploads/menus";
             Path rutaDestino = Paths.get(basePath, nombreArchivoSanitizado);
@@ -197,10 +233,10 @@ public class RestauranteController {
         return ResponseEntity.ok(restaurante.getResenyas());
     }
 
+    @PostMapping("/{idRestaurante}/solicitar-baja")
     @PreAuthorize("hasRole('RESTAURANTE')")
-    @PostMapping("/{idUsuario}/solicitar-baja")
-    public ResponseEntity<?> solicitarBaja(@PathVariable Long idUsuario) {
-        Restaurante restaurante = restauranteService.obtenerRestaurantePorUsuario(idUsuario);
+    public ResponseEntity<?> solicitarBaja(@PathVariable Long idRestaurante) {
+        Restaurante restaurante = restauranteService.obtenerRestaurantePorId(idRestaurante);
         if (restaurante == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Restaurante no encontrado");
 
@@ -231,35 +267,23 @@ public class RestauranteController {
         return ResponseEntity.ok(Map.of("mensaje", "Modificación enviada y en espera de revisión"));
     }
 
-    @GetMapping("/{id}/imagenes")
-    public ResponseEntity<List<ImagenRestauranteResponse>> obtenerImagenesBlob(@PathVariable Long id) {
-        List<ImagenRestaurante> imagenes = imagenRestauranteRepository.findByRestauranteId(id);
-        List<ImagenRestauranteResponse> response = imagenes.stream()
-                .map(ImagenRestauranteResponse::new)
-                .toList();
-        return ResponseEntity.ok(response);
-    }
-
     @PreAuthorize("hasRole('RESTAURANTE')")
     @PostMapping("/{id}/imagenes")
     public ResponseEntity<?> subirImagenes(@PathVariable Long id,
             @RequestParam("imagenes") List<MultipartFile> nuevasImagenes) {
+
+        // 🟢 id = id del USUARIO (NO del restaurante)
         Restaurante restaurante = restauranteService.obtenerRestaurantePorUsuario(id);
         if (restaurante == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Restaurante no encontrado"));
         }
 
-        // 🔥 Eliminar imágenes anteriores (de la base de datos BLOB)
-        List<ImagenRestaurante> existentes = imagenRestauranteRepository.findByRestauranteId(id);
-        imagenRestauranteRepository.deleteAll(existentes);
-        System.out.println("🧹 Imágenes antiguas eliminadas: " + existentes.size());
-
         try {
             for (MultipartFile imagen : nuevasImagenes) {
-                String nombre = System.currentTimeMillis() + "_" + imagen.getOriginalFilename().replaceAll("\\s+", "_");
+                String nombre = System.currentTimeMillis() + "_" + imagen.getOriginalFilename().replaceAll("\\s+", "");
 
                 ImagenRestaurante entidad = new ImagenRestaurante();
-                entidad.setRestaurante(restaurante);
+                entidad.setRestaurante(restaurante); // ✔️ Asociar correctamente
                 entidad.setNombreArchivo(nombre);
                 entidad.setTipo(imagen.getContentType());
                 entidad.setDatos(imagen.getBytes());
@@ -267,7 +291,7 @@ public class RestauranteController {
                 imagenRestauranteRepository.save(entidad);
             }
 
-            return ResponseEntity.ok(Map.of("mensaje", "✅ Imágenes BLOB actualizadas correctamente"));
+            return ResponseEntity.ok(Map.of("mensaje", "✅ Imágenes añadidas correctamente"));
 
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -275,32 +299,18 @@ public class RestauranteController {
         }
     }
 
-    @DeleteMapping("/{id}/imagenes/{nombreImagen}")
-    public ResponseEntity<?> eliminarImagen(@PathVariable Long id, @PathVariable String nombreImagen) {
-        Restaurante restaurante = restauranteService.obtenerRestaurantePorId(id);
-        if (restaurante == null)
-            return ResponseEntity.notFound().build();
+    @PreAuthorize("hasRole('RESTAURANTE')")
+    @DeleteMapping("/imagenes/{idImagen}")
+    public ResponseEntity<?> eliminarImagen(@PathVariable Long idImagen) {
+        Optional<ImagenRestaurante> imagenOpt = imagenRestauranteRepository.findById(idImagen);
 
-        Path ruta = Paths.get(System.getProperty("user.dir"), "uploads", "restaurantes", String.valueOf(id),
-                nombreImagen);
-
-        try {
-            if (Files.exists(ruta))
-                Files.delete(ruta);
-
-            imagenRestauranteRepository
-                    .findByRestauranteId(id)
-                    .stream()
-                    .filter(img -> img.getNombreArchivo().equals(nombreImagen))
-                    .findFirst()
-                    .ifPresent(imagenRestauranteRepository::delete);
-
-            return ResponseEntity.ok(Map.of("mensaje", "✅ Imagen eliminada"));
-
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "❌ Error al eliminar la imagen: " + e.getMessage()));
+        if (imagenOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Imagen no encontrada");
         }
+
+        imagenRestauranteRepository.deleteById(idImagen);
+
+        return ResponseEntity.ok(Map.of("mensaje", "✅ Imagen eliminada correctamente"));
     }
 
     @GetMapping("/uploads/{id}/{nombre:.+}")

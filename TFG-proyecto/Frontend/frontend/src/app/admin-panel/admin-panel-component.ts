@@ -72,26 +72,41 @@ export class AdminPanelComponent implements OnInit {
   }
 
   cargarPeticionesBaja() {
-    this.http.get<any[]>('/api/admin/bajas-restaurantes').subscribe(data => {
-      this.bajasRestaurantes = data;
-    });
 
-    this.http.get<any[]>('/api/admin/bajas-usuarios').subscribe(data => {
-      this.bajasUsuarios = data;
-    });
+  this.http.get<any[]>('/api/admin/bajas-restaurantes').subscribe(data => {
+    console.log("🧪 Restaurantes para baja:", data);
+    this.http.get<any[]>('/api/admin/bajas-restaurantes').subscribe({
+  next: data => {
+    console.log("🍳 Restaurantes para baja:", data);
+    this.bajasRestaurantes = data;
+  },
+  error: err => {
+    console.error("❌ ERROR al cargar bajas restaurantes", err);
   }
+});
+  // Asegúrate que esto imprime algo
+    this.bajasRestaurantes = Array.isArray(data) ? data : [];
+  });
+}
 
   cargarModificaciones() {
-    this.http.get<any[]>('/api/admin/modificaciones').subscribe(data => {
-      this.modificaciones = data;
+  this.http.get<any[]>('/api/admin/modificaciones').subscribe(data => {
+    this.modificaciones = data;
 
-      for (let solicitud of data) {
-        const id = solicitud.restaurante.id;
-        this.campoSeleccionado[id] = solicitud.campo;
-        this.nuevoValor[id] = solicitud.nuevoValor;
+    for (let solicitud of data) {
+      const restauranteId = solicitud.restauranteId || (solicitud.restaurante && solicitud.restaurante.id);
+
+      if (!restauranteId) {
+        console.warn('⚠️ Solicitud sin restaurante válido:', solicitud);
+        continue; // Saltamos si no hay restaurante válido
       }
-    });
-  }
+
+      this.campoSeleccionado[restauranteId] = solicitud.campo;
+      this.nuevoValor[restauranteId] = solicitud.nuevoValor;
+    }
+  });
+}
+
 
   cargarModificacionesUsuarios() {
     this.http.get<any[]>('/api/admin/modificaciones-usuarios').subscribe(data => {
@@ -108,7 +123,7 @@ export class AdminPanelComponent implements OnInit {
   cargarNotificacionesAdmin() {
     this.http.get<any[]>('/api/notificaciones/admin').subscribe({
       next: (data) => this.notificaciones = data,
-      error: () => console.warn("ℹ️ No hay notificaciones para el administrador")
+      error: () => console.warn('ℹ️ No hay notificaciones para el administrador')
     });
   }
 
@@ -149,9 +164,9 @@ export class AdminPanelComponent implements OnInit {
     });
   }
 
-  actualizarCampoRestaurante(id: number) {
-    const campo = this.campoSeleccionado[id];
-    const valor = this.nuevoValor[id];
+  actualizarCampoRestaurante(solicitudId: number, restauranteId: number) {
+    const campo = this.campoSeleccionado[restauranteId];
+    const valor = this.nuevoValor[restauranteId];
 
     if (!campo || valor === undefined || valor === '') {
       alert('⚠️ Debes seleccionar un campo y escribir un valor válido.');
@@ -167,14 +182,22 @@ export class AdminPanelComponent implements OnInit {
       payload[campo] = valor;
     }
 
-    this.http.put(`/api/admin/restaurantes/${id}`, payload).subscribe({
+    this.http.put(`/api/admin/restaurantes/${restauranteId}`, payload).subscribe({
       next: () => {
-        alert('✅ Restaurante actualizado correctamente');
-        this.modificaciones = this.eliminarItemPorId(this.modificaciones, id);
-        this.campoSeleccionado[id] = '';
-        this.nuevoValor[id] = '';
+        this.http.post(`/api/admin/modificaciones/${solicitudId}/aceptar`, {}).subscribe({
+          next: () => {
+            alert('✅ Restaurante actualizado y solicitud aceptada');
+            this.modificaciones = this.eliminarItemPorId(this.modificaciones, solicitudId);
+            this.campoSeleccionado[restauranteId] = '';
+            this.nuevoValor[restauranteId] = '';
+          },
+          error: err => {
+            console.error('❌ Error al aceptar solicitud', err);
+            alert('⚠️ Error al aceptar solicitud');
+          }
+        });
       },
-      error: (err) => {
+      error: err => {
         console.error('❌ Error al actualizar restaurante', err);
         alert('⚠️ Error al actualizar el restaurante');
       }

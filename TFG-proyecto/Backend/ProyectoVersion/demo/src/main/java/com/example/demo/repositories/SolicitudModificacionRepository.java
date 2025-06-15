@@ -15,4 +15,7 @@ public interface SolicitudModificacionRepository extends JpaRepository<Solicitud
     List<SolicitudModificacion> findByGestionadaFalse();
 
     boolean existsByRestauranteAndCampoAndNuevoValor(Restaurante restaurante, String campo, String nuevoValor);
+
+    List<SolicitudModificacion> findByRestauranteIdAndGestionadaFalse(Long restauranteId);
+
 }
