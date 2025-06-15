@@ -20,9 +20,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     List<Usuario> findByRol(RolNombre rol);
 
     List<Usuario> findBySolicitaBajaTrue();
+    
     Optional<Usuario> findFirstByRol(RolNombre admin); // o enum si usas `RolNombre.ADMIN`
-
-
-    Optional<Usuario> findFirstByRol(RolNombre admin); // o enum si usas RolNombre.ADMIN
 
 }

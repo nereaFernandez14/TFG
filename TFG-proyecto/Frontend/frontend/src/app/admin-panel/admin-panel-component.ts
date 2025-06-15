@@ -72,40 +72,45 @@ export class AdminPanelComponent implements OnInit {
   }
 
   cargarPeticionesBaja() {
+    // 🔽 1. Restaurantes que solicitan baja
+    this.http.get<any[]>('/api/admin/bajas-restaurantes', { withCredentials: true }).subscribe({
+        next: data => {
+          this.bajasRestaurantes = Array.isArray(data) ? data : [];
+        },
+        error: err => {
+          console.error("❌ ERROR al cargar bajas restaurantes", err);
+        }
+      });
 
-  this.http.get<any[]>('/api/admin/bajas-restaurantes').subscribe(data => {
-    console.log("🧪 Restaurantes para baja:", data);
-    this.http.get<any[]>('/api/admin/bajas-restaurantes').subscribe({
-  next: data => {
-    console.log("🍳 Restaurantes para baja:", data);
-    this.bajasRestaurantes = data;
-  },
-  error: err => {
-    console.error("❌ ERROR al cargar bajas restaurantes", err);
-  }
-});
-  // Asegúrate que esto imprime algo
-    this.bajasRestaurantes = Array.isArray(data) ? data : [];
-  });
-}
 
-  cargarModificaciones() {
-  this.http.get<any[]>('/api/admin/modificaciones').subscribe(data => {
-    this.modificaciones = data;
-
-    for (let solicitud of data) {
-      const restauranteId = solicitud.restauranteId || (solicitud.restaurante && solicitud.restaurante.id);
-
-      if (!restauranteId) {
-        console.warn('⚠️ Solicitud sin restaurante válido:', solicitud);
-        continue; // Saltamos si no hay restaurante válido
+    // 🔽 2. Usuarios que solicitan baja
+    this.http.get<any[]>('/api/admin/bajas-usuarios').subscribe({
+      next: data => {
+        console.log("👤 Usuarios para baja:", data);
+        this.bajasUsuarios = Array.isArray(data) ? data : [];
+      },
+      error: err => {
+        console.error("❌ ERROR al cargar bajas usuarios", err);
       }
+    });
+  }
+  cargarModificaciones() {
+    this.http.get<any[]>('/api/admin/modificaciones').subscribe(data => {
+      this.modificaciones = data;
 
-      this.campoSeleccionado[restauranteId] = solicitud.campo;
-      this.nuevoValor[restauranteId] = solicitud.nuevoValor;
-    }
-  });
-}
+      for (let solicitud of data) {
+        const restauranteId = solicitud.restauranteId || (solicitud.restaurante && solicitud.restaurante.id);
+
+        if (!restauranteId) {
+          console.warn('⚠️ Solicitud sin restaurante válido:', solicitud);
+          continue; // Saltamos si no hay restaurante válido
+        }
+
+        this.campoSeleccionado[restauranteId] = solicitud.campo;
+        this.nuevoValor[restauranteId] = solicitud.nuevoValor;
+      }
+    });
+  }
 
 
   cargarModificacionesUsuarios() {

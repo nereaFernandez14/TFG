@@ -112,8 +112,10 @@ export class RestauranteComponent implements OnInit {
   validarDireccionEspRegex(control: AbstractControl): ValidationErrors | null {
     const direccion = control.value || '';
     if (!direccion) return null;
-    const regexDireccion = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+ \d+(,? piso \d+)?(,? [A-Za-zÁÉÍÓÚáéíóúÑñ\s]+){2,},? \d{5}$/;
-    return regexDireccion.test(direccion) ? null : { direccionInvalida: true };
+
+    const regexDireccion = /^[\wÁÉÍÓÚáéíóúÑñ\s\.\-ºª]+ \d+[^\n,]*, [\wÁÉÍÓÚáéíóúÑñ\s]+, \d{5}$/;
+
+    return regexDireccion.test(direccion.trim()) ? null : { direccionInvalida: true };
   }
 
   // Teléfono móvil o fijo España con regex
