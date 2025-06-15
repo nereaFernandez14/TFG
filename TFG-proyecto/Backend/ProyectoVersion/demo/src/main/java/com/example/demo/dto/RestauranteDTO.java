@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import com.example.demo.entities.ImagenRestaurante;
 import com.example.demo.entities.Resenya;
 import com.example.demo.entities.Restaurante;
 import com.example.demo.enums.Barrio;
@@ -38,27 +39,21 @@ public class RestauranteDTO {
     private String telefono;
 
     private String tipoCocinaPersonalizado;
-
-    private String descripcion; // <-- Añadido aquí
+    private String descripcion;
 
     private double mediaPuntuacion;
-
     private List<RestriccionDietetica> restricciones;
-
     private List<String> comentarios;
 
     private String rutaMenu;
 
-    // ✅ NUEVOS CAMPOS PARA DASHBOARD
     private int visitas;
     private int cantidadComentarios;
 
-    // 🔄 Para mostrar "ITALIANA" o "Peruana (otro)"
-    public String getTipoCocinaFinal() {
-        if (tipoCocina == TipoCocina.OTRO && tipoCocinaPersonalizado != null && !tipoCocinaPersonalizado.isBlank()) {
-            return tipoCocinaPersonalizado;
-        }
-        return tipoCocina.name();
+    // ✅ NUEVO: imágenes en base a BLOB
+    private List<ImagenRestauranteResponse> imagenes;
+
+    public RestauranteDTO() {
     }
 
     public RestauranteDTO(Restaurante restaurante) {
@@ -74,18 +69,32 @@ public class RestauranteDTO {
         this.descripcion = restaurante.getDescripcion();
         this.mediaPuntuacion = restaurante.getMediaPuntuacion();
         this.restricciones = restaurante.getRestriccionesDieteticas();
+        this.rutaMenu = restaurante.getRutaMenu();
 
-        // Comentarios: mostramos los primeros 5
         this.comentarios = restaurante.getResenyas().stream()
                 .map(Resenya::getContenido)
                 .limit(5)
                 .collect(Collectors.toList());
 
         this.visitas = restaurante.getVisitas();
-        this.cantidadComentarios = restaurante.getResenyas() != null ? restaurante.getResenyas().size() : 0;
-        this.rutaMenu = restaurante.getRutaMenu();
+        this.cantidadComentarios = restaurante.getResenyas() != null
+                ? restaurante.getResenyas().size()
+                : 0;
     }
 
-    public RestauranteDTO() {
+    // ✅ Constructor extendido que incluye imágenes
+    public RestauranteDTO(Restaurante restaurante, List<ImagenRestaurante> imagenes) {
+        this(restaurante); // llama al constructor anterior
+
+        this.imagenes = imagenes.stream()
+                .map(ImagenRestauranteResponse::new)
+                .collect(Collectors.toList());
+    }
+
+    public String getTipoCocinaFinal() {
+        if (tipoCocina == TipoCocina.OTRO && tipoCocinaPersonalizado != null && !tipoCocinaPersonalizado.isBlank()) {
+            return tipoCocinaPersonalizado;
+        }
+        return tipoCocina.name();
     }
 }

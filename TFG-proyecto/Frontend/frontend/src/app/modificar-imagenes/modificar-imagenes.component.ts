@@ -3,7 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { ImagenEventService } from '../services/imagen-event.service'; // <-- Importa el servicio
+
+interface ImagenRestaurante {
+  id: number;
+  nombreArchivo: string;
+  tipo: string;
+}
 
 @Component({
   selector: 'app-modificar-imagenes',
@@ -13,51 +18,41 @@ import { ImagenEventService } from '../services/imagen-event.service'; // <-- Im
   styleUrls: ['./modificar-imagenes.component.css']
 })
 export class ModificarImagenesComponent implements OnInit {
-  imagenesActuales: string[] = [];
-  nuevasImagenes: File[] = [];
-  nombresNuevasImagenes: string[] = [];
-  nuevasImagenesPreview: string[] = [];
   restauranteId!: number;
-  imagenesUrl: string[] = [];
-  botonDeshabilitado: boolean = true;
+  imagenesActuales: ImagenRestaurante[] = [];
 
-  constructor(
-    private http: HttpClient,
-    private router: Router,
-    private imagenEventService: ImagenEventService // <-- Inyección
-  ) {}
+  nuevasImagenes: File[] = [];
+  nuevasImagenesPreview: string[] = [];
+  nombresNuevasImagenes: string[] = [];
+
+  constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
-    const usuarioStr = localStorage.getItem('usuario');
-    if (usuarioStr) {
-      const usuario = JSON.parse(usuarioStr);
-      this.restauranteId = usuario.id;
+    const usuario = localStorage.getItem('usuario');
+    if (usuario) {
+      const parsed = JSON.parse(usuario);
+      this.restauranteId = parsed.id;
       this.cargarImagenes();
     }
   }
 
   cargarImagenes(): void {
-    this.http.get<string[]>(`/api/restaurantes/${this.restauranteId}/imagenes`).subscribe({
-      next: (nombres) => {
-        this.imagenesActuales = nombres;
-        const backend = 'https://localhost:8443';
-        this.imagenesUrl = nombres.map(n =>
-          `${backend}/restaurantes/uploads/${this.restauranteId}/${n}`
-        );
+    this.http.get<ImagenRestaurante[]>(`/api/restaurantes/usuario/${this.restauranteId}/imagenes`)
+.subscribe({
+      next: (imagenes) => {
+        this.imagenesActuales = imagenes;
       },
-      error: (err) => console.error('❌ Error al cargar imágenes actuales', err)
+      error: (err) => console.error('❌ Error al cargar imágenes', err)
     });
   }
 
-  eliminarImagen(nombre: string): void {
-    if (!confirm(`¿Eliminar imagen "${nombre}"?`)) return;
+  eliminarImagen(id: number): void {
+    if (!confirm('¿Seguro que quieres eliminar esta imagen?')) return;
 
-    this.http.delete(`/api/restaurantes/${this.restauranteId}/imagenes/${nombre}`).subscribe({
+    this.http.delete(`/api/restaurantes/imagenes/${id}`).subscribe({
       next: () => {
+        this.imagenesActuales = this.imagenesActuales.filter(img => img.id !== id);
         alert('✅ Imagen eliminada correctamente');
-        this.imagenesActuales = this.imagenesActuales.filter(img => img !== nombre);
-        this.imagenesUrl = this.imagenesUrl.filter(url => !url.includes(nombre));
-        this.imagenEventService.emitirActualizacion(); // <--- Emitir evento
       },
       error: (err) => {
         console.error('❌ Error al eliminar imagen', err);
@@ -70,33 +65,9 @@ export class ModificarImagenesComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files) {
       const archivos = Array.from(input.files);
-      const tiposValidos = ['image/', 'video/'];
-      const nuevasValidas: File[] = [];
-
-      for (const archivo of archivos) {
-        const tipo = archivo.type;
-        const esValido = tiposValidos.some(prefix => tipo.startsWith(prefix));
-
-        if (!esValido) {
-          alert(`❌ Archivo "${archivo.name}" no es una imagen ni un vídeo válido`);
-          continue;
-        }
-
-        const yaExisteEnNuevas = this.nuevasImagenes.some(img => img.name === archivo.name && img.size === archivo.size);
-        const yaExisteEnActuales = this.imagenesActuales.some(imgNombre => imgNombre === archivo.name);
-
-        if (yaExisteEnNuevas || yaExisteEnActuales) {
-          alert(`⚠️ El archivo "${archivo.name}" ya está añadido o existe en el restaurante`);
-          continue;
-        }
-
-        nuevasValidas.push(archivo);
-      }
-
-      this.nuevasImagenes.push(...nuevasValidas);
-      this.nombresNuevasImagenes = this.nuevasImagenes.map(f => f.name);
+      this.nuevasImagenes = archivos;
+      this.nombresNuevasImagenes = archivos.map(f => f.name);
       this.generarPrevisualizaciones();
-      this.botonDeshabilitado = this.nuevasImagenes.length === 0;
     }
   }
 
@@ -113,53 +84,36 @@ export class ModificarImagenesComponent implements OnInit {
   }
 
   subirNuevasImagenes(): void {
-    if (this.botonDeshabilitado) {
-      alert('⚠️ No hay imágenes o vídeos seleccionados');
+    if (!this.nuevasImagenes.length) {
+      alert('⚠️ No hay imágenes seleccionadas');
       return;
     }
 
     const formData = new FormData();
     this.nuevasImagenes.forEach(img => formData.append('imagenes', img));
 
-    const backend = 'https://localhost:8443';
-
-    this.http.post(`${backend}/restaurantes/${this.restauranteId}/imagenes`, formData, {
-      withCredentials: true, // 👈 necesario para mantener la sesión
-      responseType: 'json'
-    }).subscribe({
+    this.http.post(`/api/restaurantes/${this.restauranteId}/imagenes`, formData).subscribe({
       next: () => {
-        alert('✅ Imágenes/Vídeos subidos correctamente');
+        alert('✅ Imágenes subidas correctamente');
         this.nuevasImagenes = [];
         this.nuevasImagenesPreview = [];
         this.nombresNuevasImagenes = [];
-        this.botonDeshabilitado = true;
         this.cargarImagenes();
-        this.imagenEventService.emitirActualizacion(); // <--- Emitir evento
-        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        console.error('❌ Error al subir imágenes/vídeos', err);
-        alert('Error al subir los archivos');
+        console.error('❌ Error al subir imágenes', err);
+        alert('Error al subir las imágenes');
       }
     });
   }
 
   cancelar(): void {
-    if (confirm('¿Estás seguro de cancelar los cambios?')) {
-      this.nuevasImagenes = [];
-      this.nuevasImagenesPreview = [];
-      this.nombresNuevasImagenes = [];
-      this.botonDeshabilitado = true;
+    if (confirm('¿Cancelar los cambios?')) {
       this.router.navigate(['/dashboard']);
     }
   }
 
-  esImagen(preview: string): boolean {
-    return preview.startsWith('data:image');
-  }
-
-  private getCookie(name: string): string | null {
-    const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
-    return match ? match[2] : null;
+  esImagen(mime: string): boolean {
+    return mime.startsWith('image/');
   }
 }

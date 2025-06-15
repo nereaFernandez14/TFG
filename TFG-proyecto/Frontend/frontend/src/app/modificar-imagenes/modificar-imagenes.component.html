@@ -1,38 +1,31 @@
 <div class="imagenes-modificar-wrapper">
-  <h2><i class="fas fa-images"></i> Modificar Imágenes del Restaurante</h2>
+  <h2><i class="fas fa-images"></i> Subir/Modificar Imágenes del Restaurante</h2>
 
-  <!-- 🖼️ Imágenes actuales -->
-  <div class="imagenes-actuales" *ngIf="imagenesUrl.length > 0">
-    <h3><i class="fas fa-photo-video"></i> Imágenes actuales</h3>
+  <!-- 🔄 Imágenes actuales del restaurante -->
+  <div class="imagenes-actuales" *ngIf="imagenesActuales.length > 0">
+    <h3><i class="fas fa-photo-video"></i> Imágenes Actuales</h3>
     <div class="imagenes-grid">
-      <div *ngFor="let url of imagenesUrl; let i = index" class="imagen-card">
-        <img [src]="url" alt="Imagen del restaurante" />
-        <button class="eliminar-btn" (click)="eliminarImagen(imagenesActuales[i])">
-          <i class="fas fa-trash-alt"></i> Eliminar
-        </button>
+      <div *ngFor="let imagen of imagenesActuales" class="imagen-card">
+        <img [src]="'/api/restaurantes/imagenes/' + imagen.id" [alt]="imagen.nombreArchivo" />
+        <button class="eliminar-btn" (click)="eliminarImagen(imagen.id)">×</button>
       </div>
     </div>
   </div>
 
-  <!-- ➕ Subir nuevas imágenes -->
+  <!-- ➕ Subida de nuevas imágenes -->
   <div class="subir-nuevas">
-    <h3><i class="fas fa-plus-circle"></i> Añadir nuevas imágenes o vídeos</h3>
-    <input type="file" accept="image/*,video/*" multiple (change)="onImagenSeleccionada($event)" />
+    <h3><i class="fas fa-plus-circle"></i> Añadir nuevas imágenes</h3>
+    <input type="file" accept="image/*" multiple (change)="onImagenSeleccionada($event)" />
 
-    <!-- Lista de nombres -->
     <p *ngIf="nombresNuevasImagenes.length > 0">
-      <i class="fas fa-paperclip"></i> Archivos seleccionados: {{ nombresNuevasImagenes.join(', ') }}
+      <i class="fas fa-paperclip"></i> Archivos seleccionados:
+      {{ nombresNuevasImagenes.join(', ') }}
     </p>
 
     <!-- Vista previa -->
     <div class="imagenes-grid" *ngIf="nuevasImagenesPreview.length > 0">
       <div *ngFor="let preview of nuevasImagenesPreview" class="imagen-card">
-        <ng-container *ngIf="esImagen(preview); else videoPreview">
-          <img [src]="preview" alt="Vista previa" />
-        </ng-container>
-        <ng-template #videoPreview>
-          <video [src]="preview" controls style="max-height: 200px; width: 100%; border-radius: 6px;"></video>
-        </ng-template>
+        <img [src]="preview" alt="Vista previa" />
       </div>
     </div>
 

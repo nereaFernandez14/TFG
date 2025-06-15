@@ -24,7 +24,6 @@ public class NotificacionService {
     private final SolicitudModificacionRepository solicitudModificacionRepository;
     private final UsuarioRepository usuarioRepository;
 
-
     // 🔔 Notificación dirigida a un restaurante específico
     public void crearParaRestaurante(Restaurante destino, String mensaje) {
         Notificacion noti = new Notificacion();
@@ -106,7 +105,6 @@ public class NotificacionService {
         notificacionRepository.save(n);
     }
 
-    // 🔍 Todas las no vistas para un restaurante
     public List<Notificacion> obtenerNoVistas(Restaurante restaurante) {
         return notificacionRepository.findByDestinatarioRestauranteAndVistaFalse(restaurante);
     }
@@ -115,12 +113,10 @@ public class NotificacionService {
         return notificacionRepository.findByDestinatarioUsuarioAndVistaFalse(usuario);
     }
 
-    // 🔍 Todas las no vistas para el admin
     public List<Notificacion> obtenerTodasParaAdminNoVistas() {
         return notificacionRepository.findByParaAdminTrueAndVistaFalse();
     }
 
-    // 🛠️ Solicitud de modificación + notificación al admin (restaurante)
     public void crearSolicitudConNotificacion(Restaurante restaurante, String campo, String nuevoValor) {
         boolean yaExiste = solicitudModificacionRepository
                 .existsByRestauranteAndCampoAndNuevoValor(restaurante, campo, nuevoValor);
@@ -140,7 +136,6 @@ public class NotificacionService {
         crearParaAdmin(msg, restaurante);
     }
 
-    // Alias
     public void crear(Restaurante restaurante, String mensaje) {
         crearParaRestaurante(restaurante, mensaje);
     }

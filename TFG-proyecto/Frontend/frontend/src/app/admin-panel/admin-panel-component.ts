@@ -72,26 +72,41 @@ export class AdminPanelComponent implements OnInit {
   }
 
   cargarPeticionesBaja() {
-    this.http.get<any[]>('/api/admin/bajas-restaurantes').subscribe(data => {
-      this.bajasRestaurantes = data;
-    });
 
-    this.http.get<any[]>('/api/admin/bajas-usuarios').subscribe(data => {
-      this.bajasUsuarios = data;
-    });
+  this.http.get<any[]>('/api/admin/bajas-restaurantes').subscribe(data => {
+    console.log("🧪 Restaurantes para baja:", data);
+    this.http.get<any[]>('/api/admin/bajas-restaurantes').subscribe({
+  next: data => {
+    console.log("🍳 Restaurantes para baja:", data);
+    this.bajasRestaurantes = data;
+  },
+  error: err => {
+    console.error("❌ ERROR al cargar bajas restaurantes", err);
   }
+});
+  // Asegúrate que esto imprime algo
+    this.bajasRestaurantes = Array.isArray(data) ? data : [];
+  });
+}
 
   cargarModificaciones() {
-    this.http.get<any[]>('/api/admin/modificaciones').subscribe(data => {
-      this.modificaciones = data;
+  this.http.get<any[]>('/api/admin/modificaciones').subscribe(data => {
+    this.modificaciones = data;
 
-      for (let solicitud of data) {
-        const id = solicitud.restaurante.id;
-        this.campoSeleccionado[id] = solicitud.campo;
-        this.nuevoValor[id] = solicitud.nuevoValor;
+    for (let solicitud of data) {
+      const restauranteId = solicitud.restauranteId || (solicitud.restaurante && solicitud.restaurante.id);
+
+      if (!restauranteId) {
+        console.warn('⚠️ Solicitud sin restaurante válido:', solicitud);
+        continue; // Saltamos si no hay restaurante válido
       }
-    });
-  }
+
+      this.campoSeleccionado[restauranteId] = solicitud.campo;
+      this.nuevoValor[restauranteId] = solicitud.nuevoValor;
+    }
+  });
+}
+
 
   cargarModificacionesUsuarios() {
     this.http.get<any[]>('/api/admin/modificaciones-usuarios').subscribe(data => {
@@ -108,7 +123,7 @@ export class AdminPanelComponent implements OnInit {
   cargarNotificacionesAdmin() {
     this.http.get<any[]>('/api/notificaciones/admin').subscribe({
       next: (data) => this.notificaciones = data,
-      error: () => console.warn("ℹ️ No hay notificaciones para el administrador")
+      error: () => console.warn('ℹ️ No hay notificaciones para el administrador')
     });
   }
 
@@ -167,10 +182,8 @@ export class AdminPanelComponent implements OnInit {
       payload[campo] = valor;
     }
 
-    // 1️⃣ Actualiza los datos en la entidad Restaurante
     this.http.put(`/api/admin/restaurantes/${restauranteId}`, payload).subscribe({
       next: () => {
-        // 2️⃣ Marca la solicitud como aceptada
         this.http.post(`/api/admin/modificaciones/${solicitudId}/aceptar`, {}).subscribe({
           next: () => {
             alert('✅ Restaurante actualizado y solicitud aceptada');
