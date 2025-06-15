@@ -16,6 +16,7 @@ public class RestauranteUpdateRequest {
     private String email;
     private String tipoCocinaPersonalizado;
     private TipoCocina tipoCocina;
+    private String descripcion;
     private Barrio barrio;
     private RangoPrecio rangoPrecio;
     private List<RestriccionDietetica> restriccionesDieteticas;

@@ -107,6 +107,9 @@ public class ResenyaService {
             existente.getImagenes().clear();
             existente.getImagenes().addAll(nuevas);
         }
+        System.out.println("🔄 Actualizando reseña de restaurante " + restauranteId + " por " + email);
+        System.out.println("➡️ Contenido: " + contenido);
+        System.out.println("➡️ Nº de imágenes: " + (nuevasImagenes != null ? nuevasImagenes.length : "null"));
 
         return resenyaRepository.save(existente);
     }
@@ -121,12 +124,15 @@ public class ResenyaService {
             dto.setValoracion(resenya.getValoracion());
             dto.setAutorEmail(resenya.getAutor().getEmail());
 
-            List<ImagenResenyaResponse> imagenes = resenya.getImagenes().stream().map(img -> {
-                ImagenResenyaResponse ir = new ImagenResenyaResponse();
-                ir.setId(img.getId());
-                ir.setNombreArchivo(img.getNombreArchivo());
-                return ir;
-            }).collect(Collectors.toList());
+            List<ImagenResenyaResponse> imagenes = resenya.getImagenes().stream()
+                    .map(img -> {
+                        ImagenResenyaResponse ir = new ImagenResenyaResponse(img);
+                        ir.setId(img.getId());
+                        ir.setNombreArchivo(img.getNombreArchivo());
+                        ir.setTipoArchivo(img.getTipo()); // 💥 Esto es la clave
+                        return ir;
+                    })
+                    .collect(Collectors.toList());
 
             dto.setImagenes(imagenes);
             return dto;

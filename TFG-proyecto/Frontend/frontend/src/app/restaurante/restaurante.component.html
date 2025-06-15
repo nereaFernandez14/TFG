@@ -5,7 +5,7 @@
     <!-- Nombre -->
     <div class="form-group">
       <label>Nombre*</label>
-      <input type="text" formControlName="nombre" />
+      <input type="text" formControlName="nombre" placeholder="Ej: Juan Carlos" />
       <div *ngIf="restauranteForm.get('nombre')?.touched && restauranteForm.get('nombre')?.invalid" class="error">
         El nombre es obligatorio.
       </div>
@@ -14,31 +14,47 @@
     <!-- Dirección -->
     <div class="form-group">
       <label>Dirección*</label>
-      <input type="text" formControlName="direccion" />
+      <input type="text" formControlName="direccion" placeholder="Ej: Calle Mayor 12, 3ºA, 28013 Madrid, Comunidad de Madrid" />
       <div *ngIf="restauranteForm.get('direccion')?.touched && restauranteForm.get('direccion')?.invalid" class="error">
-        La dirección es obligatoria.
+        La dirección es obligatoria o inválida.
+      </div>
+      <div *ngIf="restauranteForm.get('direccion')?.errors?.['malsonante']" class="error">
+        La dirección contiene palabras no permitidas.
       </div>
     </div>
 
     <!-- Teléfono -->
     <div class="form-group">
       <label>Teléfono*</label>
-      <input type="text" formControlName="telefono" />
+      <input type="text" formControlName="telefono" placeholder="Ej: 612345678 o 912345678" />
       <div *ngIf="restauranteForm.get('telefono')?.touched && restauranteForm.get('telefono')?.invalid" class="error">
-        El teléfono es obligatorio.
+        El teléfono es obligatorio o inválido.
+      </div>
+      <div *ngIf="restauranteForm.get('telefono')?.errors?.['malsonante']" class="error">
+        El teléfono contiene palabras no permitidas.
       </div>
     </div>
 
     <!-- Email -->
-    <!-- Email -->
-<div class="form-group">
-  <label>Email*</label>
-  <input type="email" formControlName="email" />
-  <div *ngIf="restauranteForm.get('email')?.touched && restauranteForm.get('email')?.invalid" class="error">
-    Introduce un email válido.
-  </div>
-</div>
+    <div class="form-group">
+      <label>Email*</label>
+      <input type="email" formControlName="email" placeholder="tucorreo@ejemplo.com" />
+      <div *ngIf="restauranteForm.get('email')?.touched && restauranteForm.get('email')?.invalid" class="error">
+        Introduce un email válido.
+      </div>
+    </div>
 
+    <!-- Descripción -->
+    <div class="form-group">
+      <label>Descripción*</label>
+      <textarea formControlName="descripcion" placeholder="Descripción del restaurante, menú o detalles adicionales"></textarea>
+      <div *ngIf="restauranteForm.get('descripcion')?.touched && restauranteForm.get('descripcion')?.invalid" class="error">
+        La descripción es obligatoria.
+      </div>
+      <div *ngIf="restauranteForm.get('descripcion')?.errors?.['malsonante']" class="error">
+        La descripción contiene palabras no permitidas.
+      </div>
+    </div>
 
     <!-- Tipo de Cocina -->
     <div class="form-group">
@@ -55,9 +71,12 @@
     <!-- Tipo Personalizado -->
     <div class="form-group" *ngIf="restauranteForm.get('tipoCocina')?.value === 'OTRO'">
       <label>Tipo Personalizado*</label>
-      <input type="text" formControlName="tipoCocinaPersonalizado" />
+      <input type="text" formControlName="tipoCocinaPersonalizado" placeholder="Especifica el tipo personalizado" />
       <div *ngIf="restauranteForm.get('tipoCocinaPersonalizado')?.touched && restauranteForm.get('tipoCocinaPersonalizado')?.invalid" class="error">
         Especifica el tipo personalizado (mínimo 2 caracteres).
+      </div>
+      <div *ngIf="restauranteForm.get('tipoCocinaPersonalizado')?.errors?.['malsonante']" class="error">
+        El tipo personalizado contiene palabras no permitidas.
       </div>
     </div>
 

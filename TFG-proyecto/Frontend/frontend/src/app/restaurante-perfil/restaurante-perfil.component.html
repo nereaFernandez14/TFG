@@ -5,26 +5,22 @@
       <i class="fas fa-store"></i> {{ restaurante.nombre }}
     </h2>
 
-    <!-- ❤️ Botón de favorito -->
     <button *ngIf="esUsuario" (click)="toggleFavorito()" class="btn-favorito">
       <i class="fas" [class.fa-heart]="esFavorito" [class.fa-heart-broken]="!esFavorito"></i>
       <span>{{ esFavorito ? 'Quitar de favoritos' : 'Añadir a favoritos' }}</span>
     </button>
   </div>
 
-  <!-- 📝 Descripción -->
   <p class="descripcion-restaurante">
     <i class="fas fa-info-circle"></i>
     {{ restaurante.descripcion || 'Sin descripción disponible' }}
   </p>
 
-  <!-- ☎️ Contacto -->
   <div class="info-contacto">
     <p><i class="fas fa-map-marker-alt"></i> {{ restaurante.direccion }}</p>
     <p><i class="fas fa-phone-alt"></i> {{ restaurante.telefono }}</p>
   </div>
 
-  <!-- 🏷️ Etiquetas -->
   <div class="etiquetas">
     <span class="etiqueta"><i class="fas fa-utensils"></i> {{ restaurante.tipoCocina }}</span>
     <span class="etiqueta"><i class="fas fa-city"></i> {{ restaurante.barrio }}</span>
@@ -34,7 +30,6 @@
     </span>
   </div>
 
-  <!-- 🎞️ Carrusel -->
   <div *ngIf="restaurante.imagenes?.length" class="carrusel">
     <button class="nav-btn" (click)="anteriorImagen()" title="Anterior">
       <i class="fas fa-chevron-left"></i>
@@ -54,7 +49,6 @@
     </button>
   </div>
 
-  <!-- 📋 Menú -->
   <div *ngIf="restaurante.rutaMenu" class="menu-restaurante">
     <h3><i class="fas fa-clipboard-list"></i> Menú del restaurante</h3>
     <a
@@ -67,7 +61,6 @@
     </a>
   </div>
 
-  <!-- ✍️ Añadir/Modificar reseña -->
   <ng-container *ngIf="mostrarFormularioResena; else mensajeLogin">
     <button class="btn-resena" (click)="abrirModalResena()">
       <i class="fas fa-pen"></i>
@@ -75,14 +68,12 @@
     </button>
   </ng-container>
 
-  <!-- 🔒 Requiere login -->
   <ng-template #mensajeLogin>
     <p class="aviso-login">
       <i class="fas fa-lock"></i> Debes iniciar sesión para dejar una reseña.
     </p>
   </ng-template>
 
-  <!-- 💬 Modal de Reseña -->
   <div class="modal-backdrop" *ngIf="modalAbierto" (click)="cerrarModal()">
     <div class="modal" (click)="$event.stopPropagation()">
       <app-resenya
@@ -96,7 +87,6 @@
     </div>
   </div>
 
-  <!-- 🌟 Reseñas -->
   <div class="resenas">
     <h3><i class="fas fa-comments"></i> Reseñas</h3>
 
@@ -114,8 +104,31 @@
       <p *ngIf="resena.contenido"><em><i class="fas fa-quote-left"></i> {{ resena.contenido }}</em></p>
 
       <div *ngIf="resena.imagenes?.length > 0" class="imagenes-resena">
-        <div class="img-wrapper" *ngFor="let img of resena.imagenes">
-          <img [src]="'/api/imagenes/' + img.id" [alt]="img.nombreArchivo" class="img-resena" />
+        <div class="carrusel-resena">
+          <button class="nav-btn" (click)="resena._indice = ((resena._indice || 0) - 1 + resena.imagenes.length) % resena.imagenes.length">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+
+          <div class="preview-media">
+            <ng-container *ngIf="resena.imagenes[resena._indice || 0].tipoArchivo.startsWith('image/')">
+              <img
+                [src]="'/api/imagenes/' + resena.imagenes[resena._indice || 0].id"
+                [alt]="resena.imagenes[resena._indice || 0].nombreArchivo"
+                class="img-resena"
+              />
+            </ng-container>
+            <ng-container *ngIf="resena.imagenes[resena._indice || 0].tipoArchivo.startsWith('video/')">
+              <video
+                [src]="'/api/imagenes/' + resena.imagenes[resena._indice || 0].id"
+                class="video-resena"
+                controls
+              ></video>
+            </ng-container>
+          </div>
+
+          <button class="nav-btn" (click)="resena._indice = ((resena._indice || 0) + 1) % resena.imagenes.length">
+            <i class="fas fa-chevron-right"></i>
+          </button>
         </div>
       </div>
 
@@ -126,10 +139,9 @@
       </div>
     </div>
   </div>
-  <!-- ✅ Toast de mensaje de favoritos -->
+
   <div class="toast-favorito" *ngIf="mensajeFavorito">
     <i class="fas fa-check-circle"></i>
     {{ mensajeFavorito }}
   </div>
-
 </div>

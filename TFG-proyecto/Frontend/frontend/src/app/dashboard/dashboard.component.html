@@ -1,5 +1,4 @@
 <!-- 🔔 Toasts de notificación -->
-<!-- 🔔 TOASTS DE NOTIFICACIONES -->
 <div class="toast-container">
   <div class="toast" *ngFor="let n of notificaciones">
     <span>{{ n.mensaje }}</span>
@@ -7,52 +6,61 @@
   </div>
 </div>
 
-
 <div class="dashboard-container" *ngIf="datos; else cargando">
   <h2><i class="fas fa-tools"></i> Panel de Control del Restaurante</h2>
 
-  <!-- ℹ️ Fila 1: Información -->
+  <!-- ℹ️ Información básica -->
   <div class="cards-row">
     <div class="card info-card">
       <h3><i class="fas fa-eye"></i> Visitas</h3>
       <p>{{ datos.visitas }}</p>
     </div>
-
     <div class="card info-card">
       <h3><i class="fas fa-star-half-alt"></i> Valoración Promedio</h3>
       <p>{{ datos.valoracionPromedio | number:'1.1-2' }} <i class="fas fa-star"></i></p>
     </div>
   </div>
 
-  <!-- ✏️ Fila 2: Acciones -->
+  <!-- Acciones -->
   <div class="cards-row">
     <a class="card link-card" routerLink="/comentarios">
       <h3><i class="fas fa-comments"></i> Ver Comentarios</h3>
       <p>{{ datos.comentarios }}</p>
     </a>
-
     <a class="card link-card" routerLink="/menu/modificar">
       <h3><i class="fas fa-utensils"></i> Modificar Menú</h3>
       <p>Haz clic aquí para editar tu menú</p>
     </a>
-
     <a class="card link-card" routerLink="/imagenes/modificar">
       <h3><i class="fas fa-images"></i> Modificar Imágenes</h3>
       <p>Gestiona las fotos del restaurante</p>
     </a>
-
-    <!-- ⚙️ Nueva tarjeta: Solicitar modificación -->
     <button class="card link-card" (click)="abrirVentanaModificacion()">
       <h3><i class="fas fa-edit"></i> Solicitar modificación</h3>
       <p>Cambiar información del restaurante</p>
     </button>
   </div>
 
-  <!-- ❌ Baja -->
+  <!-- Solicitud de baja -->
   <div class="cards-row">
     <button class="card danger-card" (click)="pedirBajaRestaurante()">
       <i class="fas fa-user-slash"></i> Solicitar baja del restaurante
     </button>
+  </div>
+
+  <!-- 🖼️ Carrusel de imágenes -->
+  <div class="carrusel-container" *ngIf="imagenes.length > 0">
+    <button type="button" class="carrusel-btn" (click)="retrocederCarrusel()" aria-label="Imagen anterior">&#x276E;</button>
+    <div class="carrusel-vista">
+      <div class="img-preview-wrapper">
+        <img
+          [src]="imagenes[indiceInicio]"
+          alt="Imagen del restaurante"
+          class="preview-img"
+        />
+      </div>
+    </div>
+    <button type="button" class="carrusel-btn" (click)="avanzarCarrusel()" aria-label="Imagen siguiente">&#x276F;</button>
   </div>
 </div>
 
@@ -60,37 +68,31 @@
   <p><i class="fas fa-spinner fa-spin"></i> Cargando datos del dashboard...</p>
 </ng-template>
 
-<!-- 🌐 Modal de modificación -->
-<!-- 🌐 Modal de modificación -->
+<!-- Modal de modificación -->
 <div class="modal" *ngIf="mostrarVentanaModificacion">
   <div class="modal-content">
     <h3><i class="fas fa-pencil-alt"></i> Solicitar modificación</h3>
-
-    <!-- Selección de campo -->
     <div class="form-group">
       <label for="campo">Campo a modificar: </label>
       <select id="campo" [(ngModel)]="campoSeleccionado">
-          <option value="" disabled selected>-- Selecciona un campo --</option>
-          <option *ngFor="let campo of camposDisponibles" [value]="campo.value">{{ campo.label }}</option>
+        <option value="" disabled selected>-- Selecciona un campo --</option>
+        <option *ngFor="let campo of camposDisponibles" [value]="campo.value">{{ campo.label }}</option>
       </select>
     </div>
 
-    <!-- Valor nuevo: tipoCocina -->
+    <!-- campos según selección -->
     <div *ngIf="campoSeleccionado === 'tipoCocina'" class="form-group">
       <label>Nuevo valor: </label>
       <select [(ngModel)]="nuevoValor">
         <option value="" disabled>-- Selecciona un tipo --</option>
         <option *ngFor="let val of tipoCocinaEnum" [value]="val">{{ val }}</option>
       </select>
-
-      <!-- Si elige OTRO, mostrar campo personalizado -->
       <div *ngIf="nuevoValor === 'OTRO'" class="form-group">
         <label>Especifica el tipo personalizado: </label>
         <input type="text" [(ngModel)]="valorPersonalizado" placeholder="Introduce el tipo de cocina" />
       </div>
     </div>
 
-    <!-- Valor nuevo: restricciones dietéticas -->
     <div *ngIf="campoSeleccionado === 'restriccionesDieteticas'" class="form-group">
       <label>Nuevo valor: </label>
       <select multiple [(ngModel)]="nuevoValorMultiple">
@@ -98,7 +100,6 @@
       </select>
     </div>
 
-    <!-- Valor nuevo: barrio -->
     <div *ngIf="campoSeleccionado === 'barrio'" class="form-group">
       <label>Nuevo valor: </label>
       <select [(ngModel)]="nuevoValor">
@@ -107,7 +108,6 @@
       </select>
     </div>
 
-    <!-- Valor nuevo: rango de precio -->
     <div *ngIf="campoSeleccionado === 'rangoPrecio'" class="form-group">
       <label>Nuevo valor: </label>
       <select [(ngModel)]="nuevoValor">
@@ -116,22 +116,18 @@
       </select>
     </div>
 
-    <!-- Texto libre: nombre, dirección, teléfono, email -->
     <div *ngIf="['nombre', 'direccion', 'telefono', 'email'].includes(campoSeleccionado)" class="form-group">
       <label>Nuevo valor: </label>
       <input type="text" [(ngModel)]="nuevoValor" placeholder="Introduce el nuevo valor" />
     </div>
 
-    <!-- Botones de acción -->
     <div class="modal-actions">
-      <button [disabled]="botonDeshabilitado" (click)="enviarPeticionModificacion()" class="btn primary"> Enviar
+      <button [disabled]="botonDeshabilitado" (click)="enviarPeticionModificacion()" class="btn primary">
         <i class="fas fa-paper-plane"></i> Enviar
       </button>
-
       <button (click)="cerrarVentanaModificacion()" class="btn secondary">
         <i class="fas fa-times"></i> Cancelar
       </button>
     </div>
   </div>
 </div>
-

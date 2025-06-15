@@ -61,7 +61,9 @@ public class SecurityConfig {
                                 "/usuarios/*/favoritos/**",
                                 "/api/usuarios/*/preferencias-dieteticas",
                                 "/api/usuarios/existe-email",
-                                "/usuarios/existe-email" // ✅ Añadido aquí
+                                "/usuarios/existe-email", // ✅ Añadido aquí
+                                "/uploads/**", // ✅ NUEVO
+                                "/api/uploads/**" // ✅ NUEVO
                         ))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -83,7 +85,9 @@ public class SecurityConfig {
                                 "/api/restaurantes/**",
                                 "/restaurantes/**",
                                 "/api/usuarios/existe-email",
-                                "/usuarios/existe-email" // ✅ Añadido aquí también
+                                "/usuarios/existe-email", // ✅ Añadido aquí también
+                                "/uploads/**", // ✅ NUEVO
+                                "/api/uploads/**" // ✅ NUEVO
                         ).permitAll()
 
                         .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO")
@@ -97,7 +101,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/restaurantes/*/solicitar-modificacion")
                         .hasRole("RESTAURANTE")
 
-                        // ✅ NUEVO: Solicitudes de modificación de usuario
                         .requestMatchers(HttpMethod.POST, "/api/usuarios/*/solicitar-modificacion").hasRole("USUARIO")
                         .requestMatchers(HttpMethod.POST, "/usuarios/*/solicitar-modificacion").hasRole("USUARIO")
 

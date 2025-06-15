@@ -5,8 +5,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class ResenyaRequest {
-  private String contenido;
-  private Integer valoracion;
   private Long restauranteId;
+  private String contenido;
+  private int valoracion;
   private MultipartFile[] imagenes;
 }

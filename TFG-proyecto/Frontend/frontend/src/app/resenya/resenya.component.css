@@ -92,3 +92,63 @@ button:hover:not([disabled]) {
   color: #555;
   margin-bottom: 10px;
 }
+.carrusel-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.carrusel-btn {
+  background-color: #eee;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+.carrusel-vista {
+  display: flex;
+  gap: 8px;
+  overflow: hidden;
+  flex-wrap: nowrap;
+}
+
+.preview-img {
+  height: 100px;
+  width: auto;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.img-preview-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.btn-eliminar-img {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background-color: #ff4444;
+  border: none;
+  color: white;
+  font-size: 14px;
+  border-radius: 50%;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  line-height: 18px;
+  text-align: center;
+  padding: 0;
+  box-shadow: 0 0 2px rgba(0,0,0,0.3);
+}
+
+.btn-eliminar-img:hover {
+  background-color: #cc0000;
+}
+
+
+

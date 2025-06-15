@@ -1,15 +1,14 @@
 <form [formGroup]="resenyaForm" (ngSubmit)="enviarResena()">
   <div class="estrella-container">
-  <span *ngFor="let estrella of estrellas"
-        class="estrella"
-        [class.activa]="estrella <= (puntuacionHover || puntuacionSeleccionada)"
-        (click)="!yaTieneResena && seleccionarPuntuacion(estrella)"
-        (mouseover)="!yaTieneResena && destacarPuntuacion(estrella)"
-        (mouseleave)="!yaTieneResena && resetearHover()">
-    ★
-  </span>
-</div>
-
+    <span *ngFor="let estrella of estrellas"
+          class="estrella"
+          [class.activa]="estrella <= (puntuacionHover || puntuacionSeleccionada)"
+          (click)="!yaTieneResena && seleccionarPuntuacion(estrella)"
+          (mouseover)="!yaTieneResena && destacarPuntuacion(estrella)"
+          (mouseleave)="!yaTieneResena && resetearHover()">
+      ★
+    </span>
+  </div>
 
   <div *ngIf="yaTieneResena" class="info">
     La puntuación ya no se puede modificar.
@@ -24,10 +23,32 @@
     ❌ El comentario contiene palabras inapropiadas
   </div>
 
-  <input type="file" accept="image/*" multiple (change)="handleFileInput($event)" />
+  <input type="file" accept="image/*,video/*" multiple (change)="handleFileInput($event)" />
 
-  <div class="vista-previa" *ngIf="vistaPrevia.length > 0">
-    <img *ngFor="let img of vistaPrevia" [src]="img" class="preview-img" />
+  <!-- Carrusel con imágenes y vídeos + eliminar -->
+  <div class="carrusel-container" *ngIf="vistaPrevia.length > 0">
+    <button type="button" class="carrusel-btn" (click)="retrocederCarrusel()">⟨</button>
+
+    <div class="carrusel-vista">
+      <div class="img-preview-wrapper" *ngFor="let offset of [0,1,2]; let i = index">
+        <ng-container [ngSwitch]="vistaPrevia[(indiceInicio + offset) % vistaPrevia.length].tipo">
+          <img *ngSwitchCase="'imagen'"
+               [src]="vistaPrevia[(indiceInicio + offset) % vistaPrevia.length].src"
+               class="preview-img" />
+          <video *ngSwitchCase="'video'"
+                 [src]="vistaPrevia[(indiceInicio + offset) % vistaPrevia.length].src"
+                 class="preview-img"
+                 controls></video>
+        </ng-container>
+        <button type="button"
+                class="btn-eliminar-img"
+                (click)="eliminarImagen(i)">
+          ✖
+        </button>
+      </div>
+    </div>
+
+    <button type="button" class="carrusel-btn" (click)="avanzarCarrusel()">⟩</button>
   </div>
 
   <div class="botones" *ngIf="!cargandoEstadoResena">
@@ -45,5 +66,5 @@
   </div>
 
   <p *ngIf="mostrarExito" class="exito">✅ Reseña registrada correctamente</p>
-  <div *ngIf="mostrarError" class="error">{{ mensajeError }}</div>
+  <div *ngIf="mostrarError" class="error" [innerHTML]="mensajeError"></div>
 </form>

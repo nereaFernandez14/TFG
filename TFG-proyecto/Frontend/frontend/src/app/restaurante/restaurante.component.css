@@ -12,6 +12,21 @@ h2 {
   text-align: center;
   margin-bottom: 2rem;
 }
+input::placeholder, textarea::placeholder {
+  color: #888888;
+  opacity: 1;
+}
+
+textarea {
+  width: 100%;
+  min-height: 120px;
+  resize: vertical;
+  padding: 8px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
 
 .form-group {
   margin-bottom: 1.25rem;
