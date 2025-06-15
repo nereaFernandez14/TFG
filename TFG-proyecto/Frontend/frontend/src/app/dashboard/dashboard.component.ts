@@ -62,7 +62,7 @@ export class DashboardComponent implements OnInit {
       this.dashboardService.obtenerResumen(restaurante.id).subscribe({
         next: (data) => {
           this.datos = data;
-          this.cargarImagenes(data.id);
+          this.cargarImagenes(data.id); // ✅ Usamos el ID del restaurante para cargar las imágenes
         },
         error: (err) => console.error('❌ Error cargando resumen dashboard', err)
       });
@@ -76,10 +76,11 @@ export class DashboardComponent implements OnInit {
   }
 
   cargarImagenes(idRestaurante: number) {
-    this.http.get<string[]>(`${this.backendUrl}/restaurantes/${idRestaurante}/imagenes`)
+    this.http.get<any[]>(`${this.backendUrl}/restaurantes/${idRestaurante}/imagenes`)
       .subscribe({
         next: (lista) => {
-          this.imagenes = lista.map(nombre => `${this.backendUrl}/restaurantes/uploads/${idRestaurante}/${nombre}`);
+          this.imagenes = lista.map(img => `${this.backendUrl}/restaurantes/imagenes/${img.id}`); // ✅ URL BLOB
+          this.indiceInicio = 0;
         },
         error: (err) => console.error('❌ Error cargando imágenes', err)
       });

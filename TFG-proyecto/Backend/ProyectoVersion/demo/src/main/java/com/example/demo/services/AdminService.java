@@ -96,11 +96,13 @@ public class AdminService {
     }
 
     public List<SolicitudModificacion> obtenerSolicitudesModificacion() {
-        return solicitudModificacionRepository.findAll();
+        // Cambiado para obtener solo solicitudes no gestionadas
+        return solicitudModificacionRepository.findByGestionadaFalse();
     }
 
     public List<SolicitudModificacionUsuario> obtenerSolicitudesModificacionUsuario() {
-        return solicitudUsuarioRepository.findAll();
+        // Cambiado para obtener solo solicitudes no gestionadas
+        return solicitudUsuarioRepository.findByGestionadaFalse();
     }
 
     public SolicitudModificacion obtenerSolicitudRestaurantePorId(Long id) {

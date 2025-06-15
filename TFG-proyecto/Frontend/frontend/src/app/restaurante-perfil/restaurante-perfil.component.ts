@@ -1,3 +1,4 @@
+// IMPORTS IGUAL
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -29,6 +30,7 @@ export class RestaurantePerfilComponent implements OnInit {
   usuarioId!: number;
   mensajeFavorito: string | null = null;
 
+  readonly backendUrl = 'https://localhost:8443';
 
   constructor(
     private route: ActivatedRoute,
@@ -44,10 +46,13 @@ export class RestaurantePerfilComponent implements OnInit {
       this.restaurante = data;
       if (this.restaurante?.rutaMenu) {
         const archivo = this.obtenerNombreArchivo(this.restaurante.rutaMenu);
-        const url = `https://localhost:8443/restaurantes/menus/${archivo}`;
+        const url = `${this.backendUrl}/restaurantes/menus/${archivo}`;
         this.menuSanitizado = this.sanitizer.bypassSecurityTrustResourceUrl(url);
       }
+
+      this.cargarImagenes(); // <- AÑADIDO
     });
+
     this.recargarResenas();
     this.mostrarFormularioResena = this.authService.isAuthenticated();
     const usuario = this.authService.usuarioActual();
@@ -61,6 +66,25 @@ export class RestaurantePerfilComponent implements OnInit {
     }
   }
 
+ cargarImagenes() {
+  this.http.get<any[]>(`${this.backendUrl}/restaurantes/${this.restauranteId}/imagenes`)
+    .subscribe({
+      next: (imagenes) => {
+        this.restaurante.imagenes = imagenes.map(img => ({
+          id: img.id,  // 👈 NECESARIO
+          nombreArchivo: img.nombreArchivo,
+          tipoArchivo: img.tipoArchivo
+        }));
+        this.imagenActual = 0;
+      },
+      error: (err) => {
+        console.error('❌ Error cargando imágenes del restaurante', err);
+      }
+    });
+}
+
+
+
   abrirModalResena() { this.modalAbierto = true; }
   cerrarModal() { this.modalAbierto = false; }
   obtenerNombreArchivo(ruta: string): string { return ruta.split(/[/\\]/).pop() || ''; }
@@ -69,7 +93,7 @@ export class RestaurantePerfilComponent implements OnInit {
     this.http.get<any[]>(`/api/restaurantes/${this.restauranteId}/resenas`).subscribe({
       next: data => {
         this.resenas = data;
-        const email = this.authService.getEmailUsuario(); 
+        const email = this.authService.getEmailUsuario();
         this.resenaDelUsuario = data.find(r => r.autorEmail === email) || null;
         this.yaTieneResena = !!this.resenaDelUsuario;
       },
@@ -83,7 +107,6 @@ export class RestaurantePerfilComponent implements OnInit {
     return this.authService.esAutorDeResena(emailAutor);
   }
 
-
   borrarResena(id: number) {
     this.http.delete(`/api/resenyas/${id}`, { withCredentials: true }).subscribe(() => {
       this.recargarResenas();
@@ -95,11 +118,13 @@ export class RestaurantePerfilComponent implements OnInit {
       this.imagenActual = (this.imagenActual - 1 + this.restaurante.imagenes.length) % this.restaurante.imagenes.length;
     }
   }
+
   siguienteImagen() {
     if (this.restaurante?.imagenes?.length) {
       this.imagenActual = (this.imagenActual + 1) % this.restaurante.imagenes.length;
     }
   }
+
   mostrarMensaje(mensaje: string) {
     this.mensajeFavorito = mensaje;
     setTimeout(() => this.mensajeFavorito = null, 3000);

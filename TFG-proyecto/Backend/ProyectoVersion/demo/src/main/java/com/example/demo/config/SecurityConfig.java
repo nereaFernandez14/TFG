@@ -36,59 +36,38 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .ignoringRequestMatchers(
-                                "/register",
-                                "/api/register",
-                                "/api/login",
-                                "/api/logout",
-                                "/api/rol",
-                                "/api/sesion",
-                                "/restaurantes/buscar",
-                                "/restaurantes/**",
-                                "/resenyas/**",
-                                "/roles",
-                                "/change-password",
-                                "/usuarios/*/solicitar-baja",
-                                "/api/usuarios/*/solicitar-baja",
-                                "/usuarios/*/solicitar-modificacion", // ✅ NUEVO
-                                "/api/usuarios/*/solicitar-modificacion", // ✅ NUEVO
+                                "/register", "/api/register", "/api/login", "/api/logout",
+                                "/api/rol", "/api/sesion", "/restaurantes/buscar",
+                                "/restaurantes/**", "/resenyas/**", "/roles",
+                                "/change-password", "/usuarios/*/solicitar-baja",
+                                "/api/usuarios/*/solicitar-baja", "/usuarios/*/solicitar-modificacion",
+                                "/api/usuarios/*/solicitar-modificacion",
                                 "/api/restaurantes/*/solicitar-modificacion",
                                 "/restaurantes/*/solicitar-modificacion",
-                                "/admin/**",
-                                "/api/usuarios/subir-imagenes",
-                                "/usuarios/subir-imagenes",
-                                "/api/notificaciones/**",
-                                "/notificaciones/**",
-                                "/usuarios/*/favoritos/**",
+                                "/admin/**", "/api/usuarios/subir-imagenes",
+                                "/usuarios/subir-imagenes", "/api/notificaciones/**",
+                                "/notificaciones/**", "/usuarios/*/favoritos/**",
                                 "/api/usuarios/*/preferencias-dieteticas",
-                                "/api/usuarios/existe-email",
-                                "/usuarios/existe-email", // ✅ Añadido aquí
-                                "/uploads/**", // ✅ NUEVO
-                                "/api/uploads/**" // ✅ NUEVO
+                                "/api/usuarios/existe-email", "/usuarios/existe-email",
+                                "/uploads/**", "/api/uploads/**",
+                                "/restaurantes/uploads/**",
+                                "/imagenes/**", "/api/imagenes/**",
+                                "/restaurantes/*/imagenes", // 👈 AÑADIDO
+                                "/api/restaurantes/*/imagenes" // 👈 AÑADIDO
                         ))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         .requestMatchers(
-                                "/register",
-                                "/api/register",
-                                "/api/csrf",
-                                "/api/login",
-                                "/api/logout",
-                                "/api/rol",
-                                "/api/sesion",
-                                "/restaurantes/buscar",
-                                "/roles",
-                                "/change-password",
-                                "/error",
-                                "/restaurantes/filtrar-avanzado",
-                                "/resenyas/**",
-                                "/api/restaurantes/**",
-                                "/restaurantes/**",
-                                "/api/usuarios/existe-email",
-                                "/usuarios/existe-email", // ✅ Añadido aquí también
-                                "/uploads/**", // ✅ NUEVO
-                                "/api/uploads/**" // ✅ NUEVO
-                        ).permitAll()
+                                "/register", "/api/register", "/api/csrf", "/api/login",
+                                "/api/logout", "/api/rol", "/api/sesion",
+                                "/restaurantes/buscar", "/roles", "/change-password",
+                                "/error", "/restaurantes/filtrar-avanzado", "/resenyas/**",
+                                "/api/restaurantes/**", "/restaurantes/**",
+                                "/api/usuarios/existe-email", "/usuarios/existe-email",
+                                "/uploads/**", "/api/uploads/**", "/restaurantes/uploads/**",
+                                "/imagenes/**", "/api/imagenes/**")
+                        .permitAll()
 
                         .requestMatchers(HttpMethod.POST, "/resenyas").hasRole("USUARIO")
                         .requestMatchers(HttpMethod.GET, "/usuarios/*/favoritos").hasRole("USUARIO")
@@ -100,22 +79,20 @@ public class SecurityConfig {
                         .hasRole("RESTAURANTE")
                         .requestMatchers(HttpMethod.POST, "/restaurantes/*/solicitar-modificacion")
                         .hasRole("RESTAURANTE")
-
                         .requestMatchers(HttpMethod.POST, "/api/usuarios/*/solicitar-modificacion").hasRole("USUARIO")
                         .requestMatchers(HttpMethod.POST, "/usuarios/*/solicitar-modificacion").hasRole("USUARIO")
 
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-
                         .requestMatchers(HttpMethod.GET, "/api/notificaciones").hasRole("RESTAURANTE")
-                        .requestMatchers(HttpMethod.POST, "/api/restaurantes/*/solicitar-modificacion")
-                        .hasRole("RESTAURANTE")
                         .requestMatchers(HttpMethod.GET, "/api/notificaciones/admin").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/notificaciones/*/marcar-vista")
                         .hasAnyRole("RESTAURANTE", "ADMIN", "USUARIO")
 
+                        .requestMatchers(HttpMethod.POST, "/api/restaurantes/*/imagenes").hasRole("RESTAURANTE")
+                        .requestMatchers(HttpMethod.DELETE, "/api/restaurantes/*/imagenes/*").hasRole("RESTAURANTE")
+
                         .anyRequest().authenticated())
-                .sessionManagement(
-                        session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .formLogin(form -> form.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .logout(logout -> logout

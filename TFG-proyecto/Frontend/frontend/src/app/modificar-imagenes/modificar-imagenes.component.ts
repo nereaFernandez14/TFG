@@ -82,7 +82,6 @@ export class ModificarImagenesComponent implements OnInit {
           continue;
         }
 
-        // Comprobar duplicados estrictamente: nombre + tamaño
         const yaExisteEnNuevas = this.nuevasImagenes.some(img => img.name === archivo.name && img.size === archivo.size);
         const yaExisteEnActuales = this.imagenesActuales.some(imgNombre => imgNombre === archivo.name);
 
@@ -122,7 +121,10 @@ export class ModificarImagenesComponent implements OnInit {
     const formData = new FormData();
     this.nuevasImagenes.forEach(img => formData.append('imagenes', img));
 
-    this.http.post(`/api/restaurantes/${this.restauranteId}/imagenes`, formData, {
+    const backend = 'https://localhost:8443';
+
+    this.http.post(`${backend}/restaurantes/${this.restauranteId}/imagenes`, formData, {
+      withCredentials: true, // 👈 necesario para mantener la sesión
       responseType: 'json'
     }).subscribe({
       next: () => {
@@ -154,5 +156,10 @@ export class ModificarImagenesComponent implements OnInit {
 
   esImagen(preview: string): boolean {
     return preview.startsWith('data:image');
+  }
+
+  private getCookie(name: string): string | null {
+    const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+    return match ? match[2] : null;
   }
 }

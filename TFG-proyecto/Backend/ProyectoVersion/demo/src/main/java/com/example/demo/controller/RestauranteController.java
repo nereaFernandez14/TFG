@@ -1,13 +1,16 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.ImagenRestauranteResponse;
 import com.example.demo.dto.RestauranteDTO;
 import com.example.demo.dto.RestauranteDashboardDatos;
+import com.example.demo.entities.ImagenRestaurante;
 import com.example.demo.entities.Resenya;
 import com.example.demo.entities.Restaurante;
 import com.example.demo.enums.Barrio;
 import com.example.demo.enums.RangoPrecio;
 import com.example.demo.enums.RestriccionDietetica;
 import com.example.demo.enums.TipoCocina;
+import com.example.demo.repositories.ImagenRestauranteRepository;
 import com.example.demo.services.NotificacionService;
 import com.example.demo.services.RestauranteService;
 
@@ -23,13 +26,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
+import java.util.*;
 
 @RestController
 @RequestMapping("/restaurantes")
@@ -40,6 +41,9 @@ public class RestauranteController {
 
     @Autowired
     private NotificacionService notificacionService;
+
+    @Autowired
+    private ImagenRestauranteRepository imagenRestauranteRepository;
 
     @PostMapping
     public Restaurante crearRestaurante(@RequestParam Long idUsuario, @RequestBody @Valid RestauranteDTO dto) {
@@ -136,8 +140,7 @@ public class RestauranteController {
     }
 
     @PostMapping("/subir-menu")
-    public ResponseEntity<?> subirMenu(
-            @RequestParam("archivo") MultipartFile archivo,
+    public ResponseEntity<?> subirMenu(@RequestParam("archivo") MultipartFile archivo,
             @RequestParam("email") String email) {
 
         try {
@@ -169,10 +172,9 @@ public class RestauranteController {
     @GetMapping("/menus/{nombreArchivo:.+}")
     public ResponseEntity<Resource> descargarMenu(@PathVariable String nombreArchivo) throws IOException {
         Path ruta = Paths.get(System.getProperty("user.dir") + "/uploads/menus").resolve(nombreArchivo).normalize();
-
-        if (!Files.exists(ruta)) {
+        if (!Files.exists(ruta))
             return ResponseEntity.notFound().build();
-        }
+
         Resource recurso = new UrlResource(ruta.toUri());
 
         return ResponseEntity.ok()
@@ -185,14 +187,12 @@ public class RestauranteController {
     @GetMapping("/mis-resenyas")
     public ResponseEntity<List<Resenya>> obtenerMisResenyas(HttpSession session) {
         String email = (String) session.getAttribute("usuario");
-        if (email == null) {
+        if (email == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
 
         Restaurante restaurante = restauranteService.obtenerRestaurantePorEmailUsuario(email);
-        if (restaurante == null) {
+        if (restaurante == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
 
         return ResponseEntity.ok(restaurante.getResenyas());
     }
@@ -201,9 +201,8 @@ public class RestauranteController {
     @PostMapping("/{idUsuario}/solicitar-baja")
     public ResponseEntity<?> solicitarBaja(@PathVariable Long idUsuario) {
         Restaurante restaurante = restauranteService.obtenerRestaurantePorUsuario(idUsuario);
-        if (restaurante == null) {
+        if (restaurante == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Restaurante no encontrado");
-        }
 
         restaurante.setSolicitaBaja(true);
         restauranteService.guardar(restaurante);
@@ -212,29 +211,16 @@ public class RestauranteController {
 
     @PreAuthorize("hasRole('RESTAURANTE')")
     @PostMapping("/{id}/solicitar-modificacion")
-    public ResponseEntity<?> solicitarModificacion(
-            @PathVariable Long id,
-            @RequestBody Map<String, String> payload) {
-
-        System.out.println("🛰️ Recibida solicitud de modificación");
-        System.out.println("🧩 ID recibido: " + id);
-        System.out.println("📦 Payload recibido: " + payload);
-
+    public ResponseEntity<?> solicitarModificacion(@PathVariable Long id, @RequestBody Map<String, String> payload) {
         Restaurante restaurante = restauranteService.obtenerRestaurantePorId(id);
-        if (restaurante == null) {
-            System.out.println("❌ Restaurante no encontrado con ID: " + id);
+        if (restaurante == null)
             return ResponseEntity.status(404).body("Restaurante no encontrado");
-        }
 
         String campo = payload.get("campo");
         String nuevoValor = payload.get("nuevoValor");
 
-        if (campo == null || nuevoValor == null) {
-            System.out.println("⚠️ Campo o valor nulo. Campo: " + campo + " | Valor: " + nuevoValor);
+        if (campo == null || nuevoValor == null)
             return ResponseEntity.badRequest().body("Campo o valor inválido");
-        }
-
-        System.out.println("📝 Campo: " + campo + " | Nuevo valor: " + nuevoValor);
 
         try {
             notificacionService.crearSolicitudConNotificacion(restaurante, campo, nuevoValor);
@@ -246,63 +232,52 @@ public class RestauranteController {
     }
 
     @GetMapping("/{id}/imagenes")
-    public ResponseEntity<List<String>> obtenerImagenes(@PathVariable Long id) {
-        Path dir = Paths.get(System.getProperty("user.dir"), "uploads", "restaurantes", String.valueOf(id));
-
-        if (!Files.exists(dir)) {
-            return ResponseEntity.ok(List.of());
-        }
-
-        try (Stream<Path> paths = Files.list(dir)) {
-            List<String> imagenes = paths
-                    .filter(Files::isRegularFile)
-                    .map(p -> p.getFileName().toString())
-                    .toList();
-
-            return ResponseEntity.ok(imagenes);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public ResponseEntity<List<ImagenRestauranteResponse>> obtenerImagenesBlob(@PathVariable Long id) {
+        List<ImagenRestaurante> imagenes = imagenRestauranteRepository.findByRestauranteId(id);
+        List<ImagenRestauranteResponse> response = imagenes.stream()
+                .map(ImagenRestauranteResponse::new)
+                .toList();
+        return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('RESTAURANTE')")
     @PostMapping("/{id}/imagenes")
     public ResponseEntity<?> subirImagenes(@PathVariable Long id,
-            @RequestParam("imagenes") List<MultipartFile> imagenes) {
+            @RequestParam("imagenes") List<MultipartFile> nuevasImagenes) {
         Restaurante restaurante = restauranteService.obtenerRestaurantePorUsuario(id);
         if (restaurante == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Restaurante no encontrado"));
         }
 
-        Path dir = Paths.get(System.getProperty("user.dir"), "uploads", "restaurantes", String.valueOf(id));
-        List<String> nuevasRutas = new ArrayList<>();
+        // 🔥 Eliminar imágenes anteriores (de la base de datos BLOB)
+        List<ImagenRestaurante> existentes = imagenRestauranteRepository.findByRestauranteId(id);
+        imagenRestauranteRepository.deleteAll(existentes);
+        System.out.println("🧹 Imágenes antiguas eliminadas: " + existentes.size());
 
         try {
-            Files.createDirectories(dir);
+            for (MultipartFile imagen : nuevasImagenes) {
+                String nombre = System.currentTimeMillis() + "_" + imagen.getOriginalFilename().replaceAll("\\s+", "_");
 
-            for (MultipartFile imagen : imagenes) {
-                String nombre = System.currentTimeMillis() + "_" + imagen.getOriginalFilename();
-                Path destino = dir.resolve(nombre);
-                Files.copy(imagen.getInputStream(), destino, StandardCopyOption.REPLACE_EXISTING);
-                nuevasRutas.add(nombre);
+                ImagenRestaurante entidad = new ImagenRestaurante();
+                entidad.setRestaurante(restaurante);
+                entidad.setNombreArchivo(nombre);
+                entidad.setTipo(imagen.getContentType());
+                entidad.setDatos(imagen.getBytes());
+
+                imagenRestauranteRepository.save(entidad);
             }
 
-            restaurante.getImagenes().addAll(nuevasRutas);
-            restauranteService.guardar(restaurante);
-
-            return ResponseEntity.ok(Map.of("mensaje", "✅ Imágenes subidas y registradas"));
+            return ResponseEntity.ok(Map.of("mensaje", "✅ Imágenes BLOB actualizadas correctamente"));
 
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "❌ Error al guardar imágenes: " + e.getMessage()));
+                    .body(Map.of("error", "❌ Error al guardar nuevas imágenes: " + e.getMessage()));
         }
     }
 
     @DeleteMapping("/{id}/imagenes/{nombreImagen}")
-    public ResponseEntity<?> eliminarImagen(
-            @PathVariable Long id,
-            @PathVariable String nombreImagen) {
-
-        Restaurante restaurante = restauranteService.obtenerRestaurantePorUsuario(id);
+    public ResponseEntity<?> eliminarImagen(@PathVariable Long id, @PathVariable String nombreImagen) {
+        Restaurante restaurante = restauranteService.obtenerRestaurantePorId(id);
         if (restaurante == null)
             return ResponseEntity.notFound().build();
 
@@ -310,17 +285,15 @@ public class RestauranteController {
                 nombreImagen);
 
         try {
-            if (Files.exists(ruta)) {
+            if (Files.exists(ruta))
                 Files.delete(ruta);
-            }
 
-            List<String> imagenes = restaurante.getImagenes();
-            boolean removido = imagenes.remove(nombreImagen);
-
-            if (removido) {
-                restaurante.setImagenes(imagenes);
-                restauranteService.guardar(restaurante);
-            }
+            imagenRestauranteRepository
+                    .findByRestauranteId(id)
+                    .stream()
+                    .filter(img -> img.getNombreArchivo().equals(nombreImagen))
+                    .findFirst()
+                    .ifPresent(imagenRestauranteRepository::delete);
 
             return ResponseEntity.ok(Map.of("mensaje", "✅ Imagen eliminada"));
 
@@ -337,9 +310,8 @@ public class RestauranteController {
 
         Path ruta = Paths.get(System.getProperty("user.dir"), "uploads", "restaurantes", String.valueOf(id), nombre);
 
-        if (!Files.exists(ruta)) {
+        if (!Files.exists(ruta))
             return ResponseEntity.notFound().build();
-        }
 
         Resource recurso = new UrlResource(ruta.toUri());
 
@@ -351,5 +323,16 @@ public class RestauranteController {
                 .contentType(MediaType.parseMediaType(mimeType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + nombre + "\"")
                 .body(recurso);
+    }
+
+    @GetMapping("/imagenes/{id}")
+    public ResponseEntity<byte[]> obtenerImagenBlob(@PathVariable Long id) {
+        ImagenRestaurante imagen = imagenRestauranteRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Imagen no encontrada"));
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(imagen.getTipo()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + imagen.getNombreArchivo() + "\"")
+                .body(imagen.getDatos());
     }
 }

@@ -13,9 +13,12 @@ export class CsrfInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = this.getCookie('XSRF-TOKEN');
 
+    // Solo añadimos el token si la petición es POST, PUT o DELETE
+    const methodsRequiringCsrf = ['POST', 'PUT', 'DELETE'];
+
     const cloned = req.clone({
       withCredentials: true,
-      ...(token ? {
+      ...(token && methodsRequiringCsrf.includes(req.method) ? {
         setHeaders: {
           'X-XSRF-TOKEN': decodeURIComponent(token)
         }
