@@ -144,7 +144,13 @@ public class AdminService {
                 case "direccion" -> restaurante.setDireccion(nuevoValor);
                 case "tipoCocina" -> restaurante.setTipoCocina(Enum.valueOf(TipoCocina.class, nuevoValor));
                 case "tipoCocinaPersonalizado" -> restaurante.setTipoCocinaPersonalizado(nuevoValor);
-                case "barrio" -> restaurante.setBarrio(Enum.valueOf(Barrio.class, nuevoValor));
+                case "barrio" -> {
+                        try {
+                            restaurante.setBarrio(Enum.valueOf(Barrio.class, nuevoValor.toUpperCase()));
+                        } catch (IllegalArgumentException e) {
+                            throw new IllegalArgumentException("Barrio inválido: '" + nuevoValor + "'. Valores válidos: " + List.of(Barrio.values()));
+                        }
+                    }
                 case "rangoPrecio" -> restaurante.setRangoPrecio(Enum.valueOf(RangoPrecio.class, nuevoValor));
                 case "restriccionesDieteticas" -> {
                     List<RestriccionDietetica> restricciones = new ArrayList<>();

@@ -186,6 +186,8 @@ export class AdminPanelComponent implements OnInit {
     } else if (campo === 'restriccionesDieteticas') {
       // Si el valor es string separado por comas, convertir a array
       payload[campo] = valor.split(',').map((v: string) => v.trim());
+    }else if(campo == 'barrio'){
+        payload[campo] = valor.toUpperCase();
     } else {
       payload[campo] = valor;
     }
