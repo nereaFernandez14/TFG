@@ -24,7 +24,7 @@ export class AdminPanelComponent implements OnInit {
     restaurantes: false,
     usuarios: false,
     modificar: false,
-    modificacionUsuario: false
+    modificacionUsuario: true
   };
 
   camposEditables = [

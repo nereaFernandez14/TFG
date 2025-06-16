@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.dto.ResenyaDenunciaDTO;
 import com.example.demo.dto.RestauranteUpdateRequest;
 import com.example.demo.dto.SolicitudModificacionDTO;
+import com.example.demo.dto.SolicitudModificacionUsuarioDTO;
 import com.example.demo.entities.Restaurante;
 import com.example.demo.entities.SolicitudModificacion;
 import com.example.demo.entities.SolicitudModificacionUsuario;
@@ -139,9 +140,14 @@ public class AdminController {
     }
 
     @GetMapping("/modificaciones-usuarios")
-    public List<SolicitudModificacionUsuario> obtenerSolicitudesModificacionUsuario() {
-        return solicitudUsuarioRepository.findByGestionadaFalse();
+    public ResponseEntity<List<SolicitudModificacionUsuarioDTO>> obtenerSolicitudesModUsuario() {
+        List<SolicitudModificacionUsuario> solicitudes = adminService.obtenerSolicitudesModificacionUsuario();
+        List<SolicitudModificacionUsuarioDTO> dtos = solicitudes.stream()
+                .map(SolicitudModificacionUsuarioDTO::new)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
+
 
     @PostMapping("/modificaciones/{id}/aceptar")
     public ResponseEntity<?> aceptarModificacionRestaurante(@PathVariable Long id) {
