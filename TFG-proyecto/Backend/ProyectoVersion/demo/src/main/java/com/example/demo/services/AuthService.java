@@ -30,6 +30,6 @@ public class AuthService {
     public RolNombre obtenerRolEnum(String email) {
         return usuarioRepository.findByEmail(email)
                 .map(Usuario::getRol)
-                .orElse(RolNombre.USUARIO); // Puedes cambiar el valor por defecto si prefieres lanzar una excepción
+                .orElse(RolNombre.USUARIO);
     }
 }

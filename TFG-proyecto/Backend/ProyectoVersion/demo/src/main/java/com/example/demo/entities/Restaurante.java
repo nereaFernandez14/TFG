@@ -70,7 +70,6 @@ public class Restaurante {
     @Column(length = 1000)
     private String descripcion;
 
-    // ✅ ÚNICA RELACIÓN válida para imágenes persistidas en BLOB
     @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ImagenRestaurante> imagenesBlob = new ArrayList<>();
 

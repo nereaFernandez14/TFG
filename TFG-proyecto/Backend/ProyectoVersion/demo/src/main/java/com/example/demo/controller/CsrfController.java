@@ -11,7 +11,7 @@ public class CsrfController {
 
     @GetMapping("/api/csrf")
     public CsrfToken csrf(HttpServletRequest request, CsrfToken token) {
-        request.getSession(true); // Fuerza la creación de sesión
+        request.getSession(true);
         return token;
     }
 }

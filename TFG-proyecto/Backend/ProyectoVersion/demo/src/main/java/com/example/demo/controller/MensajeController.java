@@ -15,13 +15,11 @@ public class MensajeController {
     public ResponseEntity<?> obtenerMensajes(HttpSession session) {
         String usuario = (String) session.getAttribute("usuario");
 
-        // 🔐 Si no hay sesión activa, devuelve 403
         if (usuario == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("No hay sesión activa o ha expirado.");
         }
 
-        // ✅ Usuario autenticado: devuelve mensajes
         List<Mensaje> mensajes = List.of(
                 new Mensaje("Hola " + usuario + ", desde el backend 🖥️"),
                 new Mensaje("Conexión exitosa con Angular ✔️"));

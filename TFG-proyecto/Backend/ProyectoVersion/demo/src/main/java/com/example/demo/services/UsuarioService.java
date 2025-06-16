@@ -21,8 +21,7 @@ public class UsuarioService {
     private PasswordEncoder passwordEncoder;
 
     private static final List<String> PALABRAS_PROHIBIDAS = List.of(
-            "puta", "mierda", "gilipollas", "imbécil", "estúpido" // puedes ampliar la lista
-    );
+            "puta", "mierda", "gilipollas", "imbécil", "estúpido");
 
     public void setRegistro(String email) throws DangerException {
         Optional<Usuario> optionalUsuario = usuarioRepository.findByEmail(email);
@@ -87,17 +86,14 @@ public class UsuarioService {
      */
 
     public void registrarUsuario(Usuario usuario) throws DangerException {
-        // Email ya registrado
         if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
             throw new DangerException("El usuario ya está registrado con ese email");
         }
 
-        // Validar email
         if (!usuario.getEmail().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
             throw new DangerException("El email tiene un formato inválido");
         }
 
-        // Validar nombre/apellidos sin insultos
         String nombreCompleto = (usuario.getNombre() + " " + usuario.getApellidos()).toLowerCase();
         for (String palabra : PALABRAS_PROHIBIDAS) {
             if (nombreCompleto.contains(palabra)) {
@@ -105,12 +101,10 @@ public class UsuarioService {
             }
         }
 
-        // Validar longitud de contraseña
         if (usuario.getPassword() == null || usuario.getPassword().length() < 6) {
             throw new DangerException("La contraseña debe tener al menos 6 caracteres");
         }
 
-        // Encriptar y guardar
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         usuario.setEstaRegistrado(true);
         usuarioRepository.save(usuario);

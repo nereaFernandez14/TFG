@@ -31,7 +31,6 @@ public class ChangePasswordController {
 
         try {
             usuarioService.changePassword(email, request);
-            // 🔧 Devolver JSON con clave `message` para que Angular lo entienda
             return ResponseEntity.ok(Map.of("message", "Contraseña cambiada correctamente"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(403).body(Map.of("error", e.getMessage()));

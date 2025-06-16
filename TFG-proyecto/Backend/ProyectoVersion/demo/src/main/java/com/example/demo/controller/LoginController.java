@@ -65,22 +65,17 @@ public class LoginController {
             session.setAttribute("usuario", loginRequest.getUsername());
             session.setAttribute("rol", rol);
 
-            // ✅ El rol se establece correctamente con ROLE_ prefijo
-            // ✅ Línea corregida
             GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + rol.name());
-
 
             User userDetails = new User(
                     loginRequest.getUsername(),
                     "",
-                    Collections.singletonList(authority)
-            );
+                    Collections.singletonList(authority));
 
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     userDetails,
                     null,
-                    userDetails.getAuthorities()
-            );
+                    userDetails.getAuthorities());
 
             SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
             securityContext.setAuthentication(authentication);
@@ -94,8 +89,7 @@ public class LoginController {
                     "role", rol.name(),
                     "email", loginRequest.getUsername(),
                     "nombre", nombre,
-                    "id", id
-            ));
+                    "id", id));
 
         } catch (Exception ex) {
             ex.printStackTrace();

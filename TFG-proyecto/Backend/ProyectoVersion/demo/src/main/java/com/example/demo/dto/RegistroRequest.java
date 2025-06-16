@@ -24,6 +24,5 @@ public class RegistroRequest {
     private String password;
 
     @NotBlank(message = "El rol es obligatorio")
-    private String rol; // ✅ Ahora es un String (ej: "USUARIO", "RESTAURANTE"), lo convierte el
-                        // controller al enum
+    private String rol;
 }

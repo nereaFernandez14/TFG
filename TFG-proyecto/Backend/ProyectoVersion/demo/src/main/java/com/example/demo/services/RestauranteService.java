@@ -180,7 +180,6 @@ public class RestauranteService {
                     imagen.setTipo(archivo.getContentType());
                     imagen.setDatos(archivo.getBytes());
                     imagen.setRestaurante(restaurante);
-                    // 👇 AÑADIDO A LA LISTA CORRECTA
                     restaurante.getImagenesBlob().add(imagen);
                 } catch (IOException e) {
                     throw new RuntimeException("Error procesando imagen", e);

@@ -14,7 +14,6 @@ import com.example.demo.repositories.ImagenRestauranteRepository;
 import com.example.demo.services.NotificacionService;
 import com.example.demo.services.RestauranteService;
 
-import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
@@ -150,9 +149,6 @@ public class RestauranteController {
     @GetMapping("/resumen/{idUsuario}")
     public ResponseEntity<RestauranteDashboardDatos> obtenerResumen(@PathVariable Long idUsuario) {
         Restaurante restaurante = restauranteService.obtenerRestaurantePorUsuario(idUsuario);
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("👤 Usuario autenticado: " + auth.getName());
-        System.out.println("🔐 Roles: " + auth.getAuthorities());
         if (restaurante == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -272,7 +268,6 @@ public class RestauranteController {
     public ResponseEntity<?> subirImagenes(@PathVariable Long id,
             @RequestParam("imagenes") List<MultipartFile> nuevasImagenes) {
 
-        // 🟢 id = id del USUARIO (NO del restaurante)
         Restaurante restaurante = restauranteService.obtenerRestaurantePorUsuario(id);
         if (restaurante == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Restaurante no encontrado"));
@@ -283,7 +278,7 @@ public class RestauranteController {
                 String nombre = System.currentTimeMillis() + "_" + imagen.getOriginalFilename().replaceAll("\\s+", "");
 
                 ImagenRestaurante entidad = new ImagenRestaurante();
-                entidad.setRestaurante(restaurante); // ✔️ Asociar correctamente
+                entidad.setRestaurante(restaurante);
                 entidad.setNombreArchivo(nombre);
                 entidad.setTipo(imagen.getContentType());
                 entidad.setDatos(imagen.getBytes());

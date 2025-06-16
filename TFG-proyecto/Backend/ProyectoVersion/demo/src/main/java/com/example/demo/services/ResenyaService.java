@@ -59,7 +59,7 @@ public class ResenyaService {
                         img.setResenya(resenya);
                         img.setNombreArchivo(imagen.getOriginalFilename());
                         img.setTipo(imagen.getContentType());
-                        img.setDatos(imagen.getBytes()); // Guardar como BLOB
+                        img.setDatos(imagen.getBytes());
                         imagenEntities.add(img);
                     } catch (IOException e) {
                         throw new IllegalStateException("Error guardando imagen: " + imagen.getOriginalFilename(), e);
@@ -96,7 +96,7 @@ public class ResenyaService {
                         img.setResenya(existente);
                         img.setNombreArchivo(imagen.getOriginalFilename());
                         img.setTipo(imagen.getContentType());
-                        img.setDatos(imagen.getBytes()); // Guardar como BLOB
+                        img.setDatos(imagen.getBytes());
                         nuevas.add(img);
                     } catch (IOException e) {
                         throw new IllegalStateException("Error guardando imagen: " + imagen.getOriginalFilename(), e);
@@ -129,7 +129,7 @@ public class ResenyaService {
                         ImagenResenyaResponse ir = new ImagenResenyaResponse(img);
                         ir.setId(img.getId());
                         ir.setNombreArchivo(img.getNombreArchivo());
-                        ir.setTipoArchivo(img.getTipo()); // 💥 Esto es la clave
+                        ir.setTipoArchivo(img.getTipo());
                         return ir;
                     })
                     .collect(Collectors.toList());
@@ -189,7 +189,7 @@ public class ResenyaService {
             throw new IllegalArgumentException("No puedes eliminar esta reseña");
         }
 
-        resenyaRepository.delete(resenya); // Cascade ALL borrará las imágenes asociadas
+        resenyaRepository.delete(resenya);
     }
 
     @Transactional

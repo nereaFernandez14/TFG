@@ -137,7 +137,7 @@ public class UsuarioController {
 
                 try {
                     ImagenRestaurante imagenRestaurante = new ImagenRestaurante();
-                    imagenRestaurante.setNombreArchivo(nombreArchivo); // 👈 usamos el nombre limpio que generaste
+                    imagenRestaurante.setNombreArchivo(nombreArchivo);
                     imagenRestaurante.setTipo(imagen.getContentType());
                     imagenRestaurante.setDatos(imagen.getBytes());
                     imagenRestaurante.setRestaurante(restaurante);
@@ -187,14 +187,11 @@ public class UsuarioController {
     }
 
     private boolean contienePalabrasMalSonantes(String texto) {
-        // Lista configurable de palabras prohibidas
         List<String> palabrasProhibidas = List.of(
                 "puta", "mierda", "gilipollas", "cabron", "imbecil", "coño", "zorra", "maldito", "joder");
 
-        // Normalizamos el texto: lo pasamos a minúsculas y eliminamos símbolos
         String textoNormalizado = texto.toLowerCase().replaceAll("[^a-záéíóúñ]", " ");
 
-        // Verifica si contiene alguna de las palabras mal sonantes
         for (String palabra : palabrasProhibidas) {
             if (textoNormalizado.contains(palabra)) {
                 return true;
@@ -265,7 +262,6 @@ public class UsuarioController {
 
             solicitudUsuarioRepository.save(solicitud);
 
-            // 📬 Notificación al admin
             notificacionService.crearParaAdmin(
                     "✏️ El usuario '" + usuario.getNombre()
                             + "' solicita modificar el campo \"" + campo
@@ -275,7 +271,7 @@ public class UsuarioController {
             return ResponseEntity.ok(Map.of("mensaje", "✅ Solicitud enviada"));
         } catch (Exception e) {
             System.err.println("❌ Error interno en solicitud de modificación:");
-            e.printStackTrace(); // 🔥 Asegura trazabilidad
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body("Error inesperado al procesar la solicitud: " + e.getMessage());
         }

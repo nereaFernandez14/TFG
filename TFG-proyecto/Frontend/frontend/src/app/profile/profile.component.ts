@@ -208,49 +208,66 @@ export class ProfileComponent implements OnInit {
   }
 
   validarNuevoValor(): void {
-    this.errorCampoModificacion = '';
-    this.errorMalsonante = '';
+  this.errorCampoModificacion = '';
+  this.errorMalsonante = '';
 
-    if (!this.nuevoValor.trim()) {
-      this.errorCampoModificacion = '⚠️ El campo no puede estar vacío';
-      return;
-    }
+  const valor = this.nuevoValor.trim();
 
-    const contieneProhibidas = this.palabrasProhibidas.some(p => this.nuevoValor.toLowerCase().includes(p));
-    if (contieneProhibidas) {
-      this.errorMalsonante = '❌ El nuevo valor contiene palabras no permitidas';
-    }
+  if (!valor) {
+    this.errorCampoModificacion = '⚠️ El campo no puede estar vacío';
+    return;
   }
 
-  enviarSolicitudModificacion(): void {
-    if (!this.usuario) return;
-
-    if (!['nombre', 'apellidos'].includes(this.campoSeleccionado)) {
-      alert('❌ Solo se permite modificar nombre o apellidos');
-      return;
-    }
-
-    this.validarNuevoValor();
-    if (this.errorCampoModificacion || this.errorMalsonante) return;
-
-    const normalizado = this.capitalizarCadaPalabra(this.nuevoValor || '');
-
-    const payload = {
-      campo: this.campoSeleccionado,
-      nuevoValor: normalizado
-    };
-
-    this.usuarioService.solicitarModificacion(this.usuario.id!, payload).subscribe({
-      next: () => {
-        alert('✅ Solicitud enviada correctamente');
-        this.cerrarModalModificacion();
-      },
-      error: (err) => {
-        console.error('❌ Error al enviar solicitud de modificación', err);
-        alert('❌ Ocurrió un error al enviar la solicitud');
-      }
-    });
+  const contieneProhibidas = this.palabrasProhibidas.some(p => valor.toLowerCase().includes(p));
+  if (contieneProhibidas) {
+    this.errorMalsonante = '❌ El nuevo valor contiene palabras no permitidas';
+    return;
   }
+
+  const regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜïÏëË\s]+$/;
+  if (!regex.test(valor)) {
+    this.errorCampoModificacion = '❌ Solo se permiten letras, espacios, acentos y diéresis. No se aceptan números ni símbolos.';
+  }
+}
+
+enviarSolicitudModificacion(): void {
+  if (!this.usuario) return;
+
+  if (!['nombre', 'apellidos'].includes(this.campoSeleccionado)) {
+    alert('❌ Solo se permite modificar nombre o apellidos');
+    return;
+  }
+
+  this.validarNuevoValor();
+  if (this.errorCampoModificacion || this.errorMalsonante) return;
+
+  const normalizado = this.capitalizarCadaPalabra(this.nuevoValor.trim());
+  const valorActual = this.campoSeleccionado === 'nombre'
+    ? this.usuario.nombre
+    : this.usuario.apellidos;
+
+  if (normalizado === valorActual) {
+    this.errorCampoModificacion = '⚠️ El nuevo valor debe ser diferente del actual';
+    return;
+  }
+
+  const payload = {
+    campo: this.campoSeleccionado,
+    nuevoValor: normalizado
+  };
+
+  this.usuarioService.solicitarModificacion(this.usuario.id!, payload).subscribe({
+    next: () => {
+      alert('✅ Solicitud enviada correctamente');
+      this.cerrarModalModificacion();
+    },
+    error: (err) => {
+      console.error('❌ Error al enviar solicitud de modificación', err);
+      alert('❌ Ocurrió un error al enviar la solicitud');
+    }
+  });
+}
+
 
   cerrarModal(): void {
     this.cerrarModalModificacion();

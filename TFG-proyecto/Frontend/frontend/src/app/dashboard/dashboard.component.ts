@@ -153,12 +153,21 @@ export class DashboardComponent implements OnInit {
   validarEnTiempoReal(): void {
     const campo = this.campoSeleccionado;
     const valor = (campo === 'tipoCocinaPersonalizado' || (campo === 'tipoCocina' && this.nuevoValor === 'OTRO'))
-      ? this.valorPersonalizado.trim().toLowerCase()
-      : this.nuevoValor.trim().toLowerCase();
+      ? this.valorPersonalizado.trim()
+      : this.nuevoValor.trim();
 
-    if ((campo === 'nombre' || campo === 'tipoCocinaPersonalizado' || (campo === 'tipoCocina' && this.nuevoValor === 'OTRO')) && this.palabrasProhibidas.some(p => valor.includes(p))) {
-      this.errorMensaje = '❌ Este campo contiene palabras no permitidas.';
-      return;
+    const regexSinSignosNiCifras = /^[a-zA-ZÁÉÍÓÚÜÑáéíóúüñ\s]+$/;
+
+    if (['tipoCocinaPersonalizado', 'nombre'].includes(campo) || (campo === 'tipoCocina' && this.nuevoValor === 'OTRO')) {
+      if (!regexSinSignosNiCifras.test(valor)) {
+        this.errorMensaje = '❌ No se aceptan cifras ni signos especiales.';
+        return;
+      }
+
+      if (this.palabrasProhibidas.some(p => valor.toLowerCase().includes(p))) {
+        this.errorMensaje = '❌ El nuevo valor contiene palabras no permitidas.';
+        return;
+      }
     }
 
     if (campo === 'direccion' && valor && !this.esDireccionValida(valor)) {
@@ -193,34 +202,42 @@ export class DashboardComponent implements OnInit {
         return;
       }
       nuevoValor = match[0];
-    } // 🟡 Restricciones Dietéticas
-if (campo === 'restriccionesDieteticas') {
-  if (this.nuevoValorMultiple.length === 0) return;
+    } else if (campo === 'restriccionesDieteticas') {
+      if (this.nuevoValorMultiple.length === 0) return;
 
-  const mapeados = this.nuevoValorMultiple.map(label => {
-    const entry = Object.entries(RestriccionDietetica)
-      .find(([clave, valorLegible]) => valorLegible === label);
-    return entry ? entry[0] : null;
-  });
+      const mapeados = this.nuevoValorMultiple.map(label => {
+        const entry = Object.entries(RestriccionDietetica)
+          .find(([clave, valorLegible]) => valorLegible === label);
+        return entry ? entry[0] : null;
+      });
 
-  if (mapeados.includes(null)) {
-    alert('❌ Algún valor de restricción dietética no es válido.');
-    return;
-  }
+      if (mapeados.includes(null)) {
+        alert('❌ Algún valor de restricción dietética no es válido.');
+        return;
+      }
 
-  nuevoValor = mapeados.join(',');
-}
- else if (campo === 'tipoCocina' && this.nuevoValor === 'OTRO') {
+      nuevoValor = mapeados.join(',');
+    } else if (campo === 'tipoCocina' && this.nuevoValor === 'OTRO') {
       if (!this.valorPersonalizado.trim()) return;
       const actual = (this.datos as any)['tipoCocinaPersonalizado']?.trim() || '';
-      if (actual.toLowerCase() === this.valorPersonalizado.trim().toLowerCase()) return;
+      if (actual.toLowerCase() === this.valorPersonalizado.trim().toLowerCase()) {
+        this.errorMensaje = '⚠️ El nuevo valor no puede ser igual al actual.';
+        return;
+      }
       campo = 'tipoCocinaPersonalizado';
       nuevoValor = this.valorPersonalizado.trim();
     } else {
-      if (!this.nuevoValor || !this.nuevoValor.trim()) return;
+      if (!this.nuevoValor || !this.nuevoValor.trim()) {
+        this.errorMensaje = '⚠️ El campo no puede estar vacío.';
+        return;
+      }
       const actual = (this.datos as any)[campo];
-      if (actual?.toString().trim().toLowerCase() === this.nuevoValor.trim().toLowerCase()) return;
-      nuevoValor = this.nuevoValor.trim();
+      const normalizado = this.capitalizarCadaPalabra(this.nuevoValor);
+      if (actual?.toString().trim().toLowerCase() === normalizado.trim().toLowerCase()) {
+        this.errorMensaje = '⚠️ El nuevo valor no puede ser igual al actual.';
+        return;
+      }
+      nuevoValor = normalizado;
     }
 
     this.botonDeshabilitado = true;

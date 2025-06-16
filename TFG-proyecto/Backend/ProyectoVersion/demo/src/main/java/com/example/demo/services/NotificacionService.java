@@ -24,7 +24,6 @@ public class NotificacionService {
     private final SolicitudModificacionRepository solicitudModificacionRepository;
     private final UsuarioRepository usuarioRepository;
 
-    // 🔔 Notificación dirigida a un restaurante específico
     public void crearParaRestaurante(Restaurante destino, String mensaje) {
         Notificacion noti = new Notificacion();
         noti.setMensaje(mensaje);
@@ -35,7 +34,6 @@ public class NotificacionService {
         notificacionRepository.save(noti);
     }
 
-    // 🔔 Notificación dirigida a un usuario específico
     public void crearParaUsuario(Usuario destino, String mensaje) {
         Notificacion noti = new Notificacion();
         noti.setMensaje(mensaje);
@@ -46,7 +44,6 @@ public class NotificacionService {
         notificacionRepository.save(noti);
     }
 
-    // 🔔 Notificación para el admin desde un restaurante
     public void crearParaAdmin(String mensaje, Restaurante generadoPor) {
         Notificacion noti = new Notificacion();
         noti.setMensaje(mensaje);
@@ -58,11 +55,10 @@ public class NotificacionService {
         Usuario admin = usuarioRepository.findFirstByRol(RolNombre.ADMIN)
                 .orElseThrow(() -> new IllegalStateException("❌ No hay un admin configurado"));
 
-        noti.setDestinatarioUsuario(admin); // ✅ Agregado
+        noti.setDestinatarioUsuario(admin);
         notificacionRepository.save(noti);
     }
 
-    // 🔔 Notificación para el admin desde un usuario
     public void crearParaAdmin(String mensaje, Usuario generadoPor) {
         Notificacion noti = new Notificacion();
         noti.setMensaje(mensaje);
@@ -71,7 +67,6 @@ public class NotificacionService {
         noti.setVista(false);
         noti.setGestionada(false);
 
-        // ✅ Establecer destinatario explícito
         Usuario admin = usuarioRepository.findFirstByRol(RolNombre.ADMIN)
                 .orElseThrow(() -> new IllegalStateException("❌ No hay un admin configurado"));
 
@@ -80,7 +75,6 @@ public class NotificacionService {
         notificacionRepository.save(noti);
     }
 
-    // 🔔 Notificación para el admin sin origen
     public void crearParaAdmin(String mensaje) {
         Notificacion noti = new Notificacion();
         noti.setMensaje(mensaje);
@@ -96,8 +90,6 @@ public class NotificacionService {
         notificacionRepository.save(noti);
     }
 
-
-    // 🔁 Marcar una notificación como vista
     public void marcarComoVista(Long id) {
         Notificacion n = notificacionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Notificación no encontrada"));

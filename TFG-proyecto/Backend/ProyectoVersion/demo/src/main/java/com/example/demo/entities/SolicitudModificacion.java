@@ -21,6 +21,6 @@ public class SolicitudModificacion {
     private Restaurante restaurante;
 
     private boolean gestionada = false;
-    private Boolean aceptada; // puede ser null inicialmente
+    private Boolean aceptada;
 
 }
