@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsuarioService, Usuario } from '../services/usuario.service';
@@ -137,12 +137,12 @@ export class ProfileComponent implements OnInit {
   solicitarBaja(): void {
     if (!this.usuario) return;
     const rol = this.usuario.rol?.toLowerCase();
-    const confirmar = confirm(`¿Seguro que deseas solicitar la baja de tu cuenta (${rol})? Será revisado por un administrador.`);
+    const confirmar = confirm("¿Seguro que deseas solicitar la baja de tu cuenta (${rol})? Será revisado por un administrador.");
     if (!confirmar) return;
 
     this.usuarioService.solicitarBaja(this.usuario.id!).subscribe({
       next: () => {
-        alert(`✅ Solicitud de baja como ${rol} enviada correctamente.`);
+        alert("✅ Solicitud de baja como ${rol} enviada correctamente.");
         this.usuario!.solicitaBaja = true;
       },
       error: (err) => {
