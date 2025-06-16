@@ -122,20 +122,29 @@
     <button class="cerrar-modal" (click)="cerrarModal()">×</button>
     <h3>Solicitar modificación de datos</h3>
 
-   <label for="campo">Campo a modificar:</label>
+    <label for="campo">Campo a modificar:</label>
     <select id="campo" [(ngModel)]="campoSeleccionado">
       <option value="" disabled selected>--- Seleccione una opción ---</option>
       <option value="nombre">Nombre</option>
       <option value="apellidos">Apellidos</option>
-      <option value="email">Email</option>
     </select>
 
-
     <label for="nuevoValor">Nuevo valor:</label>
-    <input type="text" id="nuevoValor" [(ngModel)]="nuevoValor" placeholder="Escribe el nuevo valor" />
+    <input
+      type="text"
+      id="nuevoValor"
+      [(ngModel)]="nuevoValor"
+      placeholder="Escribe el nuevo valor"
+      [ngClass]="{ 'input-error': errorCampoModificacion || errorMalsonante }"
+      (input)="validarNuevoValor()"
+    />
+
+    <!-- Mensajes de error -->
+    <div class="error" *ngIf="errorCampoModificacion">{{ errorCampoModificacion }}</div>
+    <div class="error" *ngIf="errorMalsonante">{{ errorMalsonante }}</div>
 
     <div class="modal-buttons">
-      <button class="btn-enviar" (click)="enviarSolicitudModificacion()">Enviar</button>
+      <button class="btn-enviar" [disabled]="errorCampoModificacion || errorMalsonante" (click)="enviarSolicitudModificacion()">Enviar</button>
       <button class="btn-cancelar" (click)="cerrarModal()">Cancelar</button>
     </div>
   </div>

@@ -26,10 +26,13 @@ export class ProfileComponent implements OnInit {
   restriccionesEnum = Object.values(RestriccionDietetica);
   restriccionesSeleccionadas: string[] = [];
 
-  // 🔧 NUEVO para el modal de modificación
   modalModificacionAbierto: boolean = false;
-  campoSeleccionado: string = 'nombre';
+  campoSeleccionado: string = '';
   nuevoValor: string = '';
+  errorCampoModificacion: string = '';
+  errorMalsonante: string = '';
+
+  palabrasProhibidas = ['puta', 'mierda', 'gilipollas', 'imbécil', 'estúpido'];
 
   constructor(
     private usuarioService: UsuarioService,
@@ -45,9 +48,7 @@ export class ProfileComponent implements OnInit {
 
         if (this.usuario.rol === 'RESTAURANTE') {
           this.restauranteService.obtenerRestaurantePorUsuario(this.usuario.id).subscribe({
-            next: (restaurante) => {
-              this.restaurante = restaurante;
-            },
+            next: (restaurante) => this.restaurante = restaurante,
             error: (err) => {
               console.error('❌ Error al cargar restaurante', err);
               this.restaurante = null;
@@ -69,19 +70,13 @@ export class ProfileComponent implements OnInit {
   }
 
   formatearRestriccion(valor: string): string {
-    return valor
-      .toLowerCase()
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, (l) => l.toUpperCase());
+    return valor.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   }
 
   guardarPreferencias(): void {
     if (!this.usuario) return;
-
     this.usuarioService.actualizarPreferencias(this.usuario.id!, this.restriccionesSeleccionadas).subscribe({
-      next: () => {
-        alert('✅ Preferencias guardadas correctamente');
-      },
+      next: () => alert('✅ Preferencias guardadas correctamente'),
       error: (err) => {
         console.error('❌ Error al guardar preferencias', err);
         alert('❌ No se pudieron guardar las preferencias');
@@ -141,7 +136,6 @@ export class ProfileComponent implements OnInit {
 
   solicitarBaja(): void {
     if (!this.usuario) return;
-
     const rol = this.usuario.rol?.toLowerCase();
     const confirmar = confirm(`¿Seguro que deseas solicitar la baja de tu cuenta (${rol})? Será revisado por un administrador.`);
     if (!confirmar) return;
@@ -189,29 +183,67 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  // ✅ MODAL: Abrir/Cerrar/Enviar solicitud
   abrirModalModificacion(): void {
     this.modalModificacionAbierto = true;
     this.campoSeleccionado = '';
     this.nuevoValor = '';
+    this.errorCampoModificacion = '';
+    this.errorMalsonante = '';
   }
 
   cerrarModalModificacion(): void {
     this.modalModificacionAbierto = false;
+    this.campoSeleccionado = '';
+    this.nuevoValor = '';
+    this.errorCampoModificacion = '';
+    this.errorMalsonante = '';
+  }
+
+  capitalizarCadaPalabra(texto: string): string {
+    return texto
+      .split(' ')
+      .filter(palabra => palabra.length > 0)
+      .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase())
+      .join(' ');
+  }
+
+  validarNuevoValor(): void {
+    this.errorCampoModificacion = '';
+    this.errorMalsonante = '';
+
+    if (!this.nuevoValor.trim()) {
+      this.errorCampoModificacion = '⚠️ El campo no puede estar vacío';
+      return;
+    }
+
+    const contieneProhibidas = this.palabrasProhibidas.some(p => this.nuevoValor.toLowerCase().includes(p));
+    if (contieneProhibidas) {
+      this.errorMalsonante = '❌ El nuevo valor contiene palabras no permitidas';
+    }
   }
 
   enviarSolicitudModificacion(): void {
     if (!this.usuario) return;
 
+    if (!['nombre', 'apellidos'].includes(this.campoSeleccionado)) {
+      alert('❌ Solo se permite modificar nombre o apellidos');
+      return;
+    }
+
+    this.validarNuevoValor();
+    if (this.errorCampoModificacion || this.errorMalsonante) return;
+
+    const normalizado = this.capitalizarCadaPalabra(this.nuevoValor || '');
+
     const payload = {
       campo: this.campoSeleccionado,
-      nuevoValor: this.nuevoValor
+      nuevoValor: normalizado
     };
 
     this.usuarioService.solicitarModificacion(this.usuario.id!, payload).subscribe({
       next: () => {
         alert('✅ Solicitud enviada correctamente');
-        this.modalModificacionAbierto = false;
+        this.cerrarModalModificacion();
       },
       error: (err) => {
         console.error('❌ Error al enviar solicitud de modificación', err);
@@ -219,10 +251,8 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
-  cerrarModal(): void {
-  this.modalModificacionAbierto = false;
-  this.campoSeleccionado = '';
-  this.nuevoValor = '';
-}
 
+  cerrarModal(): void {
+    this.cerrarModalModificacion();
+  }
 }

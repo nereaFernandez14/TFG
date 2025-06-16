@@ -3,13 +3,18 @@
 
   <form *ngIf="restauranteForm" [formGroup]="restauranteForm" (ngSubmit)="onSubmit()">
     <!-- Nombre -->
-    <div class="form-group">
-      <label>Nombre*</label>
-      <input type="text" formControlName="nombre" placeholder="Ej: Juan Carlos" />
-      <div *ngIf="restauranteForm.get('nombre')?.touched && restauranteForm.get('nombre')?.invalid" class="error">
-        El nombre es obligatorio.
-      </div>
-    </div>
+    <!-- Nombre -->
+<div class="form-group">
+  <label>Nombre*</label>
+  <input type="text" formControlName="nombre" placeholder="Ej: Juan Carlos" />
+  <div *ngIf="restauranteForm.get('nombre')?.touched && restauranteForm.get('nombre')?.invalid" class="error">
+    El nombre es obligatorio.
+  </div>
+  <div *ngIf="restauranteForm.get('nombre')?.errors?.['malsonante']" class="error">
+    El nombre incluye palabras no permitidas.
+  </div>
+</div>
+
 
     <!-- Dirección -->
     <div class="form-group">

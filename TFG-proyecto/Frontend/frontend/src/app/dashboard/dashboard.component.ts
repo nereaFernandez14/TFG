@@ -10,23 +10,24 @@ import { Barrio } from '../models/enums/barrio.enum';
 import { RangoPrecio } from '../models/enums/rango-precio.enum';
 import { RestriccionDietetica } from '../models/enums/restriccion-dietetica.enum';
 import { FormatearRangoPrecioPipe } from '../pipes/formatearRangoPrecio.pipe';
+import { FormatearRestriccionPipe } from '../pipes/formatearRestriccion.pipe';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, FormatearRangoPrecioPipe],
+  imports: [CommonModule, RouterModule, FormsModule, FormatearRangoPrecioPipe, FormatearRestriccionPipe],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
   datos!: RestauranteDashboardDatos;
-
   mostrarVentanaModificacion: boolean = false;
   campoSeleccionado: string = '';
   nuevoValor: string = '';
   nuevoValorMultiple: string[] = [];
   valorPersonalizado: string = '';
   botonDeshabilitado: boolean = false;
+  errorMensaje: string = '';
 
   notificaciones: { id: number, mensaje: string }[] = [];
 
@@ -47,6 +48,7 @@ export class DashboardComponent implements OnInit {
   barrioEnum = Object.values(Barrio);
   rangoPrecioEnum = Object.values(RangoPrecio);
   restriccionesEnum = Object.values(RestriccionDietetica);
+  palabrasProhibidas = ['puta', 'mierda', 'gilipollas', 'imbécil', 'estú pido'];
 
   constructor(
     private dashboardService: RestauranteDashboardService,
@@ -74,6 +76,18 @@ export class DashboardComponent implements OnInit {
 
   obtenerUrlImagen(nombreArchivo: string): string {
     return `${this.backendUrl}/restaurantes/uploads/${this.datos.id}/${nombreArchivo}`;
+  }
+
+  formatearPalabra(texto: string): string {
+    return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
+  }
+
+  capitalizarCadaPalabra(texto: string): string {
+    return texto
+      .split(' ')
+      .map(p => this.formatearPalabra(p))
+      .join(' ')
+      .trim();
   }
 
   marcarComoVista(id: number): void {
@@ -117,6 +131,7 @@ export class DashboardComponent implements OnInit {
     this.valorPersonalizado = '';
     this.nuevoValorMultiple = [];
     this.botonDeshabilitado = false;
+    this.errorMensaje = '';
   }
 
   onCampoSeleccionadoChange() {
@@ -125,66 +140,86 @@ export class DashboardComponent implements OnInit {
     }
     this.nuevoValor = '';
     this.nuevoValorMultiple = [];
+    this.errorMensaje = '';
   }
 
   onNuevoValorChange() {
     if (this.campoSeleccionado === 'tipoCocina' && this.nuevoValor !== 'OTRO') {
       this.valorPersonalizado = '';
     }
+    this.errorMensaje = '';
   }
 
-  enviarPeticionModificacion() {
-    if (!this.campoSeleccionado || !this.datos?.id) {
-      alert('⚠️ Faltan datos para enviar la solicitud');
+  validarEnTiempoReal(): void {
+    const campo = this.campoSeleccionado;
+    const valor = (campo === 'tipoCocinaPersonalizado' || (campo === 'tipoCocina' && this.nuevoValor === 'OTRO'))
+      ? this.valorPersonalizado.trim().toLowerCase()
+      : this.nuevoValor.trim().toLowerCase();
+
+    if ((campo === 'nombre' || campo === 'tipoCocinaPersonalizado' || (campo === 'tipoCocina' && this.nuevoValor === 'OTRO')) && this.palabrasProhibidas.some(p => valor.includes(p))) {
+      this.errorMensaje = '❌ Este campo contiene palabras no permitidas.';
       return;
     }
 
+    if (campo === 'direccion' && valor && !this.esDireccionValida(valor)) {
+      this.errorMensaje = '❌ La dirección no tiene el formato correcto.';
+      return;
+    }
+
+    if (campo === 'telefono' && valor && !this.esTelefonoValido(valor)) {
+      this.errorMensaje = '❌ El teléfono no es válido.';
+      return;
+    }
+
+    if (campo === 'email' && valor && !this.esEmailValido(valor)) {
+      this.errorMensaje = '❌ El email no tiene un formato válido (.com, .es, .net, etc.).';
+      return;
+    }
+
+    this.errorMensaje = '';
+  }
+
+  enviarPeticionModificacion() {
+    this.validarEnTiempoReal();
+    if (this.errorMensaje || !this.campoSeleccionado || !this.datos?.id) return;
+
     let campo = this.campoSeleccionado;
-    let nuevoValor = '';
+    let nuevoValor: string | string[];
 
-    if (campo === 'restriccionesDieteticas') {
-      if (this.nuevoValorMultiple.length === 0) {
-        alert('⚠️ Selecciona al menos una restricción dietética');
+    if (campo === 'rangoPrecio') {
+      const match = Object.entries(RangoPrecio).find(([key, val]) => val === this.nuevoValor);
+      if (!match) {
+        alert('❌ Valor de rango de precio no válido');
         return;
       }
+      nuevoValor = match[0];
+    } // 🟡 Restricciones Dietéticas
+if (campo === 'restriccionesDieteticas') {
+  if (this.nuevoValorMultiple.length === 0) return;
 
-      const valorActual = (this.datos.restricciones || []).join(',');
-      const valorNuevo = this.nuevoValorMultiple.join(',');
+  const mapeados = this.nuevoValorMultiple.map(label => {
+    const entry = Object.entries(RestriccionDietetica)
+      .find(([clave, valorLegible]) => valorLegible === label);
+    return entry ? entry[0] : null;
+  });
 
-      if (valorActual === valorNuevo) {
-        alert('⚠️ Selecciona una combinación diferente de restricciones dietéticas');
-        return;
-      }
+  if (mapeados.includes(null)) {
+    alert('❌ Algún valor de restricción dietética no es válido.');
+    return;
+  }
 
-      nuevoValor = valorNuevo;
-
-    } else if (campo === 'tipoCocina' && this.nuevoValor === 'OTRO') {
-      if (!this.valorPersonalizado.trim()) {
-        alert('⚠️ Especifica el tipo personalizado');
-        return;
-      }
-
+  nuevoValor = mapeados.join(',');
+}
+ else if (campo === 'tipoCocina' && this.nuevoValor === 'OTRO') {
+      if (!this.valorPersonalizado.trim()) return;
       const actual = (this.datos as any)['tipoCocinaPersonalizado']?.trim() || '';
-      if (actual.toLowerCase() === this.valorPersonalizado.trim().toLowerCase()) {
-        alert('⚠️ El nuevo tipo personalizado debe ser diferente al actual');
-        return;
-      }
-
+      if (actual.toLowerCase() === this.valorPersonalizado.trim().toLowerCase()) return;
       campo = 'tipoCocinaPersonalizado';
       nuevoValor = this.valorPersonalizado.trim();
-
     } else {
-      if (!this.nuevoValor.trim()) {
-        alert('⚠️ Completa el nuevo valor');
-        return;
-      }
-
+      if (!this.nuevoValor || !this.nuevoValor.trim()) return;
       const actual = (this.datos as any)[campo];
-      if (actual?.toString().trim().toLowerCase() === this.nuevoValor.trim().toLowerCase()) {
-        alert('⚠️ El nuevo valor debe ser diferente al actual');
-        return;
-      }
-
+      if (actual?.toString().trim().toLowerCase() === this.nuevoValor.trim().toLowerCase()) return;
       nuevoValor = this.nuevoValor.trim();
     }
 
@@ -204,5 +239,21 @@ export class DashboardComponent implements OnInit {
         this.botonDeshabilitado = false;
       }
     });
+  }
+
+  esDireccionValida(direccion: string): boolean {
+    const regex = /^[\wÁÉÍÓÚáéíóúÑñ\s\.\-ºª]+ \d+[\w\s,ºª\.]*, [\wÁÉÍÓÚáéíóúÑñ\s]+, \d{5}$/;
+    return regex.test(direccion.trim());
+  }
+
+  esTelefonoValido(telefono: string): boolean {
+    const regexMovil = /^[6789]\d{8}$/;
+    const regexFijo = /^0?[89]\d{7}$/;
+    return regexMovil.test(telefono) || regexFijo.test(telefono);
+  }
+
+  esEmailValido(email: string): boolean {
+    const regex = /^[^\s@]+@[^\s@]+\.(com|es|net|org|edu)$/i;
+    return regex.test(email.trim().toLowerCase());
   }
 }

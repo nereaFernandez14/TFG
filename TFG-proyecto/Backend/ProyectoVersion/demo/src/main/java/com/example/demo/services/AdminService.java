@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -113,7 +114,6 @@ public class AdminService {
                 restaurante, "📌 El administrador ha aplicado los cambios solicitados en tus datos.");
     }
 
-
     public List<SolicitudModificacion> obtenerSolicitudesModificacion() {
         // Cambiado para obtener solo solicitudes no gestionadas
         return solicitudModificacionRepository.findByGestionadaFalse();
@@ -154,12 +154,14 @@ public class AdminService {
                 case "barrio" -> restaurante.setBarrio(Enum.valueOf(Barrio.class, nuevoValor));
                 case "rangoPrecio" -> restaurante.setRangoPrecio(Enum.valueOf(RangoPrecio.class, nuevoValor));
                 case "restriccionesDieteticas" -> {
-                    List<RestriccionDietetica> restricciones = List.of(nuevoValor.split(",")).stream()
-                            .map(String::trim)
-                            .map(r -> Enum.valueOf(RestriccionDietetica.class, r))
-                            .toList();
+                    List<RestriccionDietetica> restricciones = new ArrayList<>();
+                    for (String valor : nuevoValor.split(",")) {
+                        String enumName = valor.trim().toUpperCase().replace(" ", "_");
+                        restricciones.add(Enum.valueOf(RestriccionDietetica.class, enumName));
+                    }
                     restaurante.setRestriccionesDieteticas(restricciones);
                 }
+
                 default -> throw new IllegalArgumentException("Campo no soportado: " + campo);
             }
 
@@ -177,7 +179,6 @@ public class AdminService {
         notificacionService.crear(restaurante, msg);
     }
 
-    
     public void resolverModificacionUsuario(Long id, boolean aceptada) {
         SolicitudModificacionUsuario solicitud = obtenerSolicitudUsuarioPorId(id);
 

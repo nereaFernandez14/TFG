@@ -180,12 +180,16 @@ export class AdminPanelComponent implements OnInit {
 
     const payload: any = {};
 
-    if (campo === 'tipoCocinaPersonalizado') {
+        if (campo === 'tipoCocinaPersonalizado') {
       payload['tipoCocina'] = 'OTRO';
       payload['tipoCocinaPersonalizado'] = valor;
+    } else if (campo === 'restriccionesDieteticas') {
+      // Si el valor es string separado por comas, convertir a array
+      payload[campo] = valor.split(',').map((v: string) => v.trim());
     } else {
       payload[campo] = valor;
     }
+
 
     this.http.put(`/api/admin/restaurantes/${restauranteId}`, payload).subscribe({
       next: () => {

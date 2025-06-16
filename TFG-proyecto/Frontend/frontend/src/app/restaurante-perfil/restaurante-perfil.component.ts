@@ -1,3 +1,4 @@
+import { FormatearRestriccionPipe } from './../pipes/formatearRestriccion.pipe';
 // IMPORTS IGUAL
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -12,7 +13,7 @@ import { FormatearRangoPrecioPipe } from '../pipes/formatearRangoPrecio.pipe';
 @Component({
   selector: 'app-perfil-restaurante',
   standalone: true,
-  imports: [CommonModule, ResenyaComponent, FormatearRangoPrecioPipe],
+  imports: [CommonModule, ResenyaComponent, FormatearRangoPrecioPipe, FormatearRestriccionPipe],
   templateUrl: './restaurante-perfil.component.html',
   styleUrls: ['./restaurante-perfil.component.css']
 })
@@ -146,4 +147,17 @@ export class RestaurantePerfilComponent implements OnInit {
       });
     }
   }
+  formatearTipoCocina(): string {
+  if (!this.restaurante) return '';
+
+  const tipo = this.restaurante.tipoCocina;
+  if (tipo === 'OTRO' && this.restaurante.tipoCocinaPersonalizado) {
+    const personalizado = this.restaurante.tipoCocinaPersonalizado.trim();
+    const capitalizado = personalizado.charAt(0).toUpperCase() + personalizado.slice(1).toLowerCase();
+    return `${tipo} (${capitalizado})`;
+  }
+
+  return tipo;
+}
+
 }

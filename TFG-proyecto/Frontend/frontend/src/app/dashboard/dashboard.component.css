@@ -240,3 +240,15 @@ h2 {
 .carrusel-btn:hover {
   color: #3498db;
 }
+  .error {
+    color: red;
+    margin-top: 5px;
+    font-size: 14px;
+    font-weight: bold;
+  }
+.input-error {
+    border: 1px solid red;
+    background-color: #ffe6e6;
+  }
+
+

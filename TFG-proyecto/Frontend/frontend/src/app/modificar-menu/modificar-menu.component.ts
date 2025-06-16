@@ -5,6 +5,7 @@ import { UsuarioService } from '../services/usuario.service';
 import { AutenticacionService } from '../services/autenticacion.service';
 import { RestauranteService } from '../services/restaurante.service';
 import { environment } from '../../environments/environment';
+import { Router } from '@angular/router'; // 🆕 AÑADIDO
 
 @Component({
   selector: 'app-modificar-menu',
@@ -23,7 +24,8 @@ export class ModificarMenuComponent implements OnInit {
   constructor(
     private usuarioService: UsuarioService,
     private authService: AutenticacionService,
-    private restauranteService: RestauranteService
+    private restauranteService: RestauranteService,
+    private router: Router // 🆕 AÑADIDO
   ) {}
 
   ngOnInit(): void {
@@ -72,15 +74,15 @@ export class ModificarMenuComponent implements OnInit {
 
     const formData = new FormData();
     formData.append('archivo', this.archivoSeleccionado);
-    formData.append('email', usuario.email); // 👈 usado solo para backend (no para generar ruta en front)
+    formData.append('email', usuario.email);
 
     this.usuarioService.subirMenu(formData).subscribe({
       next: () => {
         this.mensaje = '✅ Menú actualizado con éxito';
-        // Actualizamos la vista:
         this.restauranteService.obtenerRestaurantePorUsuario(this.idUsuario).subscribe({
           next: (r) => {
             this.menuUrl = `${environment.apiUrl}/restaurantes/menus/${r.rutaMenu}`;
+            setTimeout(() => this.router.navigate(['/dashboard']), 1000); // ✅ REDIRECCIÓN AUTOMÁTICA
           }
         });
       },

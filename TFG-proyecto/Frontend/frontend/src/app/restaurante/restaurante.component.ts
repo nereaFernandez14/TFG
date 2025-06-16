@@ -1,5 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+  ReactiveFormsModule
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { RestauranteService } from '../services/restaurante.service';
@@ -65,9 +72,9 @@ export class RestauranteComponent implements OnInit {
 
   private initForm(emailUsuario?: string): void {
     this.restauranteForm = this.fb.group({
-      nombre: ['', [Validators.required]],
-      direccion: ['', [Validators.required, this.validarDireccionEspRegex]],
-      telefono: ['', [Validators.required, this.validarTelefonoRegex]],
+      nombre: ['', [Validators.required, this.sinPalabrasMalSonantes.bind(this)]],
+      direccion: ['', [Validators.required, this.validarDireccionEspRegex, this.sinPalabrasMalSonantes.bind(this)]],
+      telefono: ['', [Validators.required, this.validarTelefonoRegex, this.sinPalabrasMalSonantes.bind(this)]],
       email: [emailUsuario || '', [Validators.required, Validators.email, this.formatoEmailValidoRegex]],
       descripcion: ['', [Validators.required, this.sinPalabrasMalSonantes.bind(this)]],
       tipoCocina: ['', Validators.required],
@@ -89,10 +96,7 @@ export class RestauranteComponent implements OnInit {
       ctrl?.updateValueAndValidity();
     });
 
-    // Aplicar formateo a inputs de texto
     this.aplicarFormateoTexto();
-
-    // Validar campos select para habilitar botón (puedes implementarlo en el template con un getter)
   }
 
   sinPalabrasMalSonantes(control: AbstractControl): ValidationErrors | null {
@@ -102,7 +106,6 @@ export class RestauranteComponent implements OnInit {
     return contiene ? { malsonante: true } : null;
   }
 
-  // Email con regex para validar dominios .com, .es, .net, .org, .edu
   formatoEmailValidoRegex(control: AbstractControl): ValidationErrors | null {
     const email = control.value || '';
     if (!email) return null;
@@ -110,17 +113,15 @@ export class RestauranteComponent implements OnInit {
     return regex.test(email) ? null : { formatoEmailInvalido: true };
   }
 
-  // Dirección estándar España - regex básica: calle + número + CP 5 dígitos + localidad (simplificada)
   validarDireccionEspRegex(control: AbstractControl): ValidationErrors | null {
     const direccion = control.value || '';
     if (!direccion) return null;
 
-    const regexDireccion = /^[\wÁÉÍÓÚáéíóúÑñ\s\.\-ºª]+ \d+[^\n,]*, [\wÁÉÍÓÚáéíóúÑñ\s]+, \d{5}$/;
+    const regexDireccion = /^[\wÁÉÍÓÚáéíóúÑñ\s\.\-ºª]+ \d+(,\s*piso\s*\d+)?(,[^,]+)*,\s*[\wÁÉÍÓÚáéíóúÑñ\s]+,\s*\d{5}$/i;
 
     return regexDireccion.test(direccion.trim()) ? null : { direccionInvalida: true };
   }
 
-  // Teléfono móvil o fijo España con regex
   validarTelefonoRegex(control: AbstractControl): ValidationErrors | null {
     const telefono = control.value || '';
     if (!telefono) return null;
@@ -129,14 +130,11 @@ export class RestauranteComponent implements OnInit {
     return regexMovil.test(telefono) || regexFijo.test(telefono) ? null : { telefonoInvalido: true };
   }
 
-  // Formatea una palabra: primera letra mayúscula, resto minúsculas
   private formatearPalabra(word: string): string {
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
   }
 
-  // Formateo para nombre (capitalizar cada palabra), y otros campos solo primera letra mayúscula
   private aplicarFormateoTexto(): void {
-    // Capitalizar cada palabra para nombre
     this.restauranteForm.get('nombre')?.valueChanges.subscribe(val => {
       if (val) {
         const formateado = val
@@ -149,7 +147,6 @@ export class RestauranteComponent implements OnInit {
       }
     });
 
-    // Para direccion, descripcion, tipoCocinaPersonalizado y telefono: solo primera letra mayúscula
     ['direccion', 'descripcion', 'tipoCocinaPersonalizado', 'telefono'].forEach(campo => {
       this.restauranteForm.get(campo)?.valueChanges.subscribe(val => {
         if (val) {
@@ -162,8 +159,6 @@ export class RestauranteComponent implements OnInit {
     });
   }
 
-  // Añade más validaciones o helpers si deseas, por ejemplo, para activar el botón guardar
-
   onSubmit(): void {
     if (this.restauranteForm.invalid) {
       this.restauranteForm.markAllAsTouched();
@@ -172,7 +167,6 @@ export class RestauranteComponent implements OnInit {
 
     const formData = this.restauranteForm.value;
 
-    // Si no es OTRO, borrar tipoCocinaPersonalizado para evitar inconsistencias
     if (formData.tipoCocina !== TipoCocina.OTRO) {
       formData.tipoCocinaPersonalizado = null;
     }

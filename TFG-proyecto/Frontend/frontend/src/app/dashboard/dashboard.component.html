@@ -59,7 +59,7 @@
     <h3><i class="fas fa-pencil-alt"></i> Solicitar modificación</h3>
     <div class="form-group">
       <label for="campo">Campo a modificar: </label>
-      <select id="campo" [(ngModel)]="campoSeleccionado">
+      <select id="campo" [(ngModel)]="campoSeleccionado" (change)="errorMensaje = ''">
         <option value="" disabled selected>-- Selecciona un campo --</option>
         <option *ngFor="let campo of camposDisponibles" [value]="campo.value">{{ campo.label }}</option>
       </select>
@@ -68,20 +68,22 @@
     <!-- campos según selección -->
     <div *ngIf="campoSeleccionado === 'tipoCocina'" class="form-group">
       <label>Nuevo valor: </label>
-      <select [(ngModel)]="nuevoValor">
+      <select [(ngModel)]="nuevoValor" (change)="errorMensaje = ''">
         <option value="" disabled>-- Selecciona un tipo --</option>
         <option *ngFor="let val of tipoCocinaEnum" [value]="val">{{ val }}</option>
       </select>
-      <div *ngIf="nuevoValor === 'OTRO'" class="form-group">
-        <label>Especifica el tipo personalizado: </label>
-        <input type="text" [(ngModel)]="valorPersonalizado" placeholder="Introduce el tipo de cocina" />
-      </div>
+    </div>
+
+    <div *ngIf="campoSeleccionado === 'tipoCocina' && nuevoValor === 'OTRO'" class="form-group">
+      <label>Especifica el tipo personalizado: </label>
+      <input type="text" [(ngModel)]="valorPersonalizado" placeholder="Introduce el tipo de cocina" [ngClass]="{'input-error': errorMensaje && valorPersonalizado}" (input)="validarEnTiempoReal()" />
+      <div *ngIf="errorMensaje && valorPersonalizado" class="error">{{ errorMensaje }}</div>
     </div>
 
     <div *ngIf="campoSeleccionado === 'restriccionesDieteticas'" class="form-group">
       <label>Nuevo valor: </label>
       <select multiple [(ngModel)]="nuevoValorMultiple">
-        <option *ngFor="let val of restriccionesEnum" [value]="val">{{ val }}</option>
+        <option *ngFor="let val of restriccionesEnum" [value]="val">{{ val | formatearRestriccion }}</option>
       </select>
     </div>
 
@@ -103,7 +105,8 @@
 
     <div *ngIf="['nombre', 'direccion', 'telefono', 'email'].includes(campoSeleccionado)" class="form-group">
       <label>Nuevo valor: </label>
-      <input type="text" [(ngModel)]="nuevoValor" placeholder="Introduce el nuevo valor" />
+      <input type="text" [(ngModel)]="nuevoValor" placeholder="Introduce el nuevo valor" [ngClass]="{'input-error': errorMensaje && nuevoValor}" (input)="validarEnTiempoReal()" />
+      <div *ngIf="errorMensaje && nuevoValor" class="error">{{ errorMensaje }}</div>
     </div>
 
     <div class="modal-actions">
